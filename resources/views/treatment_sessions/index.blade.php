@@ -15,7 +15,7 @@
     <div class="col-xl-12">
         <div class="card">
             <div class="card-header">
-                <a href="{{ route('treatment-sessions.create') }}" class="btn btn-primary">Add New Session</a>
+                <a href="{{ route('treatment-sessions.create') }}" class="btn btn-primary">Add New Sessions</a>
             </div>
 
             <div class="card-body">
