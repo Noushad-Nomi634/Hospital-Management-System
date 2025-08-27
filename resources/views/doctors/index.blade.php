@@ -9,7 +9,7 @@
 @endpush
 
 @section('content')
-<x-page-title title="Doctors" subtitle="List of all doctors" />
+<x-page-title title="Doctors" subtitle="List Of All Doctors" />
 
 <div class="row">
     <div class="col-xl-12">
