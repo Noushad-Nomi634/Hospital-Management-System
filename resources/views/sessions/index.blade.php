@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title')
-    Treatment Sessions
+    Treatment Sessionss
 @endsection
 @push('css')
     <link href="{{ URL::asset('build/plugins/input-tags/css/tagsinput.css') }}" rel="stylesheet">
