@@ -9,7 +9,7 @@
     <x-page-title title="Employees" subtitle="Employee Data Table" />
 
     <div class="d-flex justify-content-end mb-3">
-        <a href="/employees/create" class="btn btn-primary">+ Add New Employee</a>
+        <a href="/employees/create" class="btn btn-primary">+ Add New Employes</a>
     </div>
 
     <h6 class="mb-0 text-uppercase">Employee DataTable</h6>
