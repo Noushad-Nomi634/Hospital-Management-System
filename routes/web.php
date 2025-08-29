@@ -31,10 +31,8 @@ use App\Http\Controllers\DoctorAvailabilityController;
 
 Auth::routes();
 
-
 Route::post('/sessions/{id}/complete', [SessionTimeController::class, 'markCompleted'])->name('sessions.complete');
 Route::delete('/sessions/{id}', [SessionTimeController::class, 'destroy'])->name('sessions.destroy');
-
 
 // Employees
 Route::get('employees', [EmployeeController::class, 'index']);
@@ -45,15 +43,9 @@ Route::post('employees', [EmployeeController::class, 'store']);
 Route::get('salaries', [EmployeeSalaryController::class, 'index']);
 Route::get('salaries/create', [EmployeeSalaryController::class, 'create']);
 Route::post('salaries', [EmployeeSalaryController::class, 'store']);
-
-
 Route::post('/salaries/{id}/pay', [EmployeeSalaryController::class, 'markAsPaid'])->name('salaries.pay');
 // For modal-based salary mark as paid with adjustments
 Route::post('/salaries/mark-paid', [EmployeeSalaryController::class, 'markPaidWithAdjustment'])->name('salaries.markPaid');
-
-
-
-
 
 
 
@@ -64,7 +56,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::get('/payments/outstandings', [\App\Http\Controllers\PaymentOutstandingController::class, 'index']);
 
 
-// Show form to add a new session datetime (for ➕ icon)
+// Show form to add a new session datetime (for ➕ icon-- abx )
 Route::get('/treatment-sessions/{session_id}/add-entry', [TreatmentSessionController::class, 'addEntryForm'])->name('treatment-sessions.add-entry');
 
 // Handle form POST to store new session datetime
@@ -158,7 +150,7 @@ Route::get('/patients/{id}/edit', [PatientController::class, 'edit']);
 Route::put('/patients/{id}', [PatientController::class, 'update'])->name('patients.update');
 Route::get('/patients/{id}', [PatientController::class, 'show']);
 Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
- 
+
 
 Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
 
