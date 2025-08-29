@@ -58,6 +58,20 @@
                         <input type="hidden" name="doctor_id" id="doctor_id" value="{{ $selectedDoctorId }}">
                     </div>
 
+                    <!-- Diagnosis -->
+                    <div class="mb-3">
+                        <label class="form-label">Diagnosis</label>
+                        <input type="text" class="form-control" name="diagnosis" id="diagnosis" 
+                               value="{{ old('diagnosis') }}" placeholder="Enter diagnosis" required>
+                    </div>
+
+                    <!-- Note -->
+                    <div class="mb-3">
+                        <label class="form-label">Note</label>
+                        <textarea class="form-control" name="note" id="note" rows="3" 
+                                  placeholder="Enter any notes">{{ old('note') }}</textarea>
+                    </div>
+
                     <!-- Total Fee -->
                     <div class="mb-3">
                         <label class="form-label">Total Session Fee</label>

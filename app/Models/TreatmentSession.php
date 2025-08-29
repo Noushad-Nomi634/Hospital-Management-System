@@ -22,6 +22,9 @@ class TreatmentSession extends Model
         'payment_status',
         'paid_amount',
         'dues_amount',
+        'diagnosis',
+         'note',
+        
     ];
 
     protected $casts = [

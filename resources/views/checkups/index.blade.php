@@ -39,7 +39,6 @@
                                     <tr>
                                         <td>{{ $checkup->patient_name ?? 'N/A' }}</td>
                                         <td>{{ \Carbon\Carbon::parse($checkup->date)->format('d-m-Y') }}</td>
-                
                                         <td>{{ $checkup->doctor_name }}</td>
                                         <td>Rs. {{ $checkup->fee }}</td>
                                         <td>
@@ -47,6 +46,11 @@
                                                 <!-- View -->
                                                 <a href="{{ url('/checkups/' . $checkup->id) }}" class="btn btn-info btn-sm">
                                                     <i class="fas fa-eye"></i> View
+                                                </a>
+
+                                                <!-- History -->
+                                                <a href="{{ route('checkups.history', $checkup->patient_id) }}" class="btn btn-sm btn-dark">
+                                                    <i class="fas fa-history"></i> History
                                                 </a>
 
                                                 <!-- Edit -->

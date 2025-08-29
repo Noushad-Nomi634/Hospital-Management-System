@@ -129,7 +129,6 @@ Route::get('/get-checkup-fee/{patientId}', [App\Http\Controllers\CheckupControll
 Route::get('/checkups/history/{patient_id}', [App\Http\Controllers\CheckupController::class, 'history'])->name('checkups.history');
 
 
-
 // Doctor CRUD
 Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
 Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctors.create');
@@ -139,16 +138,19 @@ Route::put('/doctors/{id}', [DoctorController::class, 'update'])->name('doctors.
 
 Route::delete('/doctors/{id}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
 
+Route::get('/doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
+    ->name('doctors.availability');
 
-// Doctor Availability CRUD
-Route::get('/doctors/{id}/availability', [DoctorAvailabilityController::class, 'index'])->name('doctors.availability');
-Route::post('/doctors/{id}/availability', [DoctorAvailabilityController::class, 'store'])->name('doctors.availability.store');
-Route::get('/availability/{id}/edit', [DoctorAvailabilityController::class, 'edit'])->name('doctors.availability.edit');
-Route::put('/availability/{id}', [DoctorAvailabilityController::class, 'update'])->name('doctors.availability.update');
-Route::delete('/availability/{id}', [DoctorAvailabilityController::class, 'destroy'])->name('doctors.availability.destroy');
+Route::post('/doctors/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
+    ->name('doctors.availability.store');
 
+Route::post('/doctors/{doctor}/availability/generate-next-month', [DoctorAvailabilityController::class, 'generateNextMonth'])
+    ->name('doctors.availability.generateNextMonth');
 
-
+Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
+    ->name('doctors.availability.deleteMonth');
+    
+    
 Route::get('/patients', [PatientController::class, 'index']);
 Route::get('/patients/create', [PatientController::class, 'create']);
 Route::post('/patients', [PatientController::class, 'store']);

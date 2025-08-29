@@ -18,7 +18,7 @@
                 <a href="{{ route('treatment-sessions.create') }}" class="btn btn-primary">Add New Sessions</a>
             </div>
 
-            <div class="card-body">
+            <div class="card-body table-responsive">
                 <table class="table table-bordered table-hover mb-0">
                     <thead class="table-dark">
                         <tr>
@@ -26,19 +26,28 @@
                             <th>Checkup ID</th>
                             <th>Patient</th>
                             <th>Doctor</th>
+                            <th>Diagnosis</th>
+                            <th>Note</th>
                             <th>Fee</th>
                             <th>Payment Details</th>
-                            <th>Session Info</th>
+                            <th>Sessions</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($sessions as $session)
+                            @php
+                                $total = $session->sessionTimes->count();
+                                $completed = $session->sessionTimes->where('is_completed', true)->count();
+                                $remaining = $total - $completed;
+                            @endphp
                             <tr>
                                 <td>{{ $session->id }}</td>
                                 <td>{{ $session->checkup_id }}</td>
                                 <td>{{ $session->patient?->name ?? 'N/A' }}</td>
                                 <td>{{ $session->checkup?->doctor?->name ?? 'N/A' }}</td>
+                                <td>{{ $session->diagnosis ?? '-' }}</td>
+                                <td>{{ $session->note ?? '-' }}</td>
                                 <td>Rs. {{ number_format($session->session_fee, 0) }}</td>
 
                                 {{-- Payment Details --}}
@@ -55,12 +64,14 @@
                                     </button>
                                 </td>
 
-                                {{-- Session Info --}}
+                                {{-- Sessions Info --}}
                                 <td>
-                                    <strong>Total Sessions:</strong> {{ $session->sessionTimes->count() }}
+                                    <small>Total: {{ $total }}</small><br>
+                                    <small class="text-success">Completed: {{ $completed }}</small><br>
+                                    <small class="text-warning">Remaining: {{ $remaining }}</small>
                                     <br>
-                                    <button class="btn btn-info btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#sessionModal{{ $session->id }}">
-                                        View Details
+                                    <button class="btn btn-info btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#sessionModal{{ $session->id }}">
+                                        View
                                     </button>
                                 </td>
 
@@ -77,7 +88,7 @@
                                 </td>
                             </tr>
 
-                            {{-- Modal for Installment --}}
+                            {{-- Installment Modal --}}
                             <div class="modal fade" id="installmentModal{{ $session->id }}" tabindex="-1" aria-labelledby="installmentModalLabel{{ $session->id }}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -87,20 +98,10 @@
                                             
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="installmentModalLabel{{ $session->id }}">Add Installment (Session ID: {{ $session->id }})</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             
                                             <div class="modal-body">
-                                                @if ($errors->any())
-                                                    <div class="alert alert-danger">
-                                                        <ul class="mb-0">
-                                                            @foreach ($errors->all() as $error)
-                                                                <li>{{ $error }}</li>
-                                                            @endforeach
-                                                        </ul>
-                                                    </div>
-                                                @endif
-
                                                 <div class="mb-3">
                                                     <label for="amount" class="form-label">Amount</label>
                                                     <input type="number" class="form-control" name="amount" required
@@ -122,23 +123,21 @@
                                 </div>
                             </div>
 
-                            {{-- Modal for Session Info --}}
-                            <div class="modal fade" id="sessionModal{{ $session->id }}" tabindex="-1" aria-labelledby="sessionModalLabel{{ $session->id }}" aria-hidden="true">
+                            {{-- Session Details Modal --}}
+                            <div class="modal fade" id="sessionModal{{ $session->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="sessionModalLabel{{ $session->id }}">Session Details (ID: {{ $session->id }})</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <h5 class="modal-title">Session Details (ID: {{ $session->id }})</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            
                                             {{-- Completed Sessions --}}
                                             <h6 class="text-success">✅ Completed Sessions</h6>
                                             <ul>
                                                 @forelse ($session->sessionTimes->where('is_completed', true) as $entry)
                                                     <li>
-                                                        {{ \Carbon\Carbon::parse($entry->session_datetime)->format('d M Y - h:i A') }}
-                                                        <br>
+                                                        {{ \Carbon\Carbon::parse($entry->session_datetime)->format('d M Y - h:i A') }}<br>
                                                         <small>
                                                             <strong>Doctor:</strong> {{ $entry->doctor?->name ?? 'N/A' }} <br>
                                                             <strong>Work Done:</strong> {{ $entry->work_done ?? 'N/A' }}
@@ -178,7 +177,6 @@
                                                     <li><em>No upcoming sessions</em></li>
                                                 @endforelse
                                             </ul>
-
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -197,10 +195,9 @@
 @endsection
 
 @push('script')
-    <!--plugins-->
-    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/main.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+<script src="{{ URL::asset('build/js/main.js') }}"></script>
 @endpush

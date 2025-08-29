@@ -11,7 +11,23 @@
 <x-page-title title="Doctor Availability" subtitle="Manage Slots for {{ $doctor->name }}" />
 
 <div class="row">
-    <div class="col-xl-10"> <!-- Left aligned, not centered -->
+    <div class="col-xl-10">
+
+        <!-- Generate / Delete Month Buttons -->
+        <div class="mb-3 d-flex gap-2">
+            <form action="{{ route('doctors.availability.generate', $doctor->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-success">Generate Full Month Schedule</button>
+            </form>
+
+            <form action="{{ route('doctors.availability.deleteMonth', $doctor->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete the full month schedule?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Delete Full Month Schedule</button>
+            </form>
+        </div>
+
+        <!-- Existing Availability Table -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Existing Availability</h5>
@@ -30,7 +46,8 @@
                     <tbody>
                         @foreach($doctor->availabilities as $slot)
                         <tr>
-                            <td>{{ \Carbon\Carbon::parse($slot->date)->format('d M Y') }}</td>
+                            <!-- Day Name + Date -->
+                            <td>{{ \Carbon\Carbon::parse($slot->date)->format('l, d M Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}</td>
                             <td>
                                 <div class="d-flex gap-2">
@@ -52,6 +69,7 @@
             </div>
         </div>
 
+        <!-- Add New Availability -->
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">Add New Availability</h5>

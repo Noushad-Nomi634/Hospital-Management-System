@@ -26,7 +26,7 @@ class TreatmentSessionController extends Controller
     {
         $checkups = Checkup::with('patient', 'doctor')->orderBy('date', 'desc')->get();
         $doctors  = Doctor::all();
-        $patients = $checkups->pluck('patient')->unique('id'); // ✅ patients variable
+        $patients = $checkups->pluck('patient')->unique('id');
 
         return view('treatment_sessions.create', compact('checkups', 'doctors', 'patients'));
     }
@@ -38,6 +38,8 @@ class TreatmentSessionController extends Controller
             'doctor_id'       => 'required|exists:doctors,id',
             'session_fee'     => 'required|numeric|min:0',
             'paid_amount'     => 'required|numeric|min:0',
+            'diagnosis'       => 'nullable|string|max:255',
+            'note'            => 'nullable|string',
             'sessions'        => 'nullable|array',
             'sessions.*.date' => 'nullable|date',
             'sessions.*.time' => 'nullable|date_format:H:i',
@@ -58,6 +60,8 @@ class TreatmentSessionController extends Controller
             'session_count' => $sessionCount,
             'paid_amount'   => $paidAmount,
             'dues_amount'   => $duesAmount,
+            'diagnosis'     => $request->diagnosis,
+            'note'          => $request->note,
         ]);
 
         if ($request->has('sessions')) {
@@ -90,7 +94,7 @@ class TreatmentSessionController extends Controller
         $session  = TreatmentSession::with(['checkup', 'doctor', 'sessionTimes'])->findOrFail($id);
         $checkups = Checkup::with('patient', 'doctor')->orderBy('date', 'desc')->get();
         $doctors  = Doctor::all();
-        $patients = $checkups->pluck('patient')->unique('id'); // ✅ patients variable
+        $patients = $checkups->pluck('patient')->unique('id');
 
         return view('treatment_sessions.edit', compact('session', 'checkups', 'doctors', 'patients'));
     }
@@ -102,6 +106,8 @@ class TreatmentSessionController extends Controller
             'doctor_id'       => 'required|exists:doctors,id',
             'session_fee'     => 'required|numeric|min:0',
             'paid_amount'     => 'required|numeric|min:0',
+            'diagnosis'       => 'nullable|string|max:255',
+            'note'            => 'nullable|string',
             'sessions'        => 'nullable|array',
             'sessions.*.date' => 'nullable|date',
             'sessions.*.time' => 'nullable|date_format:H:i',
@@ -123,6 +129,8 @@ class TreatmentSessionController extends Controller
             'session_count' => $sessionCount,
             'paid_amount'   => $paidAmount,
             'dues_amount'   => $duesAmount,
+            'diagnosis'     => $request->diagnosis,
+            'note'          => $request->note,
         ]);
 
         if ($request->has('sessions')) {
@@ -174,4 +182,3 @@ class TreatmentSessionController extends Controller
             ->with('success', 'Treatment session deleted successfully.');
     }
 }
-
