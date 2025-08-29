@@ -108,6 +108,10 @@ class PatientController extends Controller
     public function show($id)
     {
         $patient = Patient::with('branch', 'checkups')->findOrFail($id);
+        // echo "<pre>";
+        // print_r($patient->toArray());
+        // echo "</pre>";
+        // exit();
         return view('patients.show', compact('patient'));
     }
 
