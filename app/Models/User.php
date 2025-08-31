@@ -10,6 +10,11 @@ class User extends Authenticatable
 {
     use HasFactory, HasRoles;
 
+    const Admin = 'admin';
+    const Branch_Admin = 'branch_admin';
+    const Doctor = 'Doctor';
+    const Receptionist = 'Receptionist';
+
 
     protected $fillable = [
         'name',

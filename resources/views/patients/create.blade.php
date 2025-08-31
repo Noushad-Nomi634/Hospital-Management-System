@@ -5,6 +5,7 @@
 @section('content')
     <x-page-title title="Patient" subtitle="Add New Patient" />
 
+    @section('content')
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -57,7 +58,7 @@
                             </select>
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-12 text-end">
                             <button type="submit" class="btn btn-primary px-4">Save Patient</button>
                         </div>
                     </form>

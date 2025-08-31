@@ -39,27 +39,39 @@ class PatientController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name'          => 'required|string|max:255',
-            'gender'        => 'required|in:Male,Female,Other',
-            'guardian_name' => 'required|string|max:255',
-            'age'           => 'required|numeric',
-            'phone'         => 'required|string|max:20',
-            'address'       => 'required|string|max:500',
-            'branch_id'     => 'required|exists:branches,id',
-        ]);
+        try {
+            // ✅ Validate input
+            $validatedData = $request->validate([
+                'name'          => 'required|string|max:255',
+                'gender'        => 'required|in:Male,Female,Other',
+                'guardian_name' => 'required|string|max:255',
+                'age'           => 'required|numeric',
+                'phone'         => 'required|string|max:20',
+                'address'       => 'required|string|max:500',
+                'branch_id'     => 'required|exists:branches,id',
+            ]);
 
-        Patient::create($request->only(
-            'name',
-            'gender',           // ✅ Gender included
-            'guardian_name',
-            'age',
-            'phone',
-            'address',
-            'branch_id'
-        ));
+            // Store patient
+            $patient = Patient::create($validatedData);
 
-        return redirect('/patients')->with('success', 'Patient added successfully!');
+            // Get ID of newly created patient
+            $patientId = $patient->id;
+
+            // Redirect to patient details page (or any route)
+            return redirect()->route('patients.card', $patient->id)
+                 ->with('success', 'Patient added successfully!');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Validation errors
+            return back()->withErrors($e->validator)->withInput();
+
+        } catch (\Exception $e) {
+            // General errors (DB, etc.)
+            \Log::error('Patient store error: ' . $e->getMessage());
+
+            return back()->with('error', 'Something went wrong. Please try again.'.$e->getMessage())
+                        ->withInput();
+        }
     }
 
     /**

@@ -170,7 +170,7 @@
         /* Print Styles */
         /* Print Styles */
          /* Print Styles - Force background colors to print */
-        @media print {
+       @media print {
             body, html {
                 width: 100% !important;
                 height: 100% !important;
@@ -245,6 +245,16 @@
                 padding-right: 1px;
                 border-right: 1px dashed #ccc;
             }
+
+            /* Specific fix for PSN to prevent wrapping */
+            .patient-id {
+                white-space: nowrap !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                max-width: none !important;
+                font-size: 0.8rem !important;
+                padding: 2px 6px !important;
+            }
         }
 
 
@@ -256,6 +266,12 @@
 {{--------------------------- New Card Designe ---------------}}
 
 
+
+
+
+
+
+
          <div class="card-container">
             <div class="patient-card">
                 <div class="card-header">
@@ -264,7 +280,7 @@
                 <div class="card-content">
                     <div class="left-section">
                         <img src="https://ui-avatars.com/api/?name=Ali+Raza&background=1976d2&color=fff&size=400" class="patient-img">
-                        <span class="patient-id">PSN: {{ $patient->id ?? 'N/A' }}1233</span>
+                        <span class="patient-id">PSN: {{ $patient->id ?? 'N/A' }}</span>
                     </div>
                     <div class="right-section">
                         <h6 class="p-title">{{ $patient->name ?? 'N/A' }}</h6>
@@ -338,5 +354,8 @@
             });
         });
     </script>
+
+
+
 @endpush
 

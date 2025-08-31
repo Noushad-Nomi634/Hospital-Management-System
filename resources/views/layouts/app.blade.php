@@ -14,6 +14,7 @@
     {{-- Common CSS & page-specific CSS --}}
     @include('layouts.head-css')
     @stack('css') {{-- Page-specific CSS from @push('css') --}}
+    <link rel="stylesheet" href="{{ URL::asset('build/plugins/notifications/css/lobibox.min.css') }}">
 </head>
 
 <body>
@@ -23,7 +24,7 @@
 
     {{-- Sidebar menu --}}
     @include('layouts.sidebar')
-    
+
     <!--start main wrapper-->
     <main class="main-wrapper">
         <div class="main-content">

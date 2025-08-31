@@ -7,6 +7,7 @@ use App\Http\Controllers\Doctors\DoctorController;
 
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\CheckupController;
+use App\Http\Middleware\RoleMiddleware;
 
 use App\Http\Controllers\DashboardController;
 
@@ -30,6 +31,14 @@ use App\Http\Controllers\SessionTimeController;
 use App\Http\Controllers\DoctorAvailabilityController;
 
 Auth::routes();
+
+
+// For all authenticated users
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return "General Dashboard";
+    })->name('dashboard');
+});
 
 Route::post('/sessions/{id}/complete', [SessionTimeController::class, 'markCompleted'])->name('sessions.complete');
 Route::delete('/sessions/{id}', [SessionTimeController::class, 'destroy'])->name('sessions.destroy');
@@ -141,14 +150,14 @@ Route::post('/doctors/{doctor}/availability/generate-next-month', [DoctorAvailab
 
 Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
     ->name('doctors.availability.deleteMonth');
-    
-    
+
+
 Route::get('/patients', [PatientController::class, 'index']);
 Route::get('/patients/create', [PatientController::class, 'create']);
 Route::post('/patients', [PatientController::class, 'store']);
 Route::get('/patients/{id}/edit', [PatientController::class, 'edit']);
 Route::put('/patients/{id}', [PatientController::class, 'update'])->name('patients.update');
-Route::get('/patients/{id}', [PatientController::class, 'show']);
+Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.card');
 Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 
