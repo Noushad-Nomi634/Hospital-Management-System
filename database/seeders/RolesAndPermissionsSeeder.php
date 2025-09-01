@@ -34,9 +34,9 @@ class RolesAndPermissionsSeeder extends Seeder
         }
 
         // Create roles and assign permissions
-        Role::firstOrCreate(['name' => 'Super Admin'])->givePermissionTo(Permission::all());
+        Role::firstOrCreate(['name' => 'admin'])->givePermissionTo(Permission::all());
 
-        Role::firstOrCreate(['name' => 'Branch Admin'])->givePermissionTo([
+        Role::firstOrCreate(['name' => 'branch_admin'])->givePermissionTo([
             'view_dashboard',
             'manage_appointments',
             'manage_sessions',
@@ -44,12 +44,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_reports',
         ]);
 
-        Role::firstOrCreate(['name' => 'Doctor'])->givePermissionTo([
+        Role::firstOrCreate(['name' => 'doctor'])->givePermissionTo([
             'manage_appointments',
             'manage_sessions',
         ]);
 
-        Role::firstOrCreate(['name' => 'Cashier'])->givePermissionTo([
+        Role::firstOrCreate(['name' => 'cashier'])->givePermissionTo([
             'manage_payments',
         ]);
 
@@ -58,7 +58,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_reports',
         ]);
 
-        Role::firstOrCreate(['name' => 'Receptionist'])->givePermissionTo([
+        Role::firstOrCreate(['name' => 'receptionist'])->givePermissionTo([
             'create_patients',
             'book_appointments',
             'view_schedule',

@@ -2,32 +2,22 @@
 
 
 use Illuminate\Support\Facades\Auth;
-
 use App\Http\Controllers\Doctors\DoctorController;
-
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\CheckupController;
 use App\Http\Middleware\RoleMiddleware;
-
 use App\Http\Controllers\DashboardController;
-
-
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TreatmentSessionController;
 use App\Http\Controllers\SessionInstallmentController;
 use App\Http\Controllers\GeneralSettingController;
-
 use App\Http\Controllers\SessionController;
-use App\Http\Controllers\SessionDetailController;
-
+//use App\Http\Controllers\SessionDetailController;
 use App\Http\Controllers\PaymentOutstandingController;
-
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeSalaryController;
-
 use App\Http\Controllers\SessionTimeController;
-
 use App\Http\Controllers\DoctorAvailabilityController;
 
 Auth::routes();
@@ -35,10 +25,28 @@ Auth::routes();
 
 // For all authenticated users
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return "General Dashboard";
-    })->name('dashboard');
+    //patients
+    Route::get('/patients', [PatientController::class, 'index']);
+    Route::get('/patients/create', [PatientController::class, 'create']);
+    Route::post('/patients', [PatientController::class, 'store']);
+    Route::get('/patients/{id}/edit', [PatientController::class, 'edit']);
+    Route::put('/patients/{id}', [PatientController::class, 'update'])->name('patients.update');
+    Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.card');
+    Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
+    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+
 });
+
+// For admin only
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+//For receptionist only
+Route::middleware(['auth', 'role:Receptionist'])->group(function () {
+    //Route::get('/receptionist/dashboard', [DashboardController::class, 'receptionistIndex']);
+});
+
 
 Route::post('/sessions/{id}/complete', [SessionTimeController::class, 'markCompleted'])->name('sessions.complete');
 Route::delete('/sessions/{id}', [SessionTimeController::class, 'destroy'])->name('sessions.destroy');
@@ -58,9 +66,7 @@ Route::post('/salaries/mark-paid', [EmployeeSalaryController::class, 'markPaidWi
 
 
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    // ->middleware(['auth']) // Remove if not using auth
-     ->name('dashboard');
+
 
 Route::get('/payments/outstandings', [\App\Http\Controllers\PaymentOutstandingController::class, 'index']);
 
@@ -72,7 +78,7 @@ Route::get('/treatment-sessions/{session_id}/add-entry', [TreatmentSessionContro
 Route::post('/treatment-sessions/{session_id}/store-entry', [TreatmentSessionController::class, 'storeEntry'])->name('treatment-sessions.store-entry');
 
 
-Route::get('/session-details/create/{session}', [SessionDetailController::class, 'create'])->name('session-details.create');
+//Route::get('/session-details/create/{session}', [SessionDetailController::class, 'create'])->name('session-details.create');
 Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
 
 
@@ -152,16 +158,7 @@ Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailability
     ->name('doctors.availability.deleteMonth');
 
 
-Route::get('/patients', [PatientController::class, 'index']);
-Route::get('/patients/create', [PatientController::class, 'create']);
-Route::post('/patients', [PatientController::class, 'store']);
-Route::get('/patients/{id}/edit', [PatientController::class, 'edit']);
-Route::put('/patients/{id}', [PatientController::class, 'update'])->name('patients.update');
-Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.card');
-Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
-
-Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');

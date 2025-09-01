@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'name' => 'Nomi',
             'email' => 'nomi@gmail.com',
             'password' => bcrypt('password'),
-            'branch_id' => 1, 
+            'branch_id' => 1,
         ]);
     }
 }

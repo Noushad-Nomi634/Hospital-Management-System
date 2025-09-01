@@ -17,7 +17,7 @@ class UserRoleSeeder extends Seeder
     {
          $user = User::where('email', 'admin@example.com')->first();
         if ($user) {
-            $user->assignRole('Super Admin');
+            $user->assignRole('admin');
         }
     }
     }
