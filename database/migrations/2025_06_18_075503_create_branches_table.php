@@ -16,6 +16,7 @@ return new class extends Migration
     $table->string('name');
     $table->string('address')->nullable();
     $table->string('phone')->nullable();
+    $table->decimal('balance', 15, 2)->default(0);     // transaction amount
     $table->timestamps();
         });
     }

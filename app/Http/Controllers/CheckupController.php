@@ -9,7 +9,7 @@ use App\Models\Checkup;
 class CheckupController extends Controller
 {
     // 1️⃣ Show all checkups
-    public function index() 
+    public function index()
     {
         $checkups = DB::table('checkups')
             ->join('patients', 'checkups.patient_id', '=', 'patients.id')
@@ -56,31 +56,50 @@ class CheckupController extends Controller
     // 3️⃣ Store new checkup
     public function store(Request $request)
     {
-        $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'doctor_id'  => 'required|exists:doctors,id',
-            'date'       => 'required|date',
-            'note'       => 'nullable|string',
-        ]);
+        try{
+            DB::beginTransaction();
+            $request->validate([
+                'patient_id' => 'required|exists:patients,id',
+                'doctor_id'  => 'required|exists:doctors,id',
+                'date'       => 'required|date',
+                'note'       => 'nullable|string',
+            ]);
 
-        $patient = DB::table('patients')->where('id', $request->patient_id)->first();
-        if (!$patient) {
-            return back()->with('error', 'Patient not found.');
+            $patient = DB::table('patients')->where('id', $request->patient_id)->first();
+            if (!$patient) {
+                return back()->with('error', 'Patient not found.');
+            }
+            $checkupFee = $this->getFeeByBranch($patient->branch_id);
+            Checkup::create([
+                'patient_id' => $request->patient_id,
+                'doctor_id'  => $request->doctor_id,
+                'branch_id'  => $patient->branch_id,
+                'date'       => $request->date,
+                'diagnosis'  => $request->diagnosis ?? null,
+                'fee'        => $checkupFee,
+                'note'       => $request->note,
+            ]);
+            //Add the Data in Transaction Table
+            DB::table('transactions')->insert([
+                'p_id'       => $request->patient_id,
+                'dr_id'      => $request->doctor_id,
+                'amount'     => $checkupFee,
+                'type'       => '+',
+                'b_id'       => $patient->branch_id,
+                'entery_by'  => auth()->user()->id,
+                'Remx'       => 'Checkup Fee',
+            ]);
+
+            // Update Branch Balance
+            DB::table('branches')->where('id', $patient->branch_id)->increment('balance', $checkupFee);
+
+            DB::commit();
+            return redirect()->route('checkups.index')->with('success', 'Checkup added successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'An error occurred while saving the checkup: ' . $e->getMessage());
         }
-
-        $checkupFee = $this->getFeeByBranch($patient->branch_id);
-
-        Checkup::create([
-            'patient_id' => $request->patient_id,
-            'doctor_id'  => $request->doctor_id,
-            'branch_id'  => $patient->branch_id,
-            'date'       => $request->date,
-            'diagnosis'  => $request->diagnosis ?? null,
-            'fee'        => $checkupFee,
-            'note'       => $request->note,
-        ]);
-
-        return redirect()->route('checkups.index')->with('success', 'Checkup added successfully.');
     }
 
     // 4️⃣ Edit form
