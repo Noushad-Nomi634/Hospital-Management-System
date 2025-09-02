@@ -13,8 +13,13 @@ class DoctorController extends Controller
      */
     public function index()
     {
-        $doctors = Doctor::all();
-        return view('doctors.index', compact('doctors'));
+        try {
+            $doctors = Doctor::all();
+            return view('doctors.index', compact('doctors'));
+        } catch (\Exception $e) {
+            \Log::error('Doctor index error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load doctors list.');
+        }
     }
 
     /**
@@ -22,7 +27,12 @@ class DoctorController extends Controller
      */
     public function create()
     {
-        return view('doctors.create');
+        try {
+            return view('doctors.create');
+        } catch (\Exception $e) {
+            \Log::error('Doctor create form error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load doctor creation form.');
+        }
     }
 
     /**
@@ -30,18 +40,26 @@ class DoctorController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|email|unique:doctors,email',
-            'phone'          => 'nullable|string|max:20',
-            'specialization' => 'required|string|max:255',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name'           => 'required|string|max:255',
+                'email'          => 'required|email|unique:doctors,email',
+                'phone'          => 'nullable|string|max:20',
+                'specialization' => 'required|string|max:255',
+            ]);
 
-        Doctor::create($validated);
+            Doctor::create($validated);
 
-        return redirect()
-            ->route('doctors.index')
-            ->with('success', 'Doctor created successfully!');
+            return redirect()
+                ->route('doctors.index')
+                ->with('success', 'Doctor created successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Doctor store error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to create doctor. Please try again.')
+                        ->withInput();
+        }
     }
 
     /**
@@ -49,8 +67,13 @@ class DoctorController extends Controller
      */
     public function edit($id)
     {
-        $doctor = Doctor::findOrFail($id);
-        return view('doctors.edit', compact('doctor'));
+        try {
+            $doctor = Doctor::findOrFail($id);
+            return view('doctors.edit', compact('doctor'));
+        } catch (\Exception $e) {
+            \Log::error('Doctor edit error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load doctor edit form.');
+        }
     }
 
     /**
@@ -58,20 +81,28 @@ class DoctorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $doctor = Doctor::findOrFail($id);
+        try {
+            $doctor = Doctor::findOrFail($id);
 
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|email|unique:doctors,email,' . $doctor->id,
-            'phone'          => 'nullable|string|max:20',
-            'specialization' => 'required|string|max:255',
-        ]);
+            $validated = $request->validate([
+                'name'           => 'required|string|max:255',
+                'email'          => 'required|email|unique:doctors,email,' . $doctor->id,
+                'phone'          => 'nullable|string|max:20',
+                'specialization' => 'required|string|max:255',
+            ]);
 
-        $doctor->update($validated);
+            $doctor->update($validated);
 
-        return redirect()
-            ->route('doctors.index')
-            ->with('success', 'Doctor updated successfully!');
+            return redirect()
+                ->route('doctors.index')
+                ->with('success', 'Doctor updated successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Doctor update error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to update doctor. Please try again.')
+                        ->withInput();
+        }
     }
 
     /**
@@ -79,8 +110,13 @@ class DoctorController extends Controller
      */
     public function availability($id)
     {
-        $doctor = Doctor::with('availabilities')->findOrFail($id);
-        return view('doctors.availability', compact('doctor'));
+        try {
+            $doctor = Doctor::with('availabilities')->findOrFail($id);
+            return view('doctors.availability', compact('doctor'));
+        } catch (\Exception $e) {
+            \Log::error('Doctor availability error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load doctor availability.');
+        }
     }
 
     /**
@@ -88,11 +124,16 @@ class DoctorController extends Controller
      */
     public function destroy($id)
     {
-        $doctor = Doctor::findOrFail($id);
-        $doctor->delete();
+        try {
+            $doctor = Doctor::findOrFail($id);
+            $doctor->delete();
 
-        return redirect()
-            ->route('doctors.index')
-            ->with('success', 'Doctor deleted successfully!');
+            return redirect()
+                ->route('doctors.index')
+                ->with('success', 'Doctor deleted successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Doctor delete error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to delete doctor. Please try again.');
+        }
     }
 }

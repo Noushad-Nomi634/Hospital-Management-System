@@ -1,11 +1,9 @@
 <?php
 
 namespace Database\Seeders;
+
 use Spatie\Permission\Models\Role;
 use App\Models\User;
-
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserRoleSeeder extends Seeder
@@ -15,10 +13,13 @@ class UserRoleSeeder extends Seeder
      */
     public function run(): void
     {
-         $user = User::where('email', 'admin@example.com')->first();
+        // Find user by email
+        $user = User::where('email', 'admin@example.com')->first();
+
         if ($user) {
-            $user->assignRole('admin');
+            // Assign the correct role defined in RolesAndPermissionsSeeder
+            $user->assignRole('Super Admin'); // <- yahan 'Super Admin' use karein
         }
     }
-    }
+}
 

@@ -13,16 +13,21 @@ class PatientController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Patient::with('branch');
+        try {
+            $query = Patient::with('branch');
 
-        // Filter by patient ID if provided
-        if ($request->filled('search_id')) {
-            $query->where('id', $request->search_id);
+            // Filter by patient ID if provided
+            if ($request->filled('search_id')) {
+                $query->where('id', $request->search_id);
+            }
+
+            $patients = $query->get();
+
+            return view('patients.indexx', compact('patients'));
+        } catch (\Exception $e) {
+            \Log::error('Patient index error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to fetch patients. Please try again.');
         }
-
-        $patients = $query->get();
-
-        return view('patients.indexx', compact('patients'));
     }
 
     /**
@@ -30,8 +35,13 @@ class PatientController extends Controller
      */
     public function create()
     {
-        $branches = Branch::all();
-        return view('patients.create', compact('branches'));
+        try {
+            $branches = Branch::all();
+            return view('patients.create', compact('branches'));
+        } catch (\Exception $e) {
+            \Log::error('Patient create error: ' . $e->getMessage());
+            return back()->with('error', 'Something went wrong while loading the form.');
+        }
     }
 
     /**
@@ -54,22 +64,15 @@ class PatientController extends Controller
             // Store patient
             $patient = Patient::create($validatedData);
 
-            // Get ID of newly created patient
-            $patientId = $patient->id;
-
-            // Redirect to patient details page (or any route)
             return redirect()->route('patients.card', $patient->id)
                  ->with('success', 'Patient added successfully!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Validation errors
             return back()->withErrors($e->validator)->withInput();
 
         } catch (\Exception $e) {
-            // General errors (DB, etc.)
             \Log::error('Patient store error: ' . $e->getMessage());
-
-            return back()->with('error', 'Something went wrong. Please try again.'.$e->getMessage())
+            return back()->with('error', 'Something went wrong. Please try again.')
                         ->withInput();
         }
     }
@@ -79,10 +82,15 @@ class PatientController extends Controller
      */
     public function edit($id)
     {
-        $patient  = Patient::findOrFail($id);
-        $branches = Branch::all();
+        try {
+            $patient  = Patient::findOrFail($id);
+            $branches = Branch::all();
 
-        return view('patients.edit', compact('patient', 'branches'));
+            return view('patients.edit', compact('patient', 'branches'));
+        } catch (\Exception $e) {
+            \Log::error('Patient edit error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load patient edit form.');
+        }
     }
 
     /**
@@ -90,28 +98,37 @@ class PatientController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name'          => 'required|string|max:255',
-            'gender'        => 'required|in:Male,Female,Other',
-            'guardian_name' => 'required|string|max:255',
-            'age'           => 'required|numeric',
-            'phone'         => 'required|string|max:20',
-            'address'       => 'required|string|max:500',
-            'branch_id'     => 'required|exists:branches,id',
-        ]);
+        try {
+            $request->validate([
+                'name'          => 'required|string|max:255',
+                'gender'        => 'required|in:Male,Female,Other',
+                'guardian_name' => 'required|string|max:255',
+                'age'           => 'required|numeric',
+                'phone'         => 'required|string|max:20',
+                'address'       => 'required|string|max:500',
+                'branch_id'     => 'required|exists:branches,id',
+            ]);
 
-        $patient = Patient::findOrFail($id);
-        $patient->update($request->only(
-            'name',
-            'gender',           // ✅ Gender included
-            'guardian_name',
-            'age',
-            'phone',
-            'address',
-            'branch_id'
-        ));
+            $patient = Patient::findOrFail($id);
+            $patient->update($request->only(
+                'name',
+                'gender',
+                'guardian_name',
+                'age',
+                'phone',
+                'address',
+                'branch_id'
+            ));
 
-        return redirect('/patients')->with('success', 'Patient updated successfully!');
+            return redirect('/patients')->with('success', 'Patient updated successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->validator)->withInput();
+
+        } catch (\Exception $e) {
+            \Log::error('Patient update error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to update patient. Please try again.')
+                        ->withInput();
+        }
     }
 
     /**
@@ -119,12 +136,13 @@ class PatientController extends Controller
      */
     public function show($id)
     {
-        $patient = Patient::with('branch', 'checkups')->findOrFail($id);
-        // echo "<pre>";
-        // print_r($patient->toArray());
-        // echo "</pre>";
-        // exit();
-        return view('patients.show', compact('patient'));
+        try {
+            $patient = Patient::with('branch', 'checkups')->findOrFail($id);
+            return view('patients.show', compact('patient'));
+        } catch (\Exception $e) {
+            \Log::error('Patient show error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load patient details.');
+        }
     }
 
     /**
@@ -132,10 +150,14 @@ class PatientController extends Controller
      */
     public function destroy($id)
     {
-        $patient = Patient::findOrFail($id);
-        $patient->delete();
+        try {
+            $patient = Patient::findOrFail($id);
+            $patient->delete();
 
-        return redirect('/patients')->with('success', 'Patient deleted successfully!');
+            return redirect('/patients')->with('success', 'Patient deleted successfully!');
+        } catch (\Exception $e) {
+            \Log::error('Patient delete error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to delete patient. Please try again.');
+        }
     }
 }
-

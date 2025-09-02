@@ -163,5 +163,3 @@ Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailability
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');
-
-
