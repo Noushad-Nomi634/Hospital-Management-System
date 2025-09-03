@@ -19,6 +19,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeSalaryController;
 use App\Http\Controllers\SessionTimeController;
 use App\Http\Controllers\DoctorAvailabilityController;
+use App\Http\Controllers\Admin\AdminController;
 
 Auth::routes();
 
@@ -39,8 +40,14 @@ Route::middleware(['auth'])->group(function () {
 
 // For admin only
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
+
+
+Route::middleware(['auth:doctor', 'role:doctor,doctor'])->group(function () {
+    Route::get('dr/dashboard', [DashboardController::class, 'index'])->name('dr.dashboard');
+});
+
 
 //For receptionist only
 Route::middleware(['auth', 'role:Receptionist'])->group(function () {

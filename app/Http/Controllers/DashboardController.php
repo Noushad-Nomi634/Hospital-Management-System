@@ -13,6 +13,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // echo "<pre>";
+        // print_r(auth()->user());
+        // echo "</pre>";
+
         // ✅ Total counts
         $totalDoctors = Doctor::count();
         $totalPatients = Patient::count();

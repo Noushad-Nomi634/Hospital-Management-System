@@ -48,6 +48,12 @@
                                 <div class="line"></div>
                             </div>
 
+                            @if($errors->any())
+                                <div class="alert alert-danger">
+                                    {{ $errors->first() }}
+                                </div>
+                            @endif
+
                             <div class="form-body mt-4">
                                 <form method="POST" action="{{ route('login') }}" class="row g-3">
                                     @csrf
@@ -83,10 +89,42 @@
                                         </div>
                                     </div>
 
+                                    <div class="col-12">
+                                        <label for="role" class="form-label">Login As <span
+                                                class="text-danger">*</span></label>
+                                        <div class="input-group" id="show_hide_role">
+                                            <select class="form-control" name="role"required>
+                                                <option value="" disabled selected>Select Role</option>
+                                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin
+                                                </option>
+                                                <option value="doctor" {{ old('role') == 'doctor' ? 'selected' : '' }}>
+                                                    Doctor</option>
+                                                <option value="receptionist"
+                                                    {{ old('role') == 'receptionist' ? 'selected' : '' }}>Receptionist
+                                                </option>
+                                                <option value="accountant"
+                                                    {{ old('role') == 'accountant' ? 'selected' : '' }}>Accountant
+                                                </option>
+                                                <option value="pharmacist"
+                                                    {{ old('role') == 'pharmacist' ? 'selected' : '' }}>Pharmacist
+                                                </option>
+                                            </select>
+
+
+
+                                            @error('role')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+
                                     <div class="col-md-6">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" id="checkbox"
-                                                {{ old('remember') ? 'checked' : '' }}>
+                                                name="remember" {{ old('remember') ? 'checked' : '' }}>
                                             <label class="form-check-label" for="checkbox">Remember Me</label>
                                         </div>
                                     </div>

@@ -16,11 +16,22 @@ class RoleMiddleware
      */
     public function handle($request, Closure $next, $role)
     {
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            abort(403, 'Unauthorized');
-        }
+        if (!Auth::guard($guard)->check()) {
+        return redirect()->route('login'); // or doctor.login if separate
+    }
 
-        return $next($request);
+
+    $user = Auth::guard($guard)->user();
+
+    if ($guard === 'doctor' && $role !== 'doctor') {
+        abort(403, 'Unauthorized');
+    }
+
+    if ($guard === 'web' && $user->role !== $role) {
+        abort(403, 'Unauthorized');
+    }
+
+    return $next($request);
     }
 }
 

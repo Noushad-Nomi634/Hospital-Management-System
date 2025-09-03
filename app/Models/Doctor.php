@@ -2,19 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
-class Doctor extends Model
+class Doctor extends  Authenticatable
 {
-    protected $table = 'doctors'; 
+    use HasRoles;
+
+    protected $guard_name = 'web';
+    protected $table = 'doctors';
+    use Notifiable;
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'specialization',
-        'branch_id',   // ✅ Doctor linked with Branch
+            'name', 'email', 'phone', 'specialization', 'password','branch_id',
+        ];
+
+    protected $hidden = [
+        'password', 'remember_token',
     ];
+
 
     // ───────────────────────────────
     // Relationships

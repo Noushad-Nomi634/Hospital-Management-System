@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Doctors;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
+use Illuminate\Support\Facades\Hash;
 
 class DoctorController extends Controller
 {
@@ -30,18 +31,28 @@ class DoctorController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        try {
+            $validated = $request->validate([
             'name'           => 'required|string|max:255',
             'email'          => 'required|email|unique:doctors,email',
             'phone'          => 'nullable|string|max:20',
             'specialization' => 'required|string|max:255',
-        ]);
+            'password'       => 'required|string|min:8',
 
-        Doctor::create($validated);
+        ]);
+        $validated['password'] = Hash::make($validated['password']);
+        $doctor = Doctor::create($validated);
+        //Doctor role assign
+
+        $doctor->assignRole('doctor');
 
         return redirect()
             ->route('doctors.index')
             ->with('success', 'Doctor created successfully!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
     }
 
     /**

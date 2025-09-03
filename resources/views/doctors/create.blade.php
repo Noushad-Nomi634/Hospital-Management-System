@@ -41,6 +41,11 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="email" class="form-label">Password</label>
+                    <input type="password" name="password" id="password" value="{{ old('password') }}" class="form-control" placeholder="Enter email" required>
+                </div>
+
+                <div class="mb-3">
                     <label for="phone" class="form-label">Phone Number</label>
                     <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="form-control" placeholder="Enter phone number">
                 </div>
