@@ -146,7 +146,7 @@ Route::put('/doctors/{id}', [DoctorController::class, 'update'])->name('doctors.
 Route::delete('/doctors/{id}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
 
 Route::get('/doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
-    ->name('doctors.availability');
+    ->name('doctors.availability.index');
 
 Route::post('/doctors/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
     ->name('doctors.availability.store');
@@ -156,8 +156,6 @@ Route::post('/doctors/{doctor}/availability/generate-next-month', [DoctorAvailab
 
 Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
     ->name('doctors.availability.deleteMonth');
-
-
 
 
 

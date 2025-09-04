@@ -51,8 +51,9 @@
                                                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                             </form>
                                             
-                                            {{-- Availability Button (Last) --}}
-                                            <a href="{{ route('doctors.availability', $doctor->id) }}" class="btn btn-sm btn-info">Availability</a>
+                                            {{-- Availability Button --}}
+                                            <a href="{{ route('doctors.availability.index', ['doctor' => $doctor->id]) }}" 
+                                               class="btn btn-sm btn-info">Availability</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -78,3 +79,4 @@
         new PerfectScrollbar('.table-responsive');
     </script>
 @endpush
+

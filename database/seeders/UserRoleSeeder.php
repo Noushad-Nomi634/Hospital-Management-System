@@ -2,24 +2,23 @@
 
 namespace Database\Seeders;
 
-use Spatie\Permission\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 
 class UserRoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Find user by email
-        $user = User::where('email', 'admin@example.com')->first();
+        // Find user by email or create
+        $user = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('password123')
+            ]
+        );
 
-        if ($user) {
-            // Assign the correct role defined in RolesAndPermissionsSeeder
-            $user->assignRole('Super Admin'); // <- yahan 'Super Admin' use karein
-        }
+        // Assign role
+        $user->assignRole('admin');
     }
 }
-

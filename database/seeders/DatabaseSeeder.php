@@ -17,8 +17,6 @@ class DatabaseSeeder extends Seeder
 
          $this->call(BranchSeeder::class);
           $this->call(PatientSeeder::class);
-          $this->call(DoctorSeeder::class);
-          $this->call(DoctorPerformanceSeeder::class);
           $this->call(GeneralSettingsSeeder::class);
           $this->call(RolesAndPermissionsSeeder::class);
           $this->call(UserRoleSeeder::class);
