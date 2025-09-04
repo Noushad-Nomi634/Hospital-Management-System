@@ -153,7 +153,7 @@ Route::put('/doctors/{id}', [DoctorController::class, 'update'])->name('doctors.
 Route::delete('/doctors/{id}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
 
 Route::get('/doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
-    ->name('doctors.availability');
+    ->name('doctors.availability.index');
 
 Route::post('/doctors/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
     ->name('doctors.availability.store');
@@ -166,9 +166,5 @@ Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailability
 
 
 
-
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');
-
-

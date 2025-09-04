@@ -61,7 +61,7 @@
                                     <div class="col-12">
                                         <label for="email" class="form-label">Email <span
                                                 class="text-danger">*</span></label>
-                                        <input type="email" name="email"  class="form-control @error('email') is-invalid @enderror"
+                                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                             id="email" placeholder="jhon@example.com" value="{{ old('email') }}"
                                             required autocomplete="email" autofocus>
 

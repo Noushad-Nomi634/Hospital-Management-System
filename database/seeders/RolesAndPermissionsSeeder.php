@@ -2,19 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-          // Clear cache
+        // Clear Spatie permission cache
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Define permissions
@@ -29,6 +25,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_schedule',
         ];
 
+        // Create permissions
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
@@ -53,7 +50,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_payments',
         ]);
 
-        Role::firstOrCreate(['name' => 'View-Only Admin'])->givePermissionTo([
+        Role::firstOrCreate(['name' => 'view-only-admin'])->givePermissionTo([
             'view_dashboard',
             'view_reports',
         ]);
@@ -64,5 +61,4 @@ class RolesAndPermissionsSeeder extends Seeder
             'view_schedule',
         ]);
     }
-    }
-
+}
