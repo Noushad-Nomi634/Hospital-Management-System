@@ -53,7 +53,7 @@
                 @elseif(Auth::guard('web')->user())
                     <a href="{{ url('admin/dashboard') }}">
                 @endif
-
+                        {{-- hello just for testing  --}}
               <div class="parent-icon"><i class="material-icons-outlined">home</i>
               </div>
               <div class="menu-title">Dashboard</div>
