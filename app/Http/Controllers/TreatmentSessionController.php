@@ -64,6 +64,7 @@ class TreatmentSessionController extends Controller
 
             $session = TreatmentSession::create([
                 'patient_id'    => $checkup->patient_id,
+                'branch_id'     => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
                 'checkup_id'    => $request->checkup_id,
                 'doctor_id'     => $request->doctor_id,
                 'session_fee'   => $request->session_fee,
@@ -103,7 +104,7 @@ class TreatmentSessionController extends Controller
                 'dr_id'     => $request->doctor_id,
                 'amount'    => $paidAmount,
                 'type'      => '+',
-                'b_id'      => $checkup->branch_id ?? 1,
+                'b_id'      => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
                 'entery_by' => auth()->user()->id,
                 'Remx'      => 'Treatment Session Payment',
                 'created_at'=> now(),
@@ -142,6 +143,7 @@ class TreatmentSessionController extends Controller
 
             $session->update([
                 'patient_id'    => $checkup->patient_id,
+                'branch_id'     => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
                 'checkup_id'    => $request->checkup_id,
                 'doctor_id'     => $request->doctor_id,
                 'session_fee'   => $request->session_fee,
@@ -173,6 +175,7 @@ class TreatmentSessionController extends Controller
                 ['Remx', '=', 'Treatment Session Payment']
             ])->update([
                 'amount'     => $paidAmount,
+                'b_id'       => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
                 'updated_at' => now(),
             ]);
 
@@ -235,3 +238,4 @@ class TreatmentSessionController extends Controller
         }
     }
 }
+

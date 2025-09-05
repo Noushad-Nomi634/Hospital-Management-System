@@ -12,6 +12,7 @@ class TreatmentSession extends Model
 
     protected $fillable = [
         'checkup_id',
+        'branch_id',
         'doctor_id',
         'patient_id',
         'session_date',

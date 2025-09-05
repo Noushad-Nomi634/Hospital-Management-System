@@ -30,6 +30,7 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Specialization</th>
+                                <th>Branch</th> <!-- NEW -->
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -39,6 +40,8 @@
                                     <td>{{ $doctor->name }}</td>
                                     <td>{{ $doctor->email }}</td>
                                     <td>{{ $doctor->specialization }}</td>
+                                     <td>{{ $doctor->branch ? $doctor->branch->name : '-' }}</td> <!-- NEW -->
+
                                     <td>
                                         <div class="d-flex gap-2 flex-wrap">
                                             {{-- Edit Button --}}

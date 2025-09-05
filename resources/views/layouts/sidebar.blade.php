@@ -50,7 +50,7 @@
             <a href="javascript:;" class="has-arrow">
                 @if(Auth::guard('doctor')->check())
                     <a href="{{ url('dr/dashboard') }}">
-                @elseif(Auth::guard('web')->user()->role === 'admin')
+                @elseif(Auth::guard('web')->user())
                     <a href="{{ url('admin/dashboard') }}">
                 @endif
 

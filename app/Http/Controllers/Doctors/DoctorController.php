@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DoctorController extends Controller
 {
-    /**
-     * Show all doctors
-     */
+    // ───────────────────────────────
+    // Show all doctors
+    // ───────────────────────────────
     public function index()
     {
         try {
@@ -23,54 +24,44 @@ class DoctorController extends Controller
         }
     }
 
-    /**
-     * Show create doctor form
-     */
+    // ───────────────────────────────
+    // Show create doctor form
+    // ───────────────────────────────
     public function create()
     {
         try {
-            return view('doctors.create');
+            $branches = \App\Models\Branch::all();
+            return view('doctors.create', compact('branches'));
         } catch (\Exception $e) {
             \Log::error('Doctor create form error: ' . $e->getMessage());
             return back()->with('error', 'Unable to load doctor creation form.');
         }
     }
 
-    /**
-     * Store new doctor
-     */
+    // ───────────────────────────────
+    // Store new doctor
+    // ───────────────────────────────
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
-<<<<<<< HEAD
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|email|unique:doctors,email',
-            'phone'          => 'nullable|string|max:20',
-            'specialization' => 'required|string|max:255',
-            'password'       => 'required|string|min:8',
-
-        ]);
-        $validated['password'] = Hash::make($validated['password']);
-        $doctor = Doctor::create($validated);
-        //Doctor role assign
-
-        $doctor->assignRole('doctor');
-
-        return redirect()
-            ->route('doctors.index')
-            ->with('success', 'Doctor created successfully!');
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
-=======
                 'name'           => 'required|string|max:255',
                 'email'          => 'required|email|unique:doctors,email',
                 'phone'          => 'nullable|string|max:20',
                 'specialization' => 'required|string|max:255',
+                'password'       => 'required|string|min:8',
+                'branch_id'      => 'required|exists:branches,id',
             ]);
 
-            Doctor::create($validated);
+            // Hash password
+            $validated['password'] = Hash::make($validated['password']);
+
+            // Create doctor
+            $doctor = Doctor::create($validated);
+
+            // Assign role
+            $role = Role::firstOrCreate(['name' => 'doctor']);
+            $doctor->assignRole($role);
 
             return redirect()
                 ->route('doctors.index')
@@ -79,29 +70,28 @@ class DoctorController extends Controller
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             \Log::error('Doctor store error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to create doctor. Please try again.')
-                        ->withInput();
->>>>>>> 00f2678d40523d79c4be43904b06709548b83784
+            return back()->with('error', 'Unable to create doctor. Please try again.')->withInput();
         }
     }
 
-    /**
-     * Show edit form
-     */
+    // ───────────────────────────────
+    // Show edit form
+    // ───────────────────────────────
     public function edit($id)
     {
         try {
             $doctor = Doctor::findOrFail($id);
-            return view('doctors.edit', compact('doctor'));
+            $branches = \App\Models\Branch::all();
+            return view('doctors.edit', compact('doctor', 'branches'));
         } catch (\Exception $e) {
             \Log::error('Doctor edit error: ' . $e->getMessage());
             return back()->with('error', 'Unable to load doctor edit form.');
         }
     }
 
-    /**
-     * Update doctor
-     */
+    // ───────────────────────────────
+    // Update doctor
+    // ───────────────────────────────
     public function update(Request $request, $id)
     {
         try {
@@ -112,6 +102,7 @@ class DoctorController extends Controller
                 'email'          => 'required|email|unique:doctors,email,' . $doctor->id,
                 'phone'          => 'nullable|string|max:20',
                 'specialization' => 'required|string|max:255',
+                'branch_id'      => 'required|exists:branches,id',
             ]);
 
             $doctor->update($validated);
@@ -123,14 +114,13 @@ class DoctorController extends Controller
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             \Log::error('Doctor update error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to update doctor. Please try again.')
-                        ->withInput();
+            return back()->with('error', 'Unable to update doctor. Please try again.')->withInput();
         }
     }
 
-    /**
-     * Show availability page of a doctor
-     */
+    // ───────────────────────────────
+    // Show availability page of a doctor
+    // ───────────────────────────────
     public function availability($id)
     {
         try {
@@ -142,9 +132,9 @@ class DoctorController extends Controller
         }
     }
 
-    /**
-     * Delete a doctor
-     */
+    // ───────────────────────────────
+    // Delete a doctor
+    // ───────────────────────────────
     public function destroy($id)
     {
         try {
