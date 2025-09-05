@@ -23,6 +23,32 @@ use App\Http\Controllers\Admin\AdminController;
 
 Auth::routes();
 
+// Clear all cache route
+Route::get('/clear', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    return "All caches cleared successfully!";
+})->name('clear');
+
+// For admin only
+Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->group(function () {
+    Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    // Add more admin-specific routes here
+});
+
+// For Doctores only
+Route::prefix('doctor')->middleware(['auth:doctor', 'role:doctor'])->name('doctor.')->group(function () {
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Add more admin-specific routes here
+});
+
+//For receptionist only
+Route::middleware(['auth', 'role:Receptionist'])->group(function () {
+    //Route::get('/receptionist/dashboard', [DashboardController::class, 'receptionistIndex']);
+});
+
 
 // For all authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -35,24 +61,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.card');
     Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
     Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
-
-});
-
-// For admin only
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 });
 
 
-Route::middleware(['auth:doctor', 'role:doctor,doctor'])->group(function () {
-    Route::get('dr/dashboard', [DashboardController::class, 'index'])->name('dr.dashboard');
-});
-
-
-//For receptionist only
-Route::middleware(['auth', 'role:Receptionist'])->group(function () {
-    //Route::get('/receptionist/dashboard', [DashboardController::class, 'receptionistIndex']);
-});
 
 
 Route::post('/sessions/{id}/complete', [SessionTimeController::class, 'markCompleted'])->name('sessions.complete');

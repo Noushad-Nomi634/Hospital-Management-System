@@ -70,7 +70,12 @@ class DoctorController extends Controller
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             \Log::error('Doctor store error: ' . $e->getMessage());
+<<<<<<< HEAD
             return back()->with('error', 'Unable to create doctor. Please try again.')->withInput();
+=======
+            return back()->with('error', 'Unable to create doctor. Please try again.')
+                        ->withInput();
+>>>>>>> 3d944cc (Roles)
         }
     }
 
