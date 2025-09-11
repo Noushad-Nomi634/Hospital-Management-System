@@ -68,7 +68,7 @@
                             </select>
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-12 text-end">
                             <button type="submit" class="btn btn-info px-4">Update Patient</button>
                         </div>
                     </form>

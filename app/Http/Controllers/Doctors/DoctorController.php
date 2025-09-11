@@ -10,9 +10,7 @@ use Spatie\Permission\Models\Role;
 
 class DoctorController extends Controller
 {
-    // ───────────────────────────────
     // Show all doctors
-    // ───────────────────────────────
     public function index()
     {
         try {
@@ -24,9 +22,7 @@ class DoctorController extends Controller
         }
     }
 
-    // ───────────────────────────────
     // Show create doctor form
-    // ───────────────────────────────
     public function create()
     {
         try {
@@ -38,23 +34,38 @@ class DoctorController extends Controller
         }
     }
 
-    // ───────────────────────────────
     // Store new doctor
-    // ───────────────────────────────
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
-                'name'           => 'required|string|max:255',
+                'first_name'     => 'required|string|max:255',
+                'last_name'      => 'required|string|max:255',
                 'email'          => 'required|email|unique:doctors,email',
                 'phone'          => 'nullable|string|max:20',
                 'specialization' => 'required|string|max:255',
                 'password'       => 'required|string|min:8',
                 'branch_id'      => 'required|exists:branches,id',
+                'cnic'           => 'nullable|string|max:20',
+                'dob'            => 'nullable|date',
+                'last_education' => 'nullable|string|max:255',
+                'document'       => 'nullable|file|mimes:pdf,jpg,png,jpeg',
+                'picture'        => 'nullable|image|mimes:jpg,png,jpeg',
+                'status'         => 'required|in:active,inactive',
             ]);
 
             // Hash password
             $validated['password'] = Hash::make($validated['password']);
+
+            // Handle document upload
+            if ($request->hasFile('document')) {
+                $validated['document'] = $request->file('document')->store('documents', 'public');
+            }
+
+            // Handle picture upload
+            if ($request->hasFile('picture')) {
+                $validated['picture'] = $request->file('picture')->store('pictures', 'public');
+            }
 
             // Create doctor
             $doctor = Doctor::create($validated);
@@ -69,15 +80,13 @@ class DoctorController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
+            
             \Log::error('Doctor store error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to create doctor. Please try again.')
-                        ->withInput();
+            return back()->with('error', 'Unable to create doctor. Please try again.')->withInput();
         }
     }
 
-    // ───────────────────────────────
     // Show edit form
-    // ───────────────────────────────
     public function edit($id)
     {
         try {
@@ -90,21 +99,41 @@ class DoctorController extends Controller
         }
     }
 
-    // ───────────────────────────────
     // Update doctor
-    // ───────────────────────────────
     public function update(Request $request, $id)
     {
         try {
             $doctor = Doctor::findOrFail($id);
 
             $validated = $request->validate([
-                'name'           => 'required|string|max:255',
+                'first_name'     => 'required|string|max:255',
+                'last_name'      => 'required|string|max:255',
                 'email'          => 'required|email|unique:doctors,email,' . $doctor->id,
                 'phone'          => 'nullable|string|max:20',
                 'specialization' => 'required|string|max:255',
                 'branch_id'      => 'required|exists:branches,id',
+                'cnic'           => 'nullable|string|max:20',
+                'dob'            => 'nullable|date',
+                'last_education' => 'nullable|string|max:255',
+                'document'       => 'nullable|file|mimes:pdf,jpg,png,jpeg',
+                'picture'        => 'nullable|image|mimes:jpg,png,jpeg',
+                'status'         => 'required|in:active,inactive',
             ]);
+
+            // Handle document upload
+            if ($request->hasFile('document')) {
+                $validated['document'] = $request->file('document')->store('documents', 'public');
+            }
+
+            // Handle picture upload
+            if ($request->hasFile('picture')) {
+                $validated['picture'] = $request->file('picture')->store('pictures', 'public');
+            }
+
+            // Hash password if provided
+            if ($request->filled('password')) {
+                $validated['password'] = Hash::make($request->password);
+            }
 
             $doctor->update($validated);
 
@@ -119,23 +148,7 @@ class DoctorController extends Controller
         }
     }
 
-    // ───────────────────────────────
-    // Show availability page of a doctor
-    // ───────────────────────────────
-    public function availability($id)
-    {
-        try {
-            $doctor = Doctor::with('availabilities')->findOrFail($id);
-            return view('doctors.availability', compact('doctor'));
-        } catch (\Exception $e) {
-            \Log::error('Doctor availability error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to load doctor availability.');
-        }
-    }
-
-    // ───────────────────────────────
     // Delete a doctor
-    // ───────────────────────────────
     public function destroy($id)
     {
         try {
@@ -148,6 +161,18 @@ class DoctorController extends Controller
         } catch (\Exception $e) {
             \Log::error('Doctor delete error: ' . $e->getMessage());
             return back()->with('error', 'Unable to delete doctor. Please try again.');
+        }
+    }
+
+    // Show availability page of a doctor
+    public function availability($id)
+    {
+        try {
+            $doctor = Doctor::with('availabilities')->findOrFail($id);
+            return view('doctors.availability', compact('doctor'));
+        } catch (\Exception $e) {
+            \Log::error('Doctor availability error: ' . $e->getMessage());
+            return back()->with('error', 'Unable to load doctor availability.');
         }
     }
 }

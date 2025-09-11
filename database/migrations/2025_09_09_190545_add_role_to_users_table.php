@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::table('users', function (Blueprint $table) {
-        $table->unsignedBigInteger('branch_id')->nullable()->after('email_verified_at');
-    });
+       Schema::table('users', function (Blueprint $table) {
+            // role column add kar rahe hain, default 'user'
+            $table->string('role')->default('user')->after('password');
+        });
     }
 
     /**
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-         Schema::table('users', function (Blueprint $table) {
-        $table->dropColumn('branch_id');
-    });
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
     }
 };

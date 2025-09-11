@@ -9,8 +9,8 @@
 @section('content')
 <div class="container mt-5">
     <div class="card shadow-sm">
-        <div class="card-header bg-primary">
-            <h3 class="mb-0 text-white">Add Doctor</h3>
+        <div class="card-header bg-primary text-white">
+            <h3 class="text-white">Add Doctor</h3>
         </div>
         <div class="card-body">
 
@@ -26,37 +26,93 @@
             @endif
 
             {{-- Add Doctor Form --}}
-            <form method="POST" action="{{ route('doctors.store') }}">
+            <form method="POST" action="{{ route('doctors.store') }}" enctype="multipart/form-data">
                 @csrf
 
-                {{-- Name --}}
+                {{-- First Name --}}
                 <div class="mb-3">
-                    <label for="name" class="form-label">Doctor Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" class="form-control" placeholder="Enter full name" required>
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" name="first_name" id="first_name"
+                           class="form-control" placeholder="Enter first name" required>
+                </div>
+
+                {{-- Last Name --}}
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" name="last_name" id="last_name"
+                           class="form-control" placeholder="Enter last name" required>
                 </div>
 
                 {{-- Email --}}
                 <div class="mb-3">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" name="email" id="email" value="{{ old('email') }}" class="form-control" placeholder="Enter email" required>
-                </div>
-
-                {{-- Password --}}
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
+                    <input type="email" name="email" id="email"
+                           class="form-control" placeholder="Enter email" required autocomplete="off">
                 </div>
 
                 {{-- Phone --}}
                 <div class="mb-3">
                     <label for="phone" class="form-label">Phone Number</label>
-                    <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="form-control" placeholder="Enter phone number">
+                    <input type="text" name="phone" id="phone"
+                           class="form-control" placeholder="Enter phone number">
+                </div>
+
+                {{-- CNIC --}}
+                <div class="mb-3">
+                    <label for="cnic" class="form-label">CNIC</label>
+                    <input type="text" name="cnic" id="cnic"
+                           class="form-control" placeholder="Enter CNIC number">
+                </div>
+
+                {{-- Date of Birth --}}
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" id="dob" class="form-control">
+                </div>
+
+                {{-- Last Education / Degree --}}
+                <div class="mb-3">
+                    <label for="last_education" class="form-label">Last Education / Degree</label>
+                    <input type="text" name="last_education" id="last_education"
+                           class="form-control" placeholder="Enter last education or degree">
                 </div>
 
                 {{-- Specialization --}}
                 <div class="mb-3">
                     <label for="specialization" class="form-label">Specialization</label>
-                    <input type="text" name="specialization" id="specialization" value="{{ old('specialization') }}" class="form-control" placeholder="Enter specialization" required>
+                    <input type="text" name="specialization" id="specialization"
+                           class="form-control" placeholder="Enter specialization" required>
+                </div>
+
+                {{-- Status --}}
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-control" required>
+                        <option value="">Select Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                {{-- Password --}}
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" id="password"
+                           class="form-control" placeholder="Enter password" required autocomplete="new-password">
+                </div>
+
+                {{-- Document Upload --}}
+                <div class="mb-3">
+                    <label for="document" class="form-label">Upload Document</label>
+                    <input type="file" name="document" id="document" class="form-control">
+                    <small class="text-muted">Allowed: pdf, doc, docx, jpg, png (max: 2MB)</small>
+                </div>
+
+                {{-- Picture Upload --}}
+                <div class="mb-3">
+                    <label for="picture" class="form-label">Upload Picture</label>
+                    <input type="file" name="picture" id="picture" class="form-control">
+                    <small class="text-muted">Allowed: jpg, jpeg, png (max: 2MB)</small>
                 </div>
 
                 {{-- Branch --}}
@@ -65,9 +121,7 @@
                     <select name="branch_id" id="branch_id" class="form-control" required>
                         <option value="">Select Branch</option>
                         @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
-                                {{ $branch->name }}
-                            </option>
+                            <option value="{{ $branch->id }}">{{ $branch->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -85,10 +139,9 @@
 @endsection
 
 @push('script')
-    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/main.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+<script src="{{ URL::asset('build/js/main.js') }}"></script>
 @endpush
-

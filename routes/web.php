@@ -20,6 +20,9 @@ use App\Http\Controllers\EmployeeSalaryController;
 use App\Http\Controllers\SessionTimeController;
 use App\Http\Controllers\DoctorAvailabilityController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\BranchController;
+use App\Http\Controllers\BankController;
+use App\Http\Controllers\UserController;
 
 Auth::routes();
 
@@ -160,8 +163,11 @@ Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctor
 Route::post('/doctors/store', [DoctorController::class, 'store'])->name('doctors.store');
 Route::get('/doctors/{id}/edit', [DoctorController::class, 'edit'])->name('doctors.edit');
 Route::put('/doctors/{id}', [DoctorController::class, 'update'])->name('doctors.update');
+Route::get('/doctors/{id}', [DoctorController::class, 'show'])->name('doctors.show');
+
 
 Route::delete('/doctors/{id}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
+
 
 Route::get('/doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
     ->name('doctors.availability.index');
@@ -174,6 +180,33 @@ Route::post('/doctors/{doctor}/availability/generate-next-month', [DoctorAvailab
 
 Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
     ->name('doctors.availability.deleteMonth');
+
+
+    //Branches
+ Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
+Route::get('/branches/create', [BranchController::class, 'create'])->name('branches.create');
+Route::post('/branches/store', [BranchController::class, 'store'])->name('branches.store');
+Route::get('/branches/edit/{id}', [BranchController::class, 'edit'])->name('branches.edit');
+Route::put('/branches/update/{id}', [BranchController::class, 'update'])->name('branches.update');
+Route::delete('/branches/delete/{id}', [BranchController::class, 'destroy'])->name('branches.destroy');
+
+//Bank
+Route::get('/banks', [BankController::class, 'index'])->name('banks.index');
+Route::get('/banks/create', [BankController::class, 'create'])->name('banks.create');
+Route::post('/banks', [BankController::class, 'store'])->name('banks.store');
+Route::get('/banks/{id}', [BankController::class, 'show'])->name('banks.show');
+Route::get('/banks/{id}/edit', [BankController::class, 'edit'])->name('banks.edit');
+Route::put('/banks/{id}', [BankController::class, 'update'])->name('banks.update');
+Route::delete('/banks/{id}', [BankController::class, 'destroy'])->name('banks.destroy');
+
+
+
+Route::get('users', [UserController::class, 'index'])->name('users.index');
+Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+Route::post('users/store', [UserController::class, 'store'])->name('users.store');
+Route::get('users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
+Route::post('users/update/{id}', [UserController::class, 'update'])->name('users.update');
+Route::delete('users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
 
 

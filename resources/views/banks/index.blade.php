@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Doctors
+    Banks
 @endsection
 
 @push('css')
@@ -16,7 +16,7 @@
 @endpush
 
 @section('content')
-    <x-page-title title="Doctors" subtitle="List Of All Doctors" />
+    <x-page-title title="Banks" subtitle="Management" />
 
     <div class="row">
         <div class="col-xl-12 mx-auto">
@@ -25,62 +25,52 @@
 
                     <!-- Header with Add New Button -->
                     <div class="d-flex justify-content-between mb-3">
-                        <h5 class="mb-0">All Doctors</h5>
-                        <a href="{{ route('doctors.create') }}" class="btn btn-primary">Add Doctor</a>
+                        <h5 class="mb-0">All Banks</h5>
+                        <a href="{{ route('banks.create') }}" class="btn btn-primary">Add New Bank</a>
                     </div>
 
-                    <!-- Doctors Table -->
+                    <!-- Banks Table -->
                     <div class="table-responsive">
-                        <table id="doctorsTable" class="table table-bordered table-hover">
+                        <table id="banksTable" class="table table-bordered table-hover">
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Branch</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                    <th>Specialization</th>
-                                    <th>Status</th>
+                                    <th>Bank Name</th>
+                                    <th>Account No</th>
+                                    <th>Account Title</th>
+                                    <th>Balance</th>
                                     <th style="width:200px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($doctors as $doctor)
+                                @forelse($banks as $bank)
                                     <tr>
-                                        <td>{{ $doctor->id }}</td>
-                                        <td>{{ $doctor->first_name . ' ' . $doctor->last_name }}</td>
-                                        <td>{{ $doctor->branch->name ?? '-' }}</td>
-                                        <td>{{ $doctor->phone ?? '-' }}</td>
-                                        <td>{{ $doctor->email }}</td>
-                                        <td>{{ $doctor->specialization }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ $doctor->status == 'active' ? 'success' : 'secondary' }}">
-                                                {{ ucfirst($doctor->status) }}
-                                            </span>
-                                        </td>
+                                        <td>{{ $bank->id }}</td>
+                                        <td>{{ $bank->bank_name }}</td>
+                                        <td>{{ $bank->account_no }}</td>
+                                        <td>{{ $bank->account_title }}</td>
+                                        <td>{{ number_format($bank->balance, 2) }}</td>
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-outline-primary">Button</button>
+                                                <button type="button" class="btn btn-outline-primary">Buttons</button>
                                                 <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <span class="visually-hidden">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
-                                                    <a href="{{ route('doctors.edit', $doctor->id) }}" class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
-
-                                                    <form action="{{ route('doctors.destroy', $doctor->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this doctor?');">
+                                                    <a href="{{ route('banks.show', $bank->id) }}" class="btn btn-sm btn-info mb-1 w-100">View</a>
+                                                    <a href="{{ route('banks.edit', $bank->id) }}" class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
+                                                    <form action="{{ route('banks.destroy', $bank->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this bank?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger mb-1 w-100">Delete</button>
                                                     </form>
-
-                                                    <a href="{{ route('doctors.availability.index', $doctor->id) }}" class="btn btn-sm btn-info mb-1 w-100">Availability</a>
                                                 </div>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">No doctors found.</td>
+                                        <td colspan="6" class="text-center">No banks found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -95,7 +85,7 @@
 @endsection
 
 @push('script')
-    {{-- jQuery --}}
+    {{-- jQuery first --}}
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
     {{-- DataTables JS --}}
@@ -111,14 +101,14 @@
 
     <script>
         $(document).ready(function () {
-            $('#doctorsTable').DataTable({
+            $('#banksTable').DataTable({
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
                 lengthMenu: [5, 10, 25, 50, 100],
                 ordering: true,
                 columnDefs: [
-                    { orderable: false, targets: 7 } // Actions column
+                    { orderable: false, targets: 5 } // Actions column
                 ]
             });
         });

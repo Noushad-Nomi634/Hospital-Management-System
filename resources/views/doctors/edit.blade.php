@@ -13,32 +13,124 @@
             <h3 class="text-white">Edit Doctor</h3>
         </div>
         <div class="card-body">
-            <form method="POST" action="{{ route('doctors.update', $doctor->id) }}">
+
+            {{-- Validation Errors --}}
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{-- Edit Doctor Form --}}
+            <form method="POST" action="{{ route('doctors.update', $doctor->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
+                {{-- First Name --}}
                 <div class="mb-3">
-                    <label for="name" class="form-label">Doctor Name</label>
-                    <input type="text" name="name" id="name" value="{{ $doctor->name }}" class="form-control" placeholder="Enter full name" required>
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $doctor->first_name) }}" class="form-control" placeholder="Enter first name" required>
                 </div>
 
+                {{-- Last Name --}}
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $doctor->last_name) }}" class="form-control" placeholder="Enter last name" required>
+                </div>
+
+                {{-- Email --}}
                 <div class="mb-3">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" name="email" id="email" value="{{ $doctor->email }}" class="form-control" placeholder="Enter email" required>
+                    <input type="email" name="email" id="email" value="{{ old('email', $doctor->email) }}" class="form-control" placeholder="Enter email" required>
                 </div>
 
+                {{-- Password (Optional) --}}
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password <small>(Leave blank to keep current)</small></label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter new password if you want to change">
+                </div>
+
+                {{-- Phone --}}
                 <div class="mb-3">
                     <label for="phone" class="form-label">Phone Number</label>
-                    <input type="text" name="phone" id="phone" value="{{ $doctor->phone }}" class="form-control" placeholder="Enter phone number" required>
+                    <input type="text" name="phone" id="phone" value="{{ old('phone', $doctor->phone) }}" class="form-control" placeholder="Enter phone number">
                 </div>
 
+                {{-- Specialization --}}
                 <div class="mb-3">
                     <label for="specialization" class="form-label">Specialization</label>
-                    <input type="text" name="specialization" id="specialization" value="{{ $doctor->specialization }}" class="form-control" placeholder="Enter specialization" required>
+                    <input type="text" name="specialization" id="specialization" value="{{ old('specialization', $doctor->specialization) }}" class="form-control" placeholder="Enter specialization" required>
                 </div>
 
-                <button type="submit" class="btn btn-success">Update Doctor</button>
-                <a href="{{ route('doctors.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                {{-- Branch --}}
+                <div class="mb-3">
+                    <label for="branch_id" class="form-label">Branch</label>
+                    <select name="branch_id" id="branch_id" class="form-control" required>
+                        <option value="">Select Branch</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ old('branch_id', $doctor->branch_id) == $branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- CNIC --}}
+                <div class="mb-3">
+                    <label for="cnic" class="form-label">CNIC</label>
+                    <input type="text" name="cnic" id="cnic" value="{{ old('cnic', $doctor->cnic) }}" class="form-control" placeholder="Enter CNIC">
+                </div>
+
+                {{-- DOB --}}
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" id="dob" value="{{ old('dob', $doctor->dob) }}" class="form-control">
+                </div>
+
+                {{-- Last Education / Degree --}}
+                <div class="mb-3">
+                    <label for="last_education" class="form-label">Last Education / Degree</label>
+                    <input type="text" name="last_education" id="last_education" value="{{ old('last_education', $doctor->last_education) }}" class="form-control" placeholder="Enter last education or degree">
+                </div>
+
+                {{-- Status --}}
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select name="status" id="status" class="form-control" required>
+                        <option value="">Select Status</option>
+                        <option value="active" {{ old('status', $doctor->status) == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status', $doctor->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+
+                {{-- Document Upload --}}
+                <div class="mb-3">
+                    <label for="document" class="form-label">Upload Document</label>
+                    <input type="file" name="document" id="document" class="form-control">
+                    @if($doctor->document)
+                        <a href="{{ asset('storage/' . $doctor->document) }}" target="_blank" class="mt-1 d-block">View Current Document</a>
+                    @endif
+                </div>
+
+                {{-- Picture Upload --}}
+                <div class="mb-3">
+                    <label for="picture" class="form-label">Upload Picture</label>
+                    <input type="file" name="picture" id="picture" class="form-control">
+                    @if($doctor->picture)
+                        <img src="{{ asset('storage/' . $doctor->picture) }}" alt="Doctor Picture" class="img-thumbnail mt-2" width="120">
+                    @endif
+                </div>
+
+                {{-- Submit Buttons --}}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Update Doctor</button>
+                    <a href="{{ route('doctors.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+
             </form>
         </div>
     </div>

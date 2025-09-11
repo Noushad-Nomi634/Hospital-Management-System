@@ -21,7 +21,7 @@ class CheckupController extends Controller
                     'patients.name as patient_name',
                     'patients.gender',
                     'patients.phone as patient_phone',
-                    'doctors.name as doctor_name',
+                    DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                     'branches.name as branch_name'
                 )
                 ->orderBy('checkups.date', 'desc')
@@ -39,7 +39,9 @@ class CheckupController extends Controller
     {
         try {
             $patients = DB::table('patients')->select('id', 'name', 'phone', 'branch_id')->get();
-            $doctors = DB::table('doctors')->select('id', 'name')->get();
+            $doctors = DB::table('doctors')
+                ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
+                ->get();
 
             $selectedPatient = null;
             $fee = 0;
@@ -124,7 +126,9 @@ class CheckupController extends Controller
         try {
             $checkup  = Checkup::findOrFail($id);
             $patients = DB::table('patients')->select('id', 'name')->get();
-            $doctors  = DB::table('doctors')->select('id', 'name')->get();
+            $doctors = DB::table('doctors')
+                ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
+                ->get();
 
             return view('checkups.edit', compact('checkup', 'patients', 'doctors'));
         } catch (\Exception $e) {
@@ -184,7 +188,7 @@ class CheckupController extends Controller
                     'patients.name as patient_name',
                     'patients.phone as patient_phone',
                     'patients.gender',
-                    'doctors.name as doctor_name',
+                    DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                     'branches.name as branch_name'
                 )
                 ->where('checkups.id', $id)
@@ -231,7 +235,11 @@ class CheckupController extends Controller
             $history = DB::table('checkups')
                 ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
                 ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
-                ->select('checkups.*', 'doctors.name as doctor_name', 'branches.name as branch_name')
+                ->select(
+                    'checkups.*',
+                    DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                    'branches.name as branch_name'
+                )
                 ->where('checkups.patient_id', $patient_id)
                 ->orderBy('checkups.date', 'desc')
                 ->get();

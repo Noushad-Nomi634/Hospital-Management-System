@@ -1,14 +1,7 @@
 <IfModule mod_rewrite.c>
-    # Increase PHP Memory Limit
-    php_value memory_limit 1024M
-
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
     RewriteEngine On
 
-    # Handle Authorization Header
+    # Handle Authorization Header for APIs
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
@@ -17,8 +10,13 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # Send Requests To Front Controller (Laravel index.php)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# Optional: Disable MultiViews and Directory Indexes
+<IfModule mod_negotiation.c>
+    Options -MultiViews -Indexes
 </IfModule>

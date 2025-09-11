@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title')
-    Add Checkup
+    Add Consultation
 @endsection
 
 @push('css')
@@ -10,7 +10,7 @@
 @endpush
 
 @section('content')
-    <x-page-title title="Checkup" subtitle="Add New Checkup" />
+    <x-page-title title="Checkup" subtitle="Add New Consultation" />
 
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -63,14 +63,14 @@
 
                         <!-- Fee -->
                         <div class="col-md-12">
-                            <label for="fee" class="form-label">Checkup Fee</label>
+                            <label for="fee" class="form-label">Consultation Fee</label>
                             <input type="number" name="fee" id="fee" class="form-control" value="{{ $fee }}" readonly>
                         </div>
 
                         <!-- Submit Buttons -->
                         <div class="col-md-12">
                             <div class="d-md-flex d-grid align-items-center gap-3">
-                                <button type="submit" class="btn btn-primary px-4">Add Checkup</button>
+                                <button type="submit" class="btn btn-primary px-4">Add Consultation</button>
                                 <button type="reset" class="btn btn-secondary px-4">Reset</button>
                             </div>
                         </div>

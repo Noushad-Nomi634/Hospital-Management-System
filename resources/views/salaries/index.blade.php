@@ -19,7 +19,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
+                <table id="salaries-table" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -36,7 +36,11 @@
                             <td>{{ $salary->employee_name }}</td>
                             <td>{{ $salary->month }}</td>
                             <td>₨ {{ number_format($salary->net_salary) }}</td>
-                            <td>{{ ucfirst($salary->payment_status) }}</td>
+                            <td>
+                                <span class="badge bg-{{ strtolower($salary->payment_status) === 'paid' ? 'success' : 'warning' }}">
+                                    {{ ucfirst($salary->payment_status) }}
+                                </span>
+                            </td>
                             <td>
                                 @if(strtolower($salary->payment_status) !== 'paid')
                                     <button type="button"
@@ -128,7 +132,77 @@
     
     <script>
         $(document).ready(function() {
-            $('#example').DataTable();
+            $('#salaries-table').DataTable({
+                responsive: true,
+                ordering: true,
+                searching: true,
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-end"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search salary records...",
+                    lengthMenu: "_MENU_ records per page",
+                },
+                columnDefs: [
+                    {
+                        targets: [4, 5], // Action and Salary Info columns
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        targets: [2, 3], // Net Salary and Status columns
+                        width: "10%"
+                    },
+                    {
+                        targets: [4], // Action column
+                        width: "12%"
+                    },
+                    {
+                        targets: [5], // Salary Info column
+                        width: "20%"
+                    }
+                ],
+                footerCallback: function (row, data, start, end, display) {
+                    var api = this.api();
+                    
+                    // Remove the formatting to get integer data for summation
+                    var intVal = function (i) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\₨,]/g, '') * 1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+                    
+                    // Total over all pages
+                    var total = api
+                        .column(2)
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+                    
+                    // Total over this page
+                    var pageTotal = api
+                        .column(2, { page: 'current' })
+                        .data()
+                        .reduce(function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0);
+                    
+                    // Update footer
+                    $(api.column(2).footer()).html(
+                        '₨ ' + pageTotal.toLocaleString() + ' (Page Total)'
+                    );
+                },
+                createdRow: function(row, data, dataIndex) {
+                    // Add some styling to improve readability
+                    $(row).find('td').css('vertical-align', 'middle');
+                }
+            });
+            
+            // Add custom styling to the search box
+            $('.dataTables_filter input').addClass('form-control form-control-sm');
         });
 
         function openSalaryModal(button) {

@@ -4,25 +4,35 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Doctor extends  Authenticatable
+class Doctor extends Authenticatable
 {
-    use HasRoles;
+    use HasRoles, Notifiable;
 
     protected $guard_name = 'web';
     protected $table = 'doctors';
-    use Notifiable;
 
     protected $fillable = [
-            'name', 'email', 'phone', 'specialization', 'password','branch_id',
-        ];
-
-    protected $hidden = [
-        'password', 'remember_token',
+        'branch_id',
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'specialization',
+        'password',
+        'cnic',
+        'dob',
+        'last_education',
+        'document', // file path
+        'picture',  // file path
+        'status',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     // ───────────────────────────────
     // Relationships
@@ -62,4 +72,14 @@ class Doctor extends  Authenticatable
     {
         return $this->hasMany(SessionTime::class, 'completed_by_doctor_id');
     }
+
+    // ───────────────────────────────
+    // Accessors for full name
+    // ───────────────────────────────
+  public function getNameAttribute()
+{
+    return trim($this->first_name . ' ' . $this->last_name);
 }
+
+    }
+

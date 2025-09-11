@@ -80,17 +80,17 @@
                     <div class="parent-icon">
                     <i class="material-icons-outlined">assignment</i>
                     </div>
-                    <div class="menu-title">Checkups</div>
+                    <div class="menu-title">Consultations</div>
                 </a>
                 <ul>
                     <li>
                     <a href="{{ url('/checkups') }}">
-                        <i class="material-icons-outlined">fact_check</i> All Checkups
+                        <i class="material-icons-outlined">fact_check</i> All Consultations
                     </a>
                     </li>
                     <li>
                     <a href="{{ url('/checkups/create') }}">
-                        <i class="material-icons-outlined">add_circle</i> New Checkup
+                        <i class="material-icons-outlined">add_circle</i> New Consultation
                     </a>
                     </li>
                 </ul>
@@ -190,17 +190,17 @@
                 </a>
                 <ul>
                     <li>
-                    <a href="{{ url('/settings/branches') }}">
+                    <a href="{{ url('/branches') }}">
                         <i class="material-icons-outlined">store</i> Branches
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/settings/banks') }}">
+                    <a href="{{ url('/banks') }}">
                         <i class="material-icons-outlined">account_balance_wallet</i> Banks
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/settings/users') }}">
+                    <a href="{{ url('/users') }}">
                         <i class="material-icons-outlined">group</i> Users
                     </a>
                     </li>
@@ -280,18 +280,6 @@
     <div class="menu-title">Salary Records</div>
   </a>
 </li>
-
-
-
-
-
-
-
-
-
-
-
-
 
          </ul>
         <!--end navigation-->

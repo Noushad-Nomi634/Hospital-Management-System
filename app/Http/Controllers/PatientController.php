@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Branch;
+use Illuminate\Support\Facades\Log;
+
+
+
 
 class PatientController extends Controller
 {
@@ -27,6 +31,8 @@ class PatientController extends Controller
         } catch (\Exception $e) {
             \Log::error('Patient index error: ' . $e->getMessage());
             return back()->with('error', 'Unable to fetch patients. Please try again.');
+        } finally{
+            Log::error('Something went wrong!');
         }
     }
 

@@ -25,7 +25,9 @@
                         $selectedCheckup = $checkups->where('id', $selectedCheckupId)->first(); 
                         $selectedDoctorId = old('doctor_id') ?? ($selectedCheckup->doctor_id ?? null);
                         $selectedPatientName = $selectedCheckup->patient->name ?? '';
-                        $selectedDoctorName = $selectedCheckup->doctor->name ?? '';
+                        $selectedDoctorName = $selectedCheckup && $selectedCheckup->doctor 
+                                              ? $selectedCheckup->doctor->first_name.' '.$selectedCheckup->doctor->last_name 
+                                              : '';
                     @endphp
 
                     <!-- Checkup -->
@@ -37,7 +39,7 @@
                                 <option value="{{ $checkup->id }}" 
                                     {{ $selectedCheckupId == $checkup->id ? 'selected' : '' }}>
                                     {{ $checkup->date }} - {{ $checkup->patient->name ?? 'No Patient' }}
-                                    ({{ $checkup->doctor->name ?? 'No Doctor' }})
+                                    ({{ $checkup->doctor ? $checkup->doctor->first_name.' '.$checkup->doctor->last_name : 'No Doctor' }})
                                 </option>
                             @endforeach
                         </select>
@@ -203,13 +205,14 @@ document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('checkup_id').addEventListener('change', function(){
         const selectedCheckupId = this.value;
         if(checkups[selectedCheckupId]){
+            const doctor = checkups[selectedCheckupId].doctor;
+            document.getElementById('doctor_name').value = doctor ? doctor.first_name + ' ' + doctor.last_name : '';
+            document.getElementById('doctor_id').value = doctor ? doctor.id : '';
             document.getElementById('patient_name').value = checkups[selectedCheckupId].patient?.name ?? '';
-            document.getElementById('doctor_name').value = checkups[selectedCheckupId].doctor?.name ?? '';
-            document.getElementById('doctor_id').value = checkups[selectedCheckupId].doctor_id ?? '';
         } else {
-            document.getElementById('patient_name').value = '';
             document.getElementById('doctor_name').value = '';
             document.getElementById('doctor_id').value = '';
+            document.getElementById('patient_name').value = '';
         }
     });
 });

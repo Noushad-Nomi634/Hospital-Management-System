@@ -2,15 +2,15 @@
 @section('title')
     Payments Outstanding
 @endsection
-@section('content')
 
+@section('content')
     <x-page-title title="Payments" subtitle="Outstanding Payments" />
 
     <div class="row">
         <div class="col-xl-12">
             <div class="card">
-                <div class="card-body">
-                    <table class="table table-bordered table-hover mb-0"> <!-- added table-bordered -->
+                <div class="card-body table-responsive">
+                    <table id="outstandingTable" class="table table-bordered table-hover mb-0">
                         <thead class="table-dark">
                             <tr>
                                 <th scope="col">Session ID</th>
@@ -35,7 +35,8 @@
                                             <ul style="margin: 0; padding-left: 16px;">
                                                 @foreach($session->installments as $installment)
                                                     <li>
-                                                        {{ number_format($installment->amount, 2) }} on {{ \Carbon\Carbon::parse($installment->date)->format('d M Y') }}
+                                                        {{ number_format($installment->amount, 2) }} 
+                                                        on {{ \Carbon\Carbon::parse($installment->date)->format('d M Y') }}
                                                     </li>
                                                 @endforeach
                                             </ul>
@@ -55,13 +56,36 @@
             </div>
         </div>
     </div>
-
 @endsection
 
+@push('css')
+    {{-- DataTables CSS --}}
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+@endpush
+
 @push('script')
-    <!--plugins-->
+    <!-- Core plugins -->
     <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ URL::asset('build/js/main.js') }}"></script>
+
+    {{-- DataTables JS --}}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#outstandingTable').DataTable({
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "ordering": true,
+                "searching": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": 3 } // Payment Details column ko sort off
+                ]
+            });
+        });
+    </script>
 @endpush
