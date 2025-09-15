@@ -2,7 +2,9 @@
 
 
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Doctors\DoctorDashboardController;
 use App\Http\Controllers\Doctors\DoctorController;
+
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\CheckupController;
 use App\Http\Middleware\RoleMiddleware;
@@ -23,6 +25,8 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReceptionistDashboardController;
+
 
 Auth::routes();
 
@@ -46,6 +50,9 @@ Route::prefix('doctor')->middleware(['auth:doctor', 'role:doctor'])->name('docto
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // Add more admin-specific routes here
 });
+
+// Doctor Dashboard (for logged-in doctors only)
+
 
 //For receptionist only
 Route::middleware(['auth', 'role:Receptionist'])->group(function () {
@@ -157,6 +164,11 @@ Route::get('/get-checkup-fee/{patientId}', [App\Http\Controllers\CheckupControll
 Route::get('/checkups/history/{patient_id}', [App\Http\Controllers\CheckupController::class, 'history'])->name('checkups.history');
 
 
+// Doctor Dashboard route
+Route::get('/doctors/dashboard', [DoctorDashboardController::class, 'index'])->name('doctor.dashboard');
+
+
+
 // Doctor CRUD
 Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
 Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctors.create');
@@ -200,7 +212,7 @@ Route::put('/banks/{id}', [BankController::class, 'update'])->name('banks.update
 Route::delete('/banks/{id}', [BankController::class, 'destroy'])->name('banks.destroy');
 
 
-
+//users
 Route::get('users', [UserController::class, 'index'])->name('users.index');
 Route::get('users/create', [UserController::class, 'create'])->name('users.create');
 Route::post('users/store', [UserController::class, 'store'])->name('users.store');
@@ -208,6 +220,10 @@ Route::get('users/edit/{id}', [UserController::class, 'edit'])->name('users.edit
 Route::post('users/update/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
+//Receptionist Dashboard
+Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, 'index'])
+    ->name('receptionist.dashboard')
+    ->middleware('auth');
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
