@@ -195,7 +195,7 @@ Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailability
 
 
     //Branches
- Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
+Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
 Route::get('/branches/create', [BranchController::class, 'create'])->name('branches.create');
 Route::post('/branches/store', [BranchController::class, 'store'])->name('branches.store');
 Route::get('/branches/edit/{id}', [BranchController::class, 'edit'])->name('branches.edit');

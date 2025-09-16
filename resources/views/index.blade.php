@@ -3,7 +3,7 @@
     Dashboard
 @endsection
 @section('content')
-    
+
     <x-page-title title="Dashboard" subtitle="Analysis" />
 
     <div class="row">
@@ -16,8 +16,11 @@
                                 <img src="https://placehold.co/110x110/png" class="rounded-circle bg-grd-info p-1"
                                     width="60" height="60" alt="user">
                                 <div class="">
+                                    @php
+                                        $currentUser = Auth::user() ?? Auth::guard('doctor')->user();
+                                    @endphp
                                     <p class="mb-0 fw-semibold">Welcome back</p>
-                                    <h4 class="fw-semibold fs-4 mb-0">{{ Auth::user()->name }}</h4>
+                                    <h4 class="fw-semibold fs-4 mb-0">{{ optional($currentUser)->name ?? 'Guest' }}</h4>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-5">
