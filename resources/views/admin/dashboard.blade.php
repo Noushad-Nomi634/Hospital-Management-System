@@ -352,6 +352,14 @@
         </div>
 
         <!-- Overall Branches -->
+        @php
+            $overallDoctors = collect($branchStats)->sum('totalDoctors');
+            $overallPatients = collect($branchStats)->sum('totalPatients');
+            $overallCheckups = collect($branchStats)->sum('totalCheckups');
+            $overallSessions = collect($branchStats)->sum('totalSessionsToday');
+            $overallPayments = collect($branchStats)->sum(fn($b) => ($b['checkupPaymentsToday'] ?? 0) + ($b['sessionPaymentsToday'] ?? 0));
+        @endphp
+
         <div class="overview-section">
             <h2 class="section-title">
                 <i class="bi bi-graph-up"></i>
@@ -359,31 +367,31 @@
             </h2>
             <div class="overview-stats">
                 <div class="overview-stat doctor">
-                    <div class="overview-value">0</div>
+                    <div class="overview-value">{{$overallDoctors}}</div>
                     <div class="overview-label">
                         <i class="bi bi-person-badge"></i>Doctors
                     </div>
                 </div>
                 <div class="overview-stat patient">
-                    <div class="overview-value">41</div>
+                    <div class="overview-value">{{$overallPatients}}</div>
                     <div class="overview-label">
                         <i class="bi bi-people"></i>Patients
                     </div>
                 </div>
                 <div class="overview-stat checkup">
-                    <div class="overview-value">5</div>
+                    <div class="overview-value">{{$overallCheckups}}</div>
                     <div class="overview-label">
                         <i class="bi bi-clipboard-check"></i>Checkups
                     </div>
                 </div>
                 <div class="overview-stat session">
-                    <div class="overview-value">0</div>
+                    <div class="overview-value">{{$overallSessions}}</div>
                     <div class="overview-label">
                         <i class="bi bi-calendar-event"></i>Sessions
                     </div>
                 </div>
                 <div class="overview-stat payment">
-                    <div class="overview-value">0</div>
+                    <div class="overview-value">{{$overallPayments}}</div>
                     <div class="overview-label">
                         <i class="bi bi-cash-coin"></i>Payments
                     </div>

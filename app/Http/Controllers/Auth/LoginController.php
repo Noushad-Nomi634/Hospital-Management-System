@@ -30,7 +30,7 @@ class LoginController extends Controller
 
         if ($role === 'doctor') {
             if (Auth::guard('doctor')->attempt($credentials)) {
-                return redirect()->intended('/dr/dashboard');
+                return redirect()->intended('/doctor/dashboard');
             }
         } else {
             if (Auth::guard('web')->attempt($credentials)) {
@@ -46,7 +46,7 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         if ($request->role === 'doctor') {
-            return redirect()->route('dr.dashboard');
+            return redirect()->route('doctor.dashboard');
         }
 
         if ($user->hasRole('admin')) {
