@@ -10,7 +10,7 @@ class Doctor extends Authenticatable
 {
     use HasRoles, Notifiable;
 
-    protected $guard_name = 'web';
+    protected $guard_name = 'doctor';
     protected $table = 'doctors';
 
     protected $fillable = [

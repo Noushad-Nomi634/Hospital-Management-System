@@ -47,7 +47,7 @@ Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->
 
 // For Doctores only
 Route::prefix('doctor')->middleware(['auth:doctor', 'role:doctor'])->name('doctor.')->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
     // Add more admin-specific routes here
 });
 
@@ -168,7 +168,7 @@ Route::get('/consultations/history/{patient_id}', [CheckupController::class, 'hi
 
 
 // Doctor Dashboard route
-Route::get('/doctors/dashboard', [DoctorDashboardController::class, 'index'])->name('doctor.dashboard');
+//Route::get('/doctors/dashboard', [DoctorDashboardController::class, 'index'])->name('doctor.dashboard');
 
 
 

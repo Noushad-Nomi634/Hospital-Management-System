@@ -50,7 +50,7 @@ class LoginController extends Controller
         }
 
         if ($user->hasRole('admin')) {
-            return redirect()->route('doctor.dashboard');
+            return redirect()->route('admin.dashboard');
         }
 
         if ($user->hasRole('receptionist')) {
