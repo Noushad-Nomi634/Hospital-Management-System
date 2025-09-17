@@ -21,7 +21,7 @@
           <li>
             <a href="javascript:;">
                 @if(Auth::guard('doctor')->check())
-                    <a href="{{ url('dr/dashboard') }}">
+                    <a href="{{ url('doctor/dashboard') }}">
                 @elseif(Auth::guard('web')->user())
                     <a href="{{ url('admin/dashboard') }}">
                 @endif

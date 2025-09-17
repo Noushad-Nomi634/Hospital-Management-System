@@ -167,8 +167,6 @@ Route::get('/consultations/{id}/print', [CheckupController::class, 'printSlip'])
 Route::get('/consultations/history/{patient_id}', [CheckupController::class, 'history'])->name('consultations.history');
 
 
-// Doctor Dashboard route
-//Route::get('/doctors/dashboard', [DoctorDashboardController::class, 'index'])->name('doctor.dashboard');
 
 
 
