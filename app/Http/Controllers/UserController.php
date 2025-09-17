@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -32,13 +33,18 @@ class UserController extends Controller
             'role' => 'required',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'branch_id' => $request->branch_id,
             'role' => $request->role,
         ]);
+
+        // Assign Spatie role for web guard
+        $roleName = strtolower($request->role);
+        Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+        $user->syncRoles([$roleName]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -67,6 +73,11 @@ class UserController extends Controller
             'branch_id' => $request->branch_id,
             'role' => $request->role,
         ]);
+
+        // Sync Spatie role if changed
+        $updatedRoleName = strtolower($request->role);
+        Role::firstOrCreate(['name' => $updatedRoleName, 'guard_name' => 'web']);
+        $user->syncRoles([$updatedRoleName]);
 
         if($request->password){
             $user->update(['password' => Hash::make($request->password)]);

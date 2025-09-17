@@ -18,25 +18,14 @@
 
  <!--navigation-->
 
+         @role('admin','web')
           <li>
-            <a href="javascript:;">
-                @if(Auth::guard('doctor')->check())
-                    <a href="{{ url('doctor/dashboard') }}">
-                @elseif(Auth::guard('web')->user())
-                    <a href="{{ url('admin/dashboard') }}">
-                @endif
-                        {{-- hello just for testing  --}}
+            <a href="{{ url('admin/dashboard') }}">
               <div class="parent-icon"><i class="material-icons-outlined">home</i>
               </div>
-              <div class="menu-title">Dashboard</div>
+              <div class="menu-title">Doctor Dashboard</div>
             </a>
           </li>
-
-
-
-
-
-          {{--My Code patient --}}
 
           <li>
             <a class="has-arrow" href="javascript:;">
@@ -74,27 +63,57 @@
             </ul>
             </li>
 
-            <!-- Checkups Menu -->
+             <!-- Checkups Menu -->
+             <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                    <i class="material-icons-outlined">assignment</i>
+                    </div>
+                    <div class="menu-title">Appointments</div>
+                </a>
+                <ul>
+                    <li>
+                    <a href="{{ url('/checkups') }}">
+                        <i class="material-icons-outlined">fact_check</i> All Appointments
+                    </a>
+                    </li>
+                    <li>
+                    <a href="{{ url('/checkups/create') }}">
+                        <i class="material-icons-outlined">add_circle</i>  Book Appointment
+                    </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Doctor Consultation Checkups -->
             <li>
                 <a class="has-arrow" href="javascript:;">
                     <div class="parent-icon">
                     <i class="material-icons-outlined">assignment</i>
                     </div>
-                    <div class="menu-title">Consultations</div>
+                    <div class="menu-title">Dr Consultations</div>
                 </a>
                 <ul>
                     <li>
-                    <a href="{{ url('/checkups') }}">
-                        <i class="material-icons-outlined">fact_check</i> All Consultations
+                    <a href="{{ url('/treatment-sessions') }}">
+                        <i class="material-icons-outlined">fact_check</i> Patient Checkup
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/checkups/create') }}">
-                        <i class="material-icons-outlined">add_circle</i> New Consultation
+                    <a href="{{ url('/sessions') }}">
+                        <i class="material-icons-outlined">add_circle</i> Assign Follow-up
                     </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/sessions/create') }}">
+                            <i class="material-icons-outlined">add_circle</i> Session Histor
+                        </a>
                     </li>
                 </ul>
             </li>
+
+
 
             <!-- Accounts Menu -->
             <li>
@@ -123,7 +142,6 @@
                 </ul>
             </li>
 
-
             <!-- Expenses Management -->
             <li>
                 <a class="has-arrow" href="javascript:;">
@@ -151,10 +169,8 @@
                 </ul>
             </li>
 
-
-
-            <!-- General Settings Menu -->
-            <li>
+             <!-- General Settings Menu -->
+             <li>
                 <a class="has-arrow" href="javascript:;">
                     <div class="parent-icon">
                     <i class="material-icons-outlined">settings</i>
@@ -180,62 +196,33 @@
                 </ul>
             </li>
 
+            {{--session Table--}}
+            <li>
+                <a href="{{ url('/payments/outstandings') }}">
+                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
+                <div class="menu-title">Payments Outstandings</div>
+                </a>
+            </li>
 
+            {{--Salary Records--}}
+            <li>
+                <a href="{{ url('/salaries') }}">
+                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
+                <div class="menu-title">Salary Records</div>
+                </a>
+            </li>
 
+          @endrole
 
-
-
-{{--treatment-sessions--}}
-<li>
-  <a href="{{ url('/treatment-sessions') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Treatment-Sessions</div>
-  </a>
-</li>
-
-
-
-
-{{--session Table--}}
-<li>
-  <a href="{{ url('/sessions') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Sessions</div>
-  </a>
-</li>
-
-
-{{--session Table--}}
-<li>
-  <a href="{{ url('/payments/outstandings') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Payments Outstandings</div>
-  </a>
-</li>
-
-{{--General Setting--}}
-<li>
-  <a href="{{ url('/general-settings') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">General Settings</div>
-  </a>
-</li>
-
-{{--Add Employes--}}
-<li>
-  <a href="{{ url('/employees') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Employes</div>
-  </a>
-</li>
-
-{{--Salary Records--}}
-<li>
-  <a href="{{ url('/salaries') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Salary Records</div>
-  </a>
-</li>
+          @auth('doctor')
+          <li>
+            <a href="{{ url('doctor/dashboard') }}">
+              <div class="parent-icon"><i class="material-icons-outlined">home</i>
+              </div>
+              <div class="menu-title">Doctor Dashboard</div>
+            </a>
+          </li>
+          @endauth
 
          </ul>
         <!--end navigation-->

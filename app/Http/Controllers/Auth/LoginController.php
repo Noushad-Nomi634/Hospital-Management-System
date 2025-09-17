@@ -25,22 +25,23 @@ class LoginController extends Controller
 
     protected function attemptLogin(Request $request)
     {
-         $credentials = $request->only('email', 'password');
+        $credentials = $request->only('email', 'password');
+        $remember = (bool) $request->filled('remember');
         $role = $request->input('role');
 
         if ($role === 'doctor') {
-            if (Auth::guard('doctor')->attempt($credentials)) {
-                return redirect()->intended('/doctor/dashboard');
+            // Ensure web guard is logged out so only one guard is active
+            if (Auth::guard('web')->check()) {
+                Auth::guard('web')->logout();
             }
-        } else {
-            if (Auth::guard('web')->attempt($credentials)) {
-                return redirect()->intended('/dashboard');
-            }
+            return Auth::guard('doctor')->attempt($credentials, $remember);
         }
 
-        return back()->withErrors([
-            'email' => 'These credentials do not match our records.',
-        ]);
+        // Ensure doctor guard is logged out when logging in via web
+        if (Auth::guard('doctor')->check()) {
+            Auth::guard('doctor')->logout();
+        }
+        return Auth::guard('web')->attempt($credentials, $remember);
     }
 
     protected function authenticated(Request $request, $user)
@@ -54,7 +55,7 @@ class LoginController extends Controller
         }
 
         if ($user->hasRole('receptionist')) {
-            return redirect()->route('dashboard');
+            return redirect()->route('receptionist.dashboard');
         }
 
         if ($user->hasRole('accountant')) {
