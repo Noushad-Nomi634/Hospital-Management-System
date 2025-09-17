@@ -10,7 +10,7 @@
 @endpush
 
 @section('content')
-    <x-page-title title="Checkup" subtitle="Add New Consultation" />
+    <x-page-title title="Consultations" subtitle="Add New Consultation" />
 
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -26,7 +26,8 @@
         <div class="col-12 col-xl-8">
             <div class="card">
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ url('/checkups') }}" class="row g-3">
+                    <!-- ✅ Correct route: consultations.store -->
+                    <form method="POST" action="{{ route('consultations.store') }}" class="row g-3">
                         @csrf
 
                         <!-- Patient Dropdown with Select2 Search -->

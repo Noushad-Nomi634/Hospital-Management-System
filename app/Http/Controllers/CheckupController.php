@@ -8,7 +8,9 @@ use App\Models\Checkup;
 
 class CheckupController extends Controller
 {
-    // 1️⃣ Show all checkups
+    /**
+     * 1️⃣ Show all checkups
+     */
     public function index()
     {
         try {
@@ -27,14 +29,19 @@ class CheckupController extends Controller
                 ->orderBy('checkups.date', 'desc')
                 ->get();
 
-            return view('checkups.index', compact('checkups'));
+            return view('consultations.index', [
+                'checkups'      => $checkups,
+                'consultations' => $checkups, // compatibility
+            ]);
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to load checkups: ' . $e->getMessage());
         }
     }
 
-    // 2️⃣ Show create form
+    /**
+     * 2️⃣ Show create form
+     */
     public function create(Request $request)
     {
         try {
@@ -53,18 +60,16 @@ class CheckupController extends Controller
                 }
             }
 
-            return view('checkups.create', [
-                'patients'        => $patients,
-                'doctors'         => $doctors,
-                'selectedPatient' => $selectedPatient,
-                'fee'             => $fee,
-            ]);
+            return view('consultations.create', compact('patients', 'doctors', 'selectedPatient', 'fee'));
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to load create form: ' . $e->getMessage());
         }
     }
 
-    // 3️⃣ Store new checkup with transaction
+    /**
+     * 3️⃣ Store new checkup
+     */
     public function store(Request $request)
     {
         try {
@@ -84,7 +89,7 @@ class CheckupController extends Controller
 
             $checkupFee = $this->getFeeByBranch($patient->branch_id);
 
-            // 1️⃣ Save Checkup
+            // Save Checkup
             $checkup = Checkup::create([
                 'patient_id' => $request->patient_id,
                 'doctor_id'  => $request->doctor_id,
@@ -95,7 +100,7 @@ class CheckupController extends Controller
                 'note'       => $request->note,
             ]);
 
-            // 2️⃣ Save Transaction
+            // Save Transaction
             DB::table('transactions')->insert([
                 'p_id'       => $request->patient_id,
                 'dr_id'      => $request->doctor_id,
@@ -108,7 +113,7 @@ class CheckupController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // 3️⃣ Update Branch Balance
+            // Update Branch Balance
             DB::table('branches')->where('id', $patient->branch_id)->increment('balance', $checkupFee);
 
             DB::commit();
@@ -120,7 +125,9 @@ class CheckupController extends Controller
         }
     }
 
-    // 4️⃣ Edit form
+    /**
+     * 4️⃣ Edit form
+     */
     public function edit($id)
     {
         try {
@@ -130,13 +137,21 @@ class CheckupController extends Controller
                 ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
                 ->get();
 
-            return view('checkups.edit', compact('checkup', 'patients', 'doctors'));
+            return view('consultations.edit', [
+                'checkup'       => $checkup,
+                'consultation'  => $checkup, // compatibility
+                'patients'      => $patients,
+                'doctors'       => $doctors,
+            ]);
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to load edit form: ' . $e->getMessage());
         }
     }
 
-    // 5️⃣ Update checkup
+    /**
+     * 5️⃣ Update checkup
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -159,12 +174,15 @@ class CheckupController extends Controller
             ]);
 
             return redirect()->route('checkups.index')->with('success', '✅ Checkup updated successfully.');
+
         } catch (\Exception $e) {
             return back()->with('error', '❌ Error updating checkup: ' . $e->getMessage());
         }
     }
 
-    // 6️⃣ Delete checkup
+    /**
+     * 6️⃣ Delete checkup
+     */
     public function destroy($id)
     {
         try {
@@ -175,7 +193,9 @@ class CheckupController extends Controller
         }
     }
 
-    // 7️⃣ Show detail
+    /**
+     * 7️⃣ Show detail
+     */
     public function show($id)
     {
         try {
@@ -196,24 +216,37 @@ class CheckupController extends Controller
 
             if (!$checkup) abort(404);
 
-            return view('checkups.show', compact('checkup'));
+            return view('consultations.show', [
+                'checkup'      => $checkup,
+                'consultation' => $checkup,
+            ]);
+
         } catch (\Exception $e) {
             return back()->with('error', '❌ Error loading checkup details: ' . $e->getMessage());
         }
     }
 
-    // 8️⃣ Print slip
+    /**
+     * 8️⃣ Print slip
+     */
     public function printSlip($id)
     {
         try {
             $checkup = Checkup::with(['patient', 'doctor', 'branch'])->findOrFail($id);
-            return view('checkups.print', compact('checkup'));
+
+            return view('consultations.print', [
+                'checkup'      => $checkup,
+                'consultation' => $checkup,
+            ]);
+
         } catch (\Exception $e) {
             return back()->with('error', '❌ Error printing slip: ' . $e->getMessage());
         }
     }
 
-    // 9️⃣ Ajax: Get fee by branch
+    /**
+     * 9️⃣ Ajax: Get fee by branch
+     */
     public function getCheckupFee($patientId)
     {
         try {
@@ -225,7 +258,9 @@ class CheckupController extends Controller
         }
     }
 
-    // 🔟 Patient History
+    /**
+     * 🔟 Patient History
+     */
     public function history($patient_id)
     {
         try {
@@ -244,16 +279,24 @@ class CheckupController extends Controller
                 ->orderBy('checkups.date', 'desc')
                 ->get();
 
-            return view('checkups.history', compact('history', 'patient'));
+            return view('consultations.history', [
+                'history'       => $history,
+                'patient'       => $patient,
+                'consultations' => $history,
+            ]);
+
         } catch (\Exception $e) {
             return back()->with('error', '❌ Error fetching patient history: ' . $e->getMessage());
         }
     }
 
-    // 🛠 Helper: get fee by branch
+    /**
+     * 🛠 Helper: Get fee by branch
+     */
     private function getFeeByBranch($branch_id)
     {
         $setting = DB::table('general_settings')->where('branch_id', $branch_id)->first();
         return $setting ? $setting->default_checkup_fee : 0;
     }
 }
+

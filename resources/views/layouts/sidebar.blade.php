@@ -96,33 +96,6 @@
                 </ul>
             </li>
 
-            <!-- Prescription Menu -->
-            <li>
-                <a class="has-arrow" href="javascript:;">
-                    <div class="parent-icon">
-                    <i class="material-icons-outlined">description</i>
-                    </div>
-                    <div class="menu-title">Prescriptions</div>
-                </a>
-                <ul>
-                    <li>
-                    <a href="{{ url('/prescriptions') }}">
-                        <i class="material-icons-outlined">list</i> All Prescriptions
-                    </a>
-                    </li>
-                    <li>
-                    <a href="{{ url('/prescriptions/create') }}">
-                        <i class="material-icons-outlined">note_add</i> New Prescription
-                    </a>
-                    </li>
-                    <li>
-                    <a href="{{ url('/treatments') }}">
-                        <i class="material-icons-outlined">healing</i> Treatment / Sessions
-                    </a>
-                    </li>
-                </ul>
-            </li>
-
             <!-- Accounts Menu -->
             <li>
                 <a class="has-arrow" href="javascript:;">
@@ -211,23 +184,6 @@
 
 
 
-
-
-{{--Doctor Widget--}}
-<li>
-  <a href="{{ url('/doctors') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Doctors</div>
-  </a>
-</li>
-
-{{--Chekups--}}
-<li>
-  <a href="{{ url('/checkups') }}">
-    <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-    <div class="menu-title">Checkups</div>
-  </a>
-</li>
 
 {{--treatment-sessions--}}
 <li>

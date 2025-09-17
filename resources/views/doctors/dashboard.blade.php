@@ -13,7 +13,7 @@
             @else
                 <ul>
                     @foreach($assignedPatients as $patient)
-                        <li>{{ $patient->name }} (ID: {{ $patient->id }})</li>
+                        <li>{{ $patient->name ?? 'N/A' }} (ID: {{ $patient->id ?? 'N/A' }})</li>
                     @endforeach
                 </ul>
             @endif
@@ -38,16 +38,23 @@
                     <tbody>
                         @foreach($todaySessions as $session)
                             <tr>
-                                <td>{{ $session->patient->name ?? 'N/A' }}</td>
-                                <td>{{ $session->fee }}</td>
-                                <td>{{ \Carbon\Carbon::parse($session->date)->format('d M Y') }}</td>
+                                <!-- Safe null handling -->
+                                <td>{{ $session->patient?->name ?? 'N/A' }}</td>
+                                <td>{{ $session->fee ?? '0' }}</td>
+                                <td>
+                                    @if(!empty($session->date))
+                                        {{ \Carbon\Carbon::parse($session->date)->format('d M Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
 
-                <p><strong>Total Sessions:</strong> {{ $totalSessions }}</p>
-                <p><strong>Total Fee:</strong> {{ $totalFee }}</p>
+                <p><strong>Total Sessions:</strong> {{ $totalSessions ?? 0 }}</p>
+                <p><strong>Total Fee:</strong> {{ $totalFee ?? 0 }}</p>
             @endif
         </div>
     </div>
@@ -71,10 +78,16 @@
                     <tbody>
                         @foreach($nextSchedule as $schedule)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($schedule->date)->format('d M Y') }}</td>
-                                <td>{{ $schedule->day_of_week }}</td>
-                                <td>{{ $schedule->start_time }}</td>
-                                <td>{{ $schedule->end_time }}</td>
+                                <td>
+                                    @if(!empty($schedule->date))
+                                        {{ \Carbon\Carbon::parse($schedule->date)->format('d M Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                <td>{{ $schedule->day_of_week ?? 'N/A' }}</td>
+                                <td>{{ $schedule->start_time ?? 'N/A' }}</td>
+                                <td>{{ $schedule->end_time ?? 'N/A' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

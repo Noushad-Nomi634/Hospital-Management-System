@@ -116,6 +116,7 @@ Route::post('/settings/general', [GeneralSettingController::class, 'update'])->n
 
 Route::get('/checkups/print/{id}', [CheckupController::class, 'printSlip'])->name('checkups.print');
 
+
 Route::get('general-settings', [GeneralSettingController::class, 'index'])->name('general-settings.index');
 Route::get('general-settings/{id}/edit', [GeneralSettingController::class, 'edit'])->name('general-settings.edit');
 Route::put('general-settings/{id}/update', [GeneralSettingController::class, 'update'])->name('general-settings.update');
@@ -150,18 +151,20 @@ Route::get('/treatment-sessions/create/{checkup}', [TreatmentSessionController::
 Route::get('/patients/{id}/checkup-fee', [CheckupController::class, 'getCheckupFee']);
 
 
-Route::post('/checkups', [CheckupController::class, 'store']);
-Route::get('/checkups/{id}/edit', [CheckupController::class, 'edit']);
-Route::put('/checkups/{id}', [CheckupController::class, 'update']);
-Route::delete('/checkups/{id}', [CheckupController::class, 'destroy']);
-Route::get('/checkups/{id}', [CheckupController::class, 'show']);
-Route::get('/get-checkup-fee/{patientId}', [App\Http\Controllers\CheckupController::class, 'getFee']);
+// Consultations Routes
+Route::get('/consultations', [CheckupController::class, 'index'])->name('consultations.index');
+Route::get('/consultations/create', [CheckupController::class, 'create'])->name('consultations.create');
+Route::post('/consultations', [CheckupController::class, 'store'])->name('consultations.store');
+Route::get('/consultations/{id}/edit', [CheckupController::class, 'edit'])->name('consultations.edit');
+Route::put('/consultations/{id}', [CheckupController::class, 'update'])->name('consultations.update');
+Route::delete('/consultations/{id}', [CheckupController::class, 'destroy'])->name('consultations.destroy');
+Route::get('/consultations/{id}', [CheckupController::class, 'show'])->name('consultations.show');
 
+// ✅ Print consultation slip
+Route::get('/consultations/{id}/print', [CheckupController::class, 'printSlip'])->name('consultations.print');
 
-
-
-// Patient History Route
-Route::get('/checkups/history/{patient_id}', [App\Http\Controllers\CheckupController::class, 'history'])->name('checkups.history');
+// Patient History
+Route::get('/consultations/history/{patient_id}', [CheckupController::class, 'history'])->name('consultations.history');
 
 
 // Doctor Dashboard route
