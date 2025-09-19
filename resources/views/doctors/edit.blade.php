@@ -2,10 +2,6 @@
 
 @section('title', 'Edit Doctor')
 
-@push('css')
-    <link href="{{ URL::asset('build/plugins/input-tags/css/tagsinput.css') }}" rel="stylesheet">
-@endpush
-
 @section('content')
 <div class="container mt-5">
     <div class="card shadow-sm">
@@ -30,105 +26,127 @@
                 @csrf
                 @method('PUT')
 
-                {{-- First Name --}}
-                <div class="mb-3">
-                    <label for="first_name" class="form-label">First Name</label>
-                    <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $doctor->first_name) }}" class="form-control" placeholder="Enter first name" required>
-                </div>
+                <div class="row g-3">
 
-                {{-- Last Name --}}
-                <div class="mb-3">
-                    <label for="last_name" class="form-label">Last Name</label>
-                    <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $doctor->last_name) }}" class="form-control" placeholder="Enter last name" required>
-                </div>
+                    {{-- First Name --}}
+                    <div class="col-lg-6">
+                        <label for="first_name" class="form-label">First Name</label>
+                        <input type="text" name="first_name" id="first_name"
+                               value="{{ old('first_name', $doctor->first_name) }}"
+                               class="form-control" placeholder="Enter first name" required>
+                    </div>
 
-                {{-- Email --}}
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" name="email" id="email" value="{{ old('email', $doctor->email) }}" class="form-control" placeholder="Enter email" required>
-                </div>
+                    {{-- Last Name --}}
+                    <div class="col-lg-6">
+                        <label for="last_name" class="form-label">Last Name</label>
+                        <input type="text" name="last_name" id="last_name"
+                               value="{{ old('last_name', $doctor->last_name) }}"
+                               class="form-control" placeholder="Enter last name" required>
+                    </div>
 
-                {{-- Password (Optional) --}}
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password <small>(Leave blank to keep current)</small></label>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter new password if you want to change">
-                </div>
+                    {{-- Email --}}
+                    <div class="col-lg-6">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" name="email" id="email"
+                               value="{{ old('email', $doctor->email) }}"
+                               class="form-control" placeholder="Enter email" required>
+                    </div>
 
-                {{-- Phone --}}
-                <div class="mb-3">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="text" name="phone" id="phone" value="{{ old('phone', $doctor->phone) }}" class="form-control" placeholder="Enter phone number">
-                </div>
+                    {{-- Password (Optional) --}}
+                    <div class="col-lg-6">
+                        <label for="password" class="form-label">Password <small>(Leave blank to keep current)</small></label>
+                        <input type="password" name="password" id="password"
+                               class="form-control" placeholder="Enter new password if you want to change">
+                    </div>
 
-                {{-- Specialization --}}
-                <div class="mb-3">
-                    <label for="specialization" class="form-label">Specialization</label>
-                    <input type="text" name="specialization" id="specialization" value="{{ old('specialization', $doctor->specialization) }}" class="form-control" placeholder="Enter specialization" required>
-                </div>
+                    {{-- Phone --}}
+                    <div class="col-lg-6">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="text" name="phone" id="phone"
+                               value="{{ old('phone', $doctor->phone) }}"
+                               class="form-control" placeholder="Enter phone number">
+                    </div>
 
-                {{-- Branch --}}
-                <div class="mb-3">
-                    <label for="branch_id" class="form-label">Branch</label>
-                    <select name="branch_id" id="branch_id" class="form-control" required>
-                        <option value="">Select Branch</option>
-                        @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}" {{ old('branch_id', $doctor->branch_id) == $branch->id ? 'selected' : '' }}>
-                                {{ $branch->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    {{-- Specialization --}}
+                    <div class="col-lg-6">
+                        <label for="specialization" class="form-label">Specialization</label>
+                        <input type="text" name="specialization" id="specialization"
+                               value="{{ old('specialization', $doctor->specialization) }}"
+                               class="form-control" placeholder="Enter specialization" required>
+                    </div>
 
-                {{-- CNIC --}}
-                <div class="mb-3">
-                    <label for="cnic" class="form-label">CNIC</label>
-                    <input type="text" name="cnic" id="cnic" value="{{ old('cnic', $doctor->cnic) }}" class="form-control" placeholder="Enter CNIC">
-                </div>
+                    {{-- Branch --}}
+                    <div class="col-lg-6">
+                        <label for="branch_id" class="form-label">Branch</label>
+                        <select name="branch_id" id="branch_id" class="form-control" required>
+                            <option value="">Select Branch</option>
+                            @foreach($branches as $branch)
+                                <option value="{{ $branch->id }}" {{ old('branch_id', $doctor->branch_id) == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                {{-- DOB --}}
-                <div class="mb-3">
-                    <label for="dob" class="form-label">Date of Birth</label>
-                    <input type="date" name="dob" id="dob" value="{{ old('dob', $doctor->dob) }}" class="form-control">
-                </div>
+                    {{-- CNIC --}}
+                    <div class="col-lg-6">
+                        <label for="cnic" class="form-label">CNIC</label>
+                        <input type="text" name="cnic" id="cnic"
+                               value="{{ old('cnic', $doctor->cnic) }}"
+                               class="form-control" placeholder="Enter CNIC">
+                    </div>
 
-                {{-- Last Education / Degree --}}
-                <div class="mb-3">
-                    <label for="last_education" class="form-label">Last Education / Degree</label>
-                    <input type="text" name="last_education" id="last_education" value="{{ old('last_education', $doctor->last_education) }}" class="form-control" placeholder="Enter last education or degree">
-                </div>
+                    {{-- DOB --}}
+                    <div class="col-lg-6">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" name="dob" id="dob"
+                               value="{{ old('dob', $doctor->dob) }}"
+                               class="form-control">
+                    </div>
 
-                {{-- Status --}}
-                <div class="mb-3">
-                    <label for="status" class="form-label">Status</label>
-                    <select name="status" id="status" class="form-control" required>
-                        <option value="">Select Status</option>
-                        <option value="active" {{ old('status', $doctor->status) == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ old('status', $doctor->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                </div>
+                    {{-- Last Education / Degree --}}
+                    <div class="col-lg-6">
+                        <label for="last_education" class="form-label">Last Education / Degree</label>
+                        <input type="text" name="last_education" id="last_education"
+                               value="{{ old('last_education', $doctor->last_education) }}"
+                               class="form-control" placeholder="Enter last education or degree">
+                    </div>
 
-                {{-- Document Upload --}}
-                <div class="mb-3">
-                    <label for="document" class="form-label">Upload Document</label>
-                    <input type="file" name="document" id="document" class="form-control">
-                    @if($doctor->document)
-                        <a href="{{ asset('storage/' . $doctor->document) }}" target="_blank" class="mt-1 d-block">View Current Document</a>
-                    @endif
-                </div>
+                    {{-- Status --}}
+                    <div class="col-lg-6">
+                        <label for="status" class="form-label">Status</label>
+                        <select name="status" id="status" class="form-control" required>
+                            <option value="">Select Status</option>
+                            <option value="active" {{ old('status', $doctor->status) == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status', $doctor->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                    </div>
 
-                {{-- Picture Upload --}}
-                <div class="mb-3">
-                    <label for="picture" class="form-label">Upload Picture</label>
-                    <input type="file" name="picture" id="picture" class="form-control">
-                    @if($doctor->picture)
-                        <img src="{{ asset('storage/' . $doctor->picture) }}" alt="Doctor Picture" class="img-thumbnail mt-2" width="120">
-                    @endif
-                </div>
+                    {{-- Document Upload --}}
+                    <div class="col-lg-6">
+                        <label for="document" class="form-label">Upload Document</label>
+                        <input type="file" name="document" id="document" class="form-control">
+                        @if($doctor->document)
+                            <a href="{{ asset('storage/' . $doctor->document) }}" target="_blank" class="mt-1 d-block">View Current Document</a>
+                        @endif
+                    </div>
+
+                    {{-- Picture Upload --}}
+                    <div class="col-lg-6">
+                        <label for="picture" class="form-label">Upload Picture</label>
+                        <input type="file" name="picture" id="picture" class="form-control">
+                        @if($doctor->picture)
+                            <img src="{{ asset('storage/' . $doctor->picture) }}" alt="Doctor Picture"
+                                 class="img-thumbnail mt-2" width="120">
+                        @endif
+                    </div>
+
+                </div> {{-- row end --}}
 
                 {{-- Submit Buttons --}}
-                <div class="d-flex gap-2">
+                <div class="mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-success">Update Doctor</button>
-                    <a href="{{ route('doctors.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+                    <a href="{{ route('doctors.index') }}" class="btn btn-secondary">Cancel</a>
                 </div>
 
             </form>
@@ -136,12 +154,3 @@
     </div>
 </div>
 @endsection
-
-@push('script')
-    <!-- Plugins -->
-    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/main.js') }}"></script>
-@endpush

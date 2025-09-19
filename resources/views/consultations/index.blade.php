@@ -39,6 +39,7 @@
                                 <th>Date</th>
                                 <th>Doctor</th>
                                 <th>Fee</th>
+                                <th>Checkup Status</th>
                                 <th style="width:220px;">Actions</th>
                             </tr>
                         </thead>
@@ -49,9 +50,21 @@
                                     <td>{{ \Carbon\Carbon::parse($consultation->date)->format('d-m-Y') }}</td>
                                     <td>{{ $consultation->doctor_name }}</td>
                                     <td>Rs. {{ $consultation->fee }}</td>
+									<td>
+										@php $status = (int)($consultation->checkup_status ?? 0); @endphp
+										@if($status === 0)
+											<span class="badge bg-warning text-dark">Pending</span>
+										@elseif($status === 1)
+											<span class="badge bg-success">Completed</span>
+										@elseif($status === 2)
+											<span class="badge bg-danger">Cancelled</span>
+										@else
+											<span class="badge bg-secondary">Unknown</span>
+										@endif
+									</td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Buttons</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm">Actions</button>
                                             <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <span class="visually-hidden">Toggle Dropdown</span>
                                             </button>

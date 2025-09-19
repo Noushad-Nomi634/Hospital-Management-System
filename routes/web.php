@@ -55,10 +55,9 @@ Route::prefix('doctor')->middleware(['auth:doctor', 'role:doctor'])->name('docto
 
 
 //For receptionist only
-Route::prefix('receptionist')->middleware(['auth:web', 'role:receptionist'])->name('receptionist.')->group(function () {
-    Route::get('dashboard', [ReceptionistDashboardController::class, 'receptionistIndex'])->name('dashboard');
+Route::middleware(['auth', 'role:Receptionist'])->group(function () {
+    //Route::get('/receptionist/dashboard', [DashboardController::class, 'receptionistIndex']);
 });
-
 
 
 // For all authenticated users
@@ -222,9 +221,11 @@ Route::get('users/edit/{id}', [UserController::class, 'edit'])->name('users.edit
 Route::post('users/update/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
+//Receptionist Dashboard
+Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, 'index'])
+    ->name('receptionist.dashboard')
+    ->middleware('auth');
 
 
-
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');

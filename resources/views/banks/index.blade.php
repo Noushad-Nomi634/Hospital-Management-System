@@ -52,7 +52,7 @@
                                         <td>{{ number_format($bank->balance, 2) }}</td>
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-outline-primary">Buttons</button>
+                                                <button type="button" class="btn btn-outline-primary">Actions</button>
                                                 <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <span class="visually-hidden">Toggle Dropdown</span>
                                                 </button>

@@ -57,14 +57,14 @@ class TreatmentSessionController extends Controller
 
             $checkup = Checkup::findOrFail($request->checkup_id);
 
-            $sessionCount = $request->has('sessions') ? count($request->sessions) : 0;
+            $sessionCount = $request->has('sessions') ? count($request->sessions) : 1;
             $totalFee     = $request->session_fee * $sessionCount;
-            $paidAmount   = $request->paid_amount;
+            $paidAmount   = (float) $request->paid_amount;
             $duesAmount   = $totalFee - $paidAmount;
 
             $session = TreatmentSession::create([
                 'patient_id'    => $checkup->patient_id,
-                'branch_id'     => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
+                'branch_id'     => $checkup->doctor->branch_id ?? 1,
                 'checkup_id'    => $request->checkup_id,
                 'doctor_id'     => $request->doctor_id,
                 'session_fee'   => $request->session_fee,
@@ -73,22 +73,25 @@ class TreatmentSessionController extends Controller
                 'dues_amount'   => $duesAmount,
                 'diagnosis'     => $request->diagnosis,
                 'note'          => $request->note,
+                'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
             ]);
 
-            // ✅ Session Times
+            // Mark checkup completed
+            Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
+
+            // Add session times
             if ($request->has('sessions')) {
                 foreach ($request->sessions as $time) {
                     if (!empty($time['date']) && !empty($time['time'])) {
-                        $sessionDatetime = $time['date'] . ' ' . $time['time'];
                         SessionTime::create([
                             'treatment_session_id' => $session->id,
-                            'session_datetime'     => $sessionDatetime,
+                            'session_datetime'     => $time['date'].' '.$time['time'],
                         ]);
                     }
                 }
             }
 
-            // ✅ Installment record
+            // Add installment
             if ($paidAmount > 0) {
                 SessionInstallment::create([
                     'session_id'     => $session->id,
@@ -98,13 +101,13 @@ class TreatmentSessionController extends Controller
                 ]);
             }
 
-            // ✅ Transaction table entry
+            // Add transaction
             DB::table('transactions')->insert([
                 'p_id'      => $checkup->patient_id,
                 'dr_id'     => $request->doctor_id,
                 'amount'    => $paidAmount,
                 'type'      => '+',
-                'b_id'      => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
+                'b_id'      => $checkup->doctor->branch_id ?? 1,
                 'entery_by' => auth()->user()->id,
                 'Remx'      => 'Treatment Session Payment',
                 'created_at'=> now(),
@@ -112,9 +115,25 @@ class TreatmentSessionController extends Controller
             ]);
 
             return redirect()->route('treatment-sessions.index')
-                ->with('success', '✅ Treatment session created successfully with transaction.');
+                ->with('success', '✅ Treatment session created successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to create session: ' . $e->getMessage());
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            $session = TreatmentSession::with(['doctor', 'patient', 'sessionTimes', 'installments', 'checkup'])
+                ->findOrFail($id);
+
+            $doctors  = Doctor::all();
+            $checkups = Checkup::with('patient', 'doctor')->orderBy('date', 'desc')->get();
+            $patients = $checkups->pluck('patient')->unique('id');
+
+            return view('treatment_sessions.edit', compact('session', 'doctors', 'checkups', 'patients'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Failed to load edit form: ' . $e->getMessage());
         }
     }
 
@@ -136,14 +155,14 @@ class TreatmentSessionController extends Controller
             $session = TreatmentSession::findOrFail($id);
             $checkup = Checkup::findOrFail($request->checkup_id);
 
-            $sessionCount = $request->has('sessions') ? count($request->sessions) : 0;
+            $sessionCount = $request->has('sessions') ? count($request->sessions) : $session->session_count;
             $totalFee     = $request->session_fee * $sessionCount;
-            $paidAmount   = $request->paid_amount;
+            $paidAmount   = (float) $request->paid_amount;
             $duesAmount   = $totalFee - $paidAmount;
 
             $session->update([
                 'patient_id'    => $checkup->patient_id,
-                'branch_id'     => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
+                'branch_id'     => $checkup->doctor->branch_id ?? 1,
                 'checkup_id'    => $request->checkup_id,
                 'doctor_id'     => $request->doctor_id,
                 'session_fee'   => $request->session_fee,
@@ -152,35 +171,46 @@ class TreatmentSessionController extends Controller
                 'dues_amount'   => $duesAmount,
                 'diagnosis'     => $request->diagnosis,
                 'note'          => $request->note,
+                'session_date'  => $request->sessions[0]['date'] ?? $session->session_date,
             ]);
 
-            // ✅ Update session times
+            // Update session times
             if ($request->has('sessions')) {
                 $session->sessionTimes()->delete();
                 foreach ($request->sessions as $time) {
                     if (!empty($time['date']) && !empty($time['time'])) {
-                        $sessionDatetime = $time['date'] . ' ' . $time['time'];
                         SessionTime::create([
                             'treatment_session_id' => $session->id,
-                            'session_datetime'     => $sessionDatetime,
+                            'session_datetime'     => $time['date'].' '.$time['time'],
                         ]);
                     }
                 }
             }
 
-            // ✅ Update transaction
+            // Update installments
+            $session->installments()->delete();
+            if ($paidAmount > 0) {
+                SessionInstallment::create([
+                    'session_id'     => $session->id,
+                    'amount'         => $paidAmount,
+                    'payment_date'   => now(),
+                    'payment_method' => 'cash',
+                ]);
+            }
+
+            // Update transaction
             DB::table('transactions')->where([
                 ['p_id', '=', $session->patient_id],
                 ['dr_id', '=', $request->doctor_id],
                 ['Remx', '=', 'Treatment Session Payment']
             ])->update([
                 'amount'     => $paidAmount,
-                'b_id'       => $checkup->doctor->branch_id ?? 1, // ✅ branch_id fix
+                'b_id'       => $checkup->doctor->branch_id ?? 1,
                 'updated_at' => now(),
             ]);
 
             return redirect()->route('treatment-sessions.index')
-                ->with('success', '✅ Treatment session updated successfully with transaction.');
+                ->with('success', '✅ Treatment session updated successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to update session: ' . $e->getMessage());
         }
@@ -197,9 +227,9 @@ class TreatmentSessionController extends Controller
             $sessionTime = SessionTime::findOrFail($id);
 
             $sessionTime->update([
-                'is_completed'            => true,
-                'completed_by_doctor_id'  => $request->doctor_id,
-                'work_done'               => $request->work_done ?? null,
+                'is_completed'           => true,
+                'completed_by_doctor_id' => $request->doctor_id,
+                'work_done'              => $request->work_done ?? null,
             ]);
 
             $sessionTime->treatmentSession->refreshStatus();
@@ -215,20 +245,15 @@ class TreatmentSessionController extends Controller
         try {
             $session = TreatmentSession::findOrFail($id);
 
-            // ✅ Delete session times
             $session->sessionTimes()->delete();
-
-            // ✅ Delete installments
             $session->installments()->delete();
 
-            // ✅ Delete transaction
             DB::table('transactions')->where([
                 ['p_id', '=', $session->patient_id],
                 ['dr_id', '=', $session->doctor_id],
                 ['Remx', '=', 'Treatment Session Payment']
             ])->delete();
 
-            // ✅ Delete session
             $session->delete();
 
             return redirect()->route('treatment-sessions.index')
@@ -237,5 +262,26 @@ class TreatmentSessionController extends Controller
             return redirect()->back()->with('error', '❌ Failed to delete session: ' . $e->getMessage());
         }
     }
-}
 
+    // Optional methods for ➕ icon session entry
+    public function addEntryForm($session_id)
+    {
+        $session = TreatmentSession::findOrFail($session_id);
+        return view('treatment_sessions.add_entry', compact('session'));
+    }
+
+    public function storeEntry(Request $request, $session_id)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'time' => 'required|date_format:H:i',
+        ]);
+
+        SessionTime::create([
+            'treatment_session_id' => $session_id,
+            'session_datetime'     => $request->date.' '.$request->time,
+        ]);
+
+        return redirect()->back()->with('success', '✅ Session entry added successfully.');
+    }
+}

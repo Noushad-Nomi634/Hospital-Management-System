@@ -1,99 +1,68 @@
 @extends('layouts.app')
 
+@section('title', 'Doctor Dashboard')
+
+@push('css')
+    <link href="{{ asset('css/doctor-dashboard.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container">
-    <h1>Doctor Dashboard</h1>
+    <h2>Doctor Dashboard - {{ $doctor->name ?? $doctor->first_name.' '.$doctor->last_name }}</h2>
 
-    <!-- Assigned Patients -->
-    <div class="card mb-4">
-        <div class="card-header">Assigned Patients</div>
-        <div class="card-body">
-            @if($assignedPatients->isEmpty())
-                <p>No assigned patients.</p>
-            @else
-                <ul>
-                    @foreach($assignedPatients as $patient)
-                        <li>{{ $patient->name ?? 'N/A' }} (ID: {{ $patient->id ?? 'N/A' }})</li>
-                    @endforeach
-                </ul>
-            @endif
+    <!-- Stats Section -->
+    <div class="stats-grid">
+        <div class="stat-card stat-blue">
+            <h3>{{ $pendingConsultationsCount }}</h3>
+            <p>Pending Consultations</p>
+        </div>
+
+        <div class="stat-card stat-green">
+            <h3>{{ $todayPatients }}</h3>
+            <p>Today Patients</p>
+        </div>
+
+        <div class="stat-card stat-yellow">
+            <h3>{{ $todaySessionsCount }}</h3>
+            <p>Today Sessions</p>
         </div>
     </div>
 
-    <!-- Today's Sessions -->
-    <div class="card mb-4">
-        <div class="card-header">Today's Sessions</div>
-        <div class="card-body">
-            @if($todaySessions->isEmpty())
-                <p>No sessions today.</p>
-            @else
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Patient Name</th>
-                            <th>Fee</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($todaySessions as $session)
-                            <tr>
-                                <!-- Safe null handling -->
-                                <td>{{ $session->patient?->name ?? 'N/A' }}</td>
-                                <td>{{ $session->fee ?? '0' }}</td>
-                                <td>
-                                    @if(!empty($session->date))
-                                        {{ \Carbon\Carbon::parse($session->date)->format('d M Y') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                <p><strong>Total Sessions:</strong> {{ $totalSessions ?? 0 }}</p>
-                <p><strong>Total Fee:</strong> {{ $totalFee ?? 0 }}</p>
-            @endif
-        </div>
-    </div>
+    <hr>
 
     <!-- Next 2 Days Schedule -->
-    <div class="card mb-4">
-        <div class="card-header">Next 2 Days Schedule</div>
-        <div class="card-body">
-            @if($nextSchedule->isEmpty())
-                <p>No scheduled availability for the next 2 days.</p>
-            @else
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Day</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($nextSchedule as $schedule)
-                            <tr>
-                                <td>
-                                    @if(!empty($schedule->date))
-                                        {{ \Carbon\Carbon::parse($schedule->date)->format('d M Y') }}
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td>{{ $schedule->day_of_week ?? 'N/A' }}</td>
-                                <td>{{ $schedule->start_time ?? 'N/A' }}</td>
-                                <td>{{ $schedule->end_time ?? 'N/A' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-        </div>
-    </div>
+    <h3>Next 2 Days Schedule</h3>
+    <table class="schedule-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($twoDaySchedule as $schedule)
+                <tr>
+                    <td>{{ \Carbon\Carbon::parse($schedule->date)->format('Y-m-d') }}</td>
+                    <td>{{ $schedule->day_of_week }}</td>
+                    <td>{{ $schedule->start_time ?? '-' }}</td>
+                    <td>{{ $schedule->end_time ?? '-' }}</td>
+                    <td>
+                        @if($schedule->is_leave)
+                            <span class="badge badge-red">Leave</span>
+                        @else
+                            <span class="badge badge-green">Available</span>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">No schedule in next 2 days.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
 @endsection
