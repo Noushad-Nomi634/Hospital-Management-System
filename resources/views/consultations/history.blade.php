@@ -31,7 +31,7 @@
                         @forelse($history as $record)
                             <tr>
                                 <td>{{ $patient->name ?? 'Unknown' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($record->date)->format('d-m-Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($record->created_at)->format('d-m-Y') }}</td>
                                 <td>{{ $record->doctor_name }}</td>
                             </tr>
                         @empty

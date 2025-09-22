@@ -39,10 +39,11 @@
                                    value="{{ old('phone') }}" placeholder="Phone Number" required>
                         </div>
 
-                        <div class="col-12">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea name="address" class="form-control" id="address"
-                                      placeholder="Patient Address" rows="2" required>{{ old('address') }}</textarea>
+                        <div class="col-md-6">
+                            <label for="cnic" class="form-label">CNIC Number</label>
+                            <input type="text" name="cnic" class="form-control" id="cnic"
+                                   value="{{ old('cnic') }}" placeholder="12345-1234567-1"
+                                   pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15">
                         </div>
 
                         <div class="col-md-6">
@@ -54,6 +55,14 @@
                                 <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
+
+                        <div class="col-12">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea name="address" class="form-control" id="address"
+                                      placeholder="Patient Address" rows="2" required>{{ old('address') }}</textarea>
+                        </div>
+
+
 
                         <div class="col-md-6">
                             <label for="branch_id" class="form-label">Branch</label>

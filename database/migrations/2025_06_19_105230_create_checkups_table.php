@@ -17,7 +17,6 @@ return new class extends Migration
     $table->string('diagnosis');
     $table->string('doctor')->nullable(); // Add doctor column
     $table->decimal('fee', 10, 2)->nullable(); // Add fee column
-    $table->text('treatment');
     $table->tinyInteger('checkup_status')->default(0); // 0=pending, 1=complete, 2=cancel
     $table->tinyInteger('status')->default(1); // 1=completed (active)
     $table->timestamps();

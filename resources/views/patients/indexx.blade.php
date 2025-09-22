@@ -33,24 +33,30 @@
                         <table id="patientsTable" class="table table-bordered table-hover">
                             <thead class="table-dark">
                                 <tr>
+                                    <th>MR#</th>
                                     <th>Name</th>
                                     <th>Father/Husband Name</th>
+                                    <th>Phone</th>
+                                    <th>CNIC</th>
                                     <th>Gender</th>
                                     <th>Age</th>
                                     <th>Branch</th>
-                                    <th>Phone</th>
+
                                     <th style="width:200px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($patients as $patient)
                                     <tr>
+                                        <td>{{ $patient->id ?? 'N/A' }}</td>
                                         <td>{{ $patient->name ?? 'N/A' }}</td>
                                         <td>{{ $patient->guardian_name ?? 'N/A' }}</td>
+                                        <td>{{ $patient->phone ?? 'N/A' }}</td>
+                                        <td>{{ $patient->cnic ?? 'N/A' }}</td>
                                         <td>{{ $patient->gender ?? 'N/A' }}</td>
                                         <td>{{ $patient->age ?? 'N/A' }}</td>
                                         <td>{{ $patient->branch?->name ?? 'N/A' }}</td>
-                                        <td>{{ $patient->phone ?? 'N/A' }}</td>
+
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-outline-primary">Actions</button>

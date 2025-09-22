@@ -21,7 +21,7 @@
                     <!-- Date -->
                     <div class="mb-3">
                         <label class="form-label"><strong>Date:</strong></label>
-                        <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($checkup->date)->format('d-m-Y') }}" readonly>
+                        <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($checkup->created_at)->format('d-m-Y') }}" readonly>
                     </div>
 
                     <!-- Phone -->
@@ -30,9 +30,9 @@
                         <input type="text" class="form-control" value="{{ $checkup->patient_phone }}" readonly>
                     </div>
 
-                  
 
-                   
+
+
                     <!-- Doctor -->
                     <div class="mb-3">
                         <label class="form-label"><strong>Doctor:</strong></label>

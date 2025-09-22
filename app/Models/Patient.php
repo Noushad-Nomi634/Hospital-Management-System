@@ -10,15 +10,32 @@ use Illuminate\Database\Eloquent\Model;
 class Patient extends Model
 {
     use HasFactory;
-     protected $fillable = [ 
+     protected $fillable = [
+    'mr',
     'name',
     'gender',
     'guardian_name',
     'age',
     'phone',
+    'cnic',
     'address',
     'branch_id',
 ];
+
+    protected static function booted()
+    {
+        static::created(function ($patient) {
+            if (!$patient->mr) {
+                $branch = $patient->branch()->first();
+                $prefix = $branch ? $branch->prefix : 'MR'; // اگر branch میں prefix نہ ہو تو default MR
+
+                // patient ID سے padded MR code
+                $patient->mr = $prefix . '-' . str_pad($patient->id, 5, '0', STR_PAD_LEFT);
+
+                $patient->save();
+            }
+        });
+    }
 
     public function branch()
     {

@@ -42,6 +42,7 @@
                                     <th>Name</th>
                                     <th>Address</th>
                                     <th>Phone</th>
+                                    <th>Prefix</th>
                                     <th>Status</th>
                                     <th style="width:200px;">Actions</th>
                                 </tr>
@@ -53,6 +54,7 @@
                                         <td>{{ $branch->name }}</td>
                                         <td>{{ $branch->address }}</td>
                                         <td>{{ $branch->phone }}</td>
+                                        <td>{{ $branch->prefix }}</td>
                                         <td>
                                             <span class="badge bg-{{ $branch->status == 'active' ? 'success' : 'secondary' }}">
                                                 {{ ucfirst($branch->status) }}
