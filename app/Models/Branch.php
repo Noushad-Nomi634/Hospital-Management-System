@@ -12,6 +12,7 @@ class Branch extends Model
         'name',
         'address',
         'phone',
+        'prefix',
         'status',
     ];
 
@@ -27,5 +28,5 @@ public function generalSetting()
 {
     return $this->hasOne(GeneralSetting::class);
 }
-   
+
 }

@@ -47,7 +47,7 @@
                             @foreach($consultations as $consultation)
                                 <tr>
                                     <td>{{ $consultation->patient_name ?? 'N/A' }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($consultation->date)->format('d-m-Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($consultation->created_at)->format('d-m-Y') }}</td>
                                     <td>{{ $consultation->doctor_name }}</td>
                                     <td>Rs. {{ $consultation->fee }}</td>
 									<td>

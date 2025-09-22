@@ -29,7 +29,7 @@ class PatientController extends Controller
 
             return view('patients.indexx', compact('patients'));
         } catch (\Exception $e) {
-            \Log::error('Patient index error: ' . $e->getMessage());
+            Log::error('Patient index error: ' . $e->getMessage());
             return back()->with('error', 'Unable to fetch patients. Please try again.');
         } finally{
             Log::error('Something went wrong!');
@@ -63,6 +63,7 @@ class PatientController extends Controller
                 'guardian_name' => 'required|string|max:255',
                 'age'           => 'required|numeric',
                 'phone'         => 'required|string|max:20',
+                'cnic'         => 'string|max:15',
                 'address'       => 'required|string|max:500',
                 'branch_id'     => 'required|exists:branches,id',
             ]);
@@ -78,7 +79,7 @@ class PatientController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Patient store error: ' . $e->getMessage());
-            return back()->with('error', 'Something went wrong. Please try again.')
+            return back()->with('error', $e->getMessage())
                         ->withInput();
         }
     }
@@ -111,6 +112,7 @@ class PatientController extends Controller
                 'guardian_name' => 'required|string|max:255',
                 'age'           => 'required|numeric',
                 'phone'         => 'required|string|max:20',
+                'cnic'          => 'required|string|regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/|unique:patients,cnic,' . $id,
                 'address'       => 'required|string|max:500',
                 'branch_id'     => 'required|exists:branches,id',
             ]);
@@ -122,6 +124,7 @@ class PatientController extends Controller
                 'guardian_name',
                 'age',
                 'phone',
+                'cnic',
                 'address',
                 'branch_id'
             ));

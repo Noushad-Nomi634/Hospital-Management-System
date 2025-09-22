@@ -11,19 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('patients', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->string('email')->nullable(); // or without nullable if required
+        Schema::create('patients', function (Blueprint $table) {
+            $table->id();
+            $table->string('mr')->unique()->nullable(); // ✅ Correct column definition
+            $table->string('name');
+            $table->string('gender')->nullable();
+            $table->string('guardian_name')->nullable();
+            $table->integer('age')->nullable();
+            $table->string('email')->nullable();
+            $table->string('cnic')->unique(); // ✅ Correct
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->text('medical_history')->nullable();
+            $table->unsignedBigInteger('branch_id');
+            $table->timestamps();
 
-    $table->string('phone')->nullable();
-    $table->text('address')->nullable();
-    $table->text('medical_history')->nullable();
-    $table->unsignedBigInteger('branch_id');
-    $table->timestamps();
-
-    $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
-
+            // Foreign key with branches
+            $table->foreign('branch_id')
+                  ->references('id')
+                  ->on('branches')
+                  ->onDelete('cascade');
         });
     }
 

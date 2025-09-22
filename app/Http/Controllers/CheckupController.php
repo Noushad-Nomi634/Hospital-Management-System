@@ -26,7 +26,7 @@ class CheckupController extends Controller
                     DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                     'branches.name as branch_name'
                 )
-                ->orderBy('checkups.date', 'desc')
+                ->orderBy('checkups.id', 'desc')
                 ->get();
 
             return view('consultations.index', [
@@ -94,10 +94,7 @@ class CheckupController extends Controller
                 'patient_id' => $request->patient_id,
                 'doctor_id'  => $request->doctor_id,
                 'branch_id'  => $patient->branch_id,
-                'date'       => $request->date,
-                'diagnosis'  => $request->diagnosis ?? null,
                 'fee'        => $checkupFee,
-                'note'       => $request->note,
             ]);
 
             // Save Transaction
@@ -276,7 +273,7 @@ class CheckupController extends Controller
                     'branches.name as branch_name'
                 )
                 ->where('checkups.patient_id', $patient_id)
-                ->orderBy('checkups.date', 'desc')
+                ->orderBy('checkups.id', 'desc')
                 ->get();
 
             return view('consultations.history', [

@@ -9,14 +9,12 @@ class Checkup extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ 
+    protected $fillable = [
         'patient_id',
         'doctor_id',
         'branch_id',
-        'date',
         'fee',
-        'diagnosis',
-        'note',
+
     ];
 
     // Relations
