@@ -33,30 +33,38 @@
                 {{-- Branch Name --}}
                 <div class="mb-3">
                     <label for="name" class="form-label">Branch Name</label>
-                    <input type="text" name="name" id="name" value="{{ $branch->name }}"
+                    <input type="text" name="name" id="name" value="{{ old('name', $branch->name) }}"
                            class="form-control" placeholder="Enter branch name" required>
                 </div>
 
                 {{-- Address --}}
                 <div class="mb-3">
                     <label for="address" class="form-label">Address</label>
-                    <input type="text" name="address" id="address" value="{{ $branch->address }}"
+                    <input type="text" name="address" id="address" value="{{ old('address', $branch->address) }}"
                            class="form-control" placeholder="Enter branch address">
                 </div>
 
                 {{-- Phone --}}
                 <div class="mb-3">
                     <label for="phone" class="form-label">Phone</label>
-                    <input type="text" name="phone" id="phone" value="{{ $branch->phone }}"
+                    <input type="text" name="phone" id="phone" value="{{ old('phone', $branch->phone) }}"
                            class="form-control" placeholder="Enter phone number">
+                </div>
+
+                {{-- Fee --}}
+                <div class="mb-3">
+                    <label for="fee" class="form-label">Fee <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" name="fee" id="fee"
+                           value="{{ old('fee', $branch->fee) }}"
+                           class="form-control" placeholder="Enter branch fee" required>
                 </div>
 
                 {{-- Status --}}
                 <div class="mb-3">
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-control">
-                        <option value="active" @if($branch->status=='active') selected @endif>Active</option>
-                        <option value="inactive" @if($branch->status=='inactive') selected @endif>Inactive</option>
+                        <option value="active" {{ old('status', $branch->status)=='active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status', $branch->status)=='inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
 

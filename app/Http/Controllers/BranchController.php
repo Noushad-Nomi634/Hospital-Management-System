@@ -29,6 +29,7 @@ class BranchController extends Controller
             'prefix' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
             'status' => 'required|string|in:active,inactive',
+            'fee' => 'required|numeric|min:0', // Fee validation added
         ]);
 
         Branch::create($request->all());
@@ -51,8 +52,10 @@ class BranchController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
+            'prefix' => 'nullable|string',
             'phone' => 'nullable|string|max:20',
             'status' => 'required|string|in:active,inactive',
+            'fee' => 'required|numeric|min:0', // Fee validation added
         ]);
 
         $branch->update($request->all());

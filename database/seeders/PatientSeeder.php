@@ -20,6 +20,7 @@ class PatientSeeder extends Seeder
                 'email' => 'ali@example.com',
                 'phone' => '03123456789',
                 'branch_id' => 1,
+                'cnic' => '35202-1234567-1',
                 'guardian_name' => 'Mohammad Raza',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

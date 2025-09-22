@@ -1,21 +1,17 @@
 <?php
 
 namespace Database\Seeders;
-use App\Models\Branch;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Branch;
 use Illuminate\Database\Seeder;
 
 class BranchSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-          Branch::create([
-            'name' => 'Main Branch Rawalpindi',
-            'prefix' => 'WP',
-        ]);
+        Branch::firstOrCreate(
+            ['prefix' => 'WP'], 
+            ['name' => 'Main Branch Rawalpindi']
+        );
     }
 }

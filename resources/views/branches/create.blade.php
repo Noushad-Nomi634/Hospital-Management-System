@@ -30,34 +30,46 @@
                     <form action="{{ route('branches.store') }}" method="POST">
                         @csrf
 
+                        <!-- Branch Name -->
                         <div class="mb-3">
                             <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input type="text" id="name" name="name" class="form-control" required>
+                            <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" required>
                         </div>
 
+                        <!-- Address -->
                         <div class="mb-3">
                             <label for="address" class="form-label">Address</label>
-                            <input type="text" id="address" name="address" class="form-control">
+                            <input type="text" id="address" name="address" class="form-control" value="{{ old('address') }}">
                         </div>
 
+                        <!-- Phone -->
                         <div class="mb-3">
                             <label for="phone" class="form-label">Phone</label>
-                            <input type="text" id="phone" name="phone" class="form-control">
+                            <input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone') }}">
                         </div>
 
+                        <!-- Prefix -->
                         <div class="mb-3">
-                            <label for="prefix" class="form-label">Prefix(For patent MR-)</label>
-                            <input type="text" id="prefix" name="prefix" class="form-control">
+                            <label for="prefix" class="form-label">Prefix (For patient MR-)</label>
+                            <input type="text" id="prefix" name="prefix" class="form-control" value="{{ old('prefix') }}">
                         </div>
 
+                        <!-- Fee -->
+                        <div class="mb-3">
+                            <label for="fee" class="form-label">Fee <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="fee" name="fee" class="form-control" value="{{ old('fee') }}" required>
+                        </div>
+
+                        <!-- Status -->
                         <div class="mb-3">
                             <label for="status" class="form-label">Status</label>
                             <select id="status" name="status" class="form-select">
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active" {{ old('status')=='active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ old('status')=='inactive' ? 'selected' : '' }}>Inactive</option>
                             </select>
                         </div>
 
+                        <!-- Submit Buttons -->
                         <button type="submit" class="btn btn-primary">Save</button>
                         <a href="{{ route('branches.index') }}" class="btn btn-secondary">Cancel</a>
                     </form>

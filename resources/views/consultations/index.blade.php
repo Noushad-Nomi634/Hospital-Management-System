@@ -39,6 +39,8 @@
                                 <th>Date</th>
                                 <th>Doctor</th>
                                 <th>Fee</th>
+                                <th>Paid Amount</th>          <!-- New column -->
+                                <th>Payment Method</th>       <!-- New column -->
                                 <th>Checkup Status</th>
                                 <th style="width:220px;">Actions</th>
                             </tr>
@@ -50,18 +52,20 @@
                                     <td>{{ \Carbon\Carbon::parse($consultation->created_at)->format('d-m-Y') }}</td>
                                     <td>{{ $consultation->doctor_name }}</td>
                                     <td>Rs. {{ $consultation->fee }}</td>
-									<td>
-										@php $status = (int)($consultation->checkup_status ?? 0); @endphp
-										@if($status === 0)
-											<span class="badge bg-warning text-dark">Pending</span>
-										@elseif($status === 1)
-											<span class="badge bg-success">Completed</span>
-										@elseif($status === 2)
-											<span class="badge bg-danger">Cancelled</span>
-										@else
-											<span class="badge bg-secondary">Unknown</span>
-										@endif
-									</td>
+                                    <td>Rs. {{ $consultation->paid_amount ?? 0 }}</td>      <!-- New column data -->
+                                    <td>{{ $consultation->payment_method ?? 'N/A' }}</td>   <!-- New column data -->
+                                    <td>
+                                        @php $status = (int)($consultation->checkup_status ?? 0); @endphp
+                                        @if($status === 0)
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        @elseif($status === 1)
+                                            <span class="badge bg-success">Completed</span>
+                                        @elseif($status === 2)
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        @else
+                                            <span class="badge bg-secondary">Unknown</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-outline-primary btn-sm">Actions</button>
@@ -120,7 +124,7 @@ $(document).ready(function() {
         lengthMenu: [5, 10, 25, 50, 100],
         ordering: true,
         columnDefs: [
-            { orderable: false, targets: 4 } // Actions column
+            { orderable: false, targets: 7 } // Actions column
         ],
     });
 });

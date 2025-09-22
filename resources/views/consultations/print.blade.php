@@ -6,7 +6,7 @@
         body { font-family: Arial, sans-serif; margin: 40px; }
         h2 { text-align: center; }
         .invoice-box { border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: auto; }
-        table { width: 100%; }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 8px; text-align: left; }
         .footer { margin-top: 20px; text-align: center; font-size: 12px; color: #777; }
         .btn-print { margin-top: 20px; text-align: center; }
@@ -18,29 +18,25 @@
         <table>
             <tr>
                 <th>Patient Name:</th>
-                <td>{{ $checkup->patient->name ?? 'N/A' }}</td>
+                <td>{{ $checkup->patient_name ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <th>Doctor:</th>
-                <td>{{ $checkup->doctor->name ?? 'N/A' }}</td>
+                <td>{{ $checkup->doctor_name ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <th>Date:</th>
-                <td>{{ \Carbon\Carbon::parse($checkup->date)->format('d-m-Y') }}</td>
+                <td>
+                    {{ \Carbon\Carbon::parse($checkup->created_at)->format('d-m-Y') ?? 'N/A' }}
+                </td>
             </tr>
-
-             <tr>
-                <th>Phone:</th>
-                <td>{{ $checkup->patient->phone ?? 'N/A' }}</td>
-            </tr>
-
             <tr>
-                <th>Diagnosis:</th>
-                <td>{{ $checkup->diagnosis }}</td>
+                <th>Phone:</th>
+                <td>{{ $checkup->patient_phone ?? 'N/A' }}</td>
             </tr>
             <tr>
                 <th>Checkup Fee:</th>
-                <td>Rs. {{ $checkup->fee }}</td>
+                <td>Rs. {{ $checkup->fee ?? 0 }}</td>
             </tr>
         </table>
 

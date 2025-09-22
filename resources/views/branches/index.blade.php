@@ -43,6 +43,7 @@
                                     <th>Address</th>
                                     <th>Phone</th>
                                     <th>Prefix</th>
+                                    <th>Fee</th> <!-- Fee Column Added -->
                                     <th>Status</th>
                                     <th style="width:200px;">Actions</th>
                                 </tr>
@@ -55,6 +56,7 @@
                                         <td>{{ $branch->address }}</td>
                                         <td>{{ $branch->phone }}</td>
                                         <td>{{ $branch->prefix }}</td>
+                                        <td>{{ number_format($branch->fee, 2) }}</td> <!-- Fee Display -->
                                         <td>
                                             <span class="badge bg-{{ $branch->status == 'active' ? 'success' : 'secondary' }}">
                                                 {{ ucfirst($branch->status) }}
@@ -79,7 +81,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">No branches found.</td>
+                                        <td colspan="8" class="text-center">No branches found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -115,10 +117,9 @@
                 lengthMenu: [5, 10, 25, 50, 100],
                 ordering: true,
                 columnDefs: [
-                    { orderable: false, targets: 5 } // Actions column
+                    { orderable: false, targets: 7 } // Actions column
                 ]
             });
         });
     </script>
 @endpush
-

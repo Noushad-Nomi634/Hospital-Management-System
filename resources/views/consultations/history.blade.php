@@ -23,7 +23,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Patient</th>
-                            <th>Date</th>
+                            <th>Checkup Date</th>
                             <th>Doctor</th>
                         </tr>
                     </thead>
@@ -31,12 +31,14 @@
                         @forelse($history as $record)
                             <tr>
                                 <td>{{ $patient->name ?? 'Unknown' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($record->created_at)->format('d-m-Y') }}</td>
+                                <td>
+                                    {{ \Carbon\Carbon::parse($record->created_at)->format('d-m-Y') }}
+                                </td>
                                 <td>{{ $record->doctor_name }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">No checkup history found</td>
+                                <td colspan="3" class="text-center">No checkup history found</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -56,5 +58,3 @@
     <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ URL::asset('build/js/main.js') }}"></script>
 @endpush
-
-

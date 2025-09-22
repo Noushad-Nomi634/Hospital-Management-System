@@ -30,7 +30,8 @@ class TreatmentSessionController extends Controller
     public function create()
     {
         try {
-            $checkups = Checkup::with('patient', 'doctor')->orderBy('date', 'desc')->get();
+            // ✅ FIX: "date" column hata ke created_at use kiya
+            $checkups = Checkup::with('patient', 'doctor')->orderBy('created_at', 'desc')->get();
             $doctors  = Doctor::all();
             $patients = $checkups->pluck('patient')->unique('id');
 
@@ -128,7 +129,8 @@ class TreatmentSessionController extends Controller
                 ->findOrFail($id);
 
             $doctors  = Doctor::all();
-            $checkups = Checkup::with('patient', 'doctor')->orderBy('date', 'desc')->get();
+            // ✅ FIX: "date" column hata ke created_at use kiya
+            $checkups = Checkup::with('patient', 'doctor')->orderBy('created_at', 'desc')->get();
             $patients = $checkups->pluck('patient')->unique('id');
 
             return view('treatment_sessions.edit', compact('session', 'doctors', 'checkups', 'patients'));

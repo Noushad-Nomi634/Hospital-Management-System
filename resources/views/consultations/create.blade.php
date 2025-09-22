@@ -26,34 +26,25 @@
         <div class="col-12 col-xl-8">
             <div class="card">
                 <div class="card-body p-4">
-                    <!-- ✅ Correct route: consultations.store -->
                     <form method="POST" action="{{ route('consultations.store') }}" class="row g-3">
                         @csrf
 
-                        <!-- Patient Dropdown with Select2 Search -->
+                        <!-- Patient Dropdown -->
                         <div class="col-md-12">
-                            <label for="patient_id" class="form-label">Patient</label>
+                            <label for="patient_id" class="form-label">Patient Name</label>
                             <select name="patient_id" id="patient_id" class="form-select" required>
                                 <option value="">Select Patient</option>
                                 @foreach($patients as $patient)
-                                    <option value="{{ $patient->id }}"
-                                        {{ isset($selectedPatient) && $selectedPatient->id == $patient->id ? 'selected' : '' }}>
-                                        {{ $patient->id }} - {{ $patient->name }}
+                                    <option value="{{ $patient->id }}">
+                                        {{ $patient->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <!-- Date -->
+                        <!-- Doctor Dropdown -->
                         <div class="col-md-12">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="date" name="date" id="date" class="form-control"
-                                value="{{ old('date', date('Y-m-d')) }}" required>
-                        </div>
-
-                        <!-- Doctor Dropdown with Select2 -->
-                        <div class="col-md-12">
-                            <label for="doctor_id" class="form-label">Doctor</label>
+                            <label for="doctor_id" class="form-label">Doctor Name</label>
                             <select name="doctor_id" id="doctor_id" class="form-select" required>
                                 <option value="">Select Doctor</option>
                                 @foreach($doctors as $doctor)
@@ -62,20 +53,33 @@
                             </select>
                         </div>
 
-                        <!-- Fee -->
+                        <!-- Consultation Fee -->
                         <div class="col-md-12">
                             <label for="fee" class="form-label">Consultation Fee</label>
-                            <input type="number" name="fee" id="fee" class="form-control" value="{{ $fee }}" readonly>
+                            <input type="number" name="fee" id="fee" class="form-control" value="{{ old('fee') ?? 0 }}" readonly>
+                        </div>
+
+                        <!-- Paid Amount -->
+                        <div class="col-md-12">
+                            <label for="paid_amount" class="form-label">Paid Amount</label>
+                            <input type="number" name="paid_amount" id="paid_amount" class="form-control" value="{{ old('paid_amount') ?? 0 }}" step="0.01">
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="col-md-12">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <select name="payment_method" id="payment_method" class="form-select">
+                                <option value="">Select Payment Method</option>
+                                <option value="cash" {{ old('payment_method')=='cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="card" {{ old('payment_method')=='card' ? 'selected' : '' }}>Card</option>
+                                <option value="bank_transfer" {{ old('payment_method')=='bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                            </select>
                         </div>
 
                         <!-- Submit Buttons -->
                         <div class="col-md-12">
-                            <div class="d-md-flex d-grid align-items-center gap-3">
-                                <button type="submit" class="btn btn-primary px-4">Add Consultation</button>
-                                <button type="reset" class="btn btn-secondary px-4">Reset</button>
-                            </div>
+                            <button type="submit" class="btn btn-primary px-4">Add Consultation</button>
                         </div>
-
                     </form>
                 </div>
             </div>
@@ -84,49 +88,18 @@
 @endsection
 
 @push('script')
-    <!-- jQuery CDN (required for Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            function matchCustom(params, data) {
-                if ($.trim(params.term) === '') {
-                    return data;
-                }
-
-                var term = params.term.toLowerCase();
-                var text = data.text.toLowerCase();
-                var id = data.id ? data.id.toString().toLowerCase() : '';
-
-                if (text.startsWith(term) || id.startsWith(term)) {
-                    return data;
-                }
-
-                if (text.indexOf(term) > -1 || id.indexOf(term) > -1) {
-                    return data;
-                }
-
-                return null;
-            }
-
-            $('#patient_id').select2({
-                placeholder: "Search patient by ID or name...",
+            $('#patient_id, #doctor_id, #payment_method').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
-                matcher: matchCustom,
+                placeholder: 'Select an option',
                 allowClear: true
             });
 
-            $('#doctor_id').select2({
-                placeholder: "Select doctor...",
-                theme: 'bootstrap-5',
-                width: '100%',
-                allowClear: true
-            });
-
-            // 🔹 Patient select karte hi fee fetch aur update
+            // Automatically fetch fee when patient is selected
             $('#patient_id').on('change', function() {
                 var patientId = $(this).val();
                 if (patientId) {
@@ -137,20 +110,6 @@
                     $('#fee').val(0);
                 }
             });
-
-            // 🔹 Page load par agar patient pre-selected ho to fee set ho jaye
-            var preSelectedPatient = $('#patient_id').val();
-            if(preSelectedPatient) {
-                $.get('/patients/' + preSelectedPatient + '/checkup-fee', function(data) {
-                    $('#fee').val(data.fee);
-                });
-            }
         });
     </script>
-
-    <!-- Other JS Plugins -->
-    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/main.js') }}"></script>
 @endpush

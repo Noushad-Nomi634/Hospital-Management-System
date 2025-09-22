@@ -38,7 +38,7 @@
                             @foreach($checkups as $checkup)
                                 <option value="{{ $checkup->id }}" 
                                     {{ $selectedCheckupId == $checkup->id ? 'selected' : '' }}>
-                                    {{ $checkup->date }} - {{ $checkup->patient->name ?? 'No Patient' }}
+                                    {{ \Carbon\Carbon::parse($checkup->created_at)->format('Y-m-d') }} - {{ $checkup->patient->name ?? 'No Patient' }}
                                     ({{ $checkup->doctor ? $checkup->doctor->first_name.' '.$checkup->doctor->last_name : 'No Doctor' }})
                                 </option>
                             @endforeach

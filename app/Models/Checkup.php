@@ -9,12 +9,15 @@ class Checkup extends Model
 {
     use HasFactory;
 
+    // ✅ Add new fields to fillable
     protected $fillable = [
         'patient_id',
         'doctor_id',
         'branch_id',
         'fee',
-
+        'paid_amount',     
+        'payment_method',   
+        'checkup_status',   
     ];
 
     // Relations

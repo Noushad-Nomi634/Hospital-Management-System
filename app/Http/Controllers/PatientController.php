@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Patient;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Log;
-
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
 

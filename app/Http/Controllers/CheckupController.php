@@ -31,7 +31,7 @@ class CheckupController extends Controller
 
             return view('consultations.index', [
                 'checkups'      => $checkups,
-                'consultations' => $checkups, // compatibility
+                'consultations' => $checkups,
             ]);
 
         } catch (\Exception $e) {
@@ -46,7 +46,7 @@ class CheckupController extends Controller
     {
         try {
             $patients = DB::table('patients')->select('id', 'name', 'phone', 'branch_id')->get();
-            $doctors = DB::table('doctors')
+            $doctors  = DB::table('doctors')
                 ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
                 ->get();
 
@@ -68,50 +68,53 @@ class CheckupController extends Controller
     }
 
     /**
-     * 3️⃣ Store new checkup
+     * 3️⃣ Store new checkup (Fully Safe Version)
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'patient_id'     => 'required|exists:patients,id',
+            'doctor_id'      => 'required|exists:doctors,id',
+            'fee'            => 'required|numeric|min:0',
+            'paid_amount'    => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string',
+        ]);
+
         try {
             DB::beginTransaction();
 
-            $request->validate([
-                'patient_id' => 'required|exists:patients,id',
-                'doctor_id'  => 'required|exists:doctors,id',
-                'date'       => 'required|date',
-                'note'       => 'nullable|string',
-            ]);
-
             $patient = DB::table('patients')->where('id', $request->patient_id)->first();
             if (!$patient) {
-                return back()->with('error', 'Patient not found.');
+                return back()->with('error', '❌ Patient not found.');
             }
 
-            $checkupFee = $this->getFeeByBranch($patient->branch_id);
-
-            // Save Checkup
+            // Create Checkup
             $checkup = Checkup::create([
-                'patient_id' => $request->patient_id,
-                'doctor_id'  => $request->doctor_id,
-                'branch_id'  => $patient->branch_id,
-                'fee'        => $checkupFee,
+                'patient_id'     => $request->patient_id,
+                'doctor_id'      => $request->doctor_id,
+                'branch_id'      => $patient->branch_id,
+                'fee'            => $request->fee ?? 0,
+                'paid_amount'    => $request->paid_amount ?? 0,
+                'payment_method' => $request->payment_method ?? null,
+                'status'         => 'completed',
             ]);
 
-            // Save Transaction
+            // Insert Transaction (Safe auth check)
             DB::table('transactions')->insert([
                 'p_id'       => $request->patient_id,
                 'dr_id'      => $request->doctor_id,
-                'amount'     => $checkupFee,
+                'amount'     => $request->paid_amount ?? 0,
                 'type'       => '+',
                 'b_id'       => $patient->branch_id,
-                'entery_by'  => auth()->user()->id,
+                'entery_by'  => auth()->check() ? auth()->user()->id : null,
                 'Remx'       => 'Checkup Fee',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // Update Branch Balance
-            DB::table('branches')->where('id', $patient->branch_id)->increment('balance', $checkupFee);
+            // Increment Branch Balance
+            DB::table('branches')->where('id', $patient->branch_id)
+                ->increment('balance', $request->paid_amount ?? 0);
 
             DB::commit();
             return redirect()->route('checkups.index')->with('success', '✅ Checkup added successfully.');
@@ -127,23 +130,18 @@ class CheckupController extends Controller
      */
     public function edit($id)
     {
-        try {
-            $checkup  = Checkup::findOrFail($id);
-            $patients = DB::table('patients')->select('id', 'name')->get();
-            $doctors = DB::table('doctors')
-                ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
-                ->get();
+        $checkup  = Checkup::findOrFail($id);
+        $patients = DB::table('patients')->select('id', 'name')->get();
+        $doctors  = DB::table('doctors')
+            ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
+            ->get();
 
-            return view('consultations.edit', [
-                'checkup'       => $checkup,
-                'consultation'  => $checkup, // compatibility
-                'patients'      => $patients,
-                'doctors'       => $doctors,
-            ]);
-
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', '❌ Failed to load edit form: ' . $e->getMessage());
-        }
+        return view('consultations.edit', [
+            'checkup'       => $checkup,
+            'consultation'  => $checkup,
+            'patients'      => $patients,
+            'doctors'       => $doctors,
+        ]);
     }
 
     /**
@@ -151,30 +149,24 @@ class CheckupController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $request->validate([
-                'patient_id' => 'required|exists:patients,id',
-                'doctor_id'  => 'required|exists:doctors,id',
-                'date'       => 'required|date',
-                'fee'        => 'required|numeric|min:0',
-                'note'       => 'nullable|string',
-            ]);
+        $request->validate([
+            'patient_id'     => 'required|exists:patients,id',
+            'doctor_id'      => 'required|exists:doctors,id',
+            'fee'            => 'required|numeric|min:0',
+            'paid_amount'    => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string',
+        ]);
 
-            DB::table('checkups')->where('id', $id)->update([
-                'patient_id' => $request->patient_id,
-                'doctor_id'  => $request->doctor_id,
-                'date'       => $request->date,
-                'diagnosis'  => $request->diagnosis ?? null,
-                'fee'        => $request->fee,
-                'note'       => $request->note,
-                'updated_at' => now(),
-            ]);
+        DB::table('checkups')->where('id', $id)->update([
+            'patient_id'     => $request->patient_id,
+            'doctor_id'      => $request->doctor_id,
+            'fee'            => $request->fee,
+            'paid_amount'    => $request->paid_amount ?? 0,
+            'payment_method' => $request->payment_method ?? null,
+            'updated_at'     => now(),
+        ]);
 
-            return redirect()->route('checkups.index')->with('success', '✅ Checkup updated successfully.');
-
-        } catch (\Exception $e) {
-            return back()->with('error', '❌ Error updating checkup: ' . $e->getMessage());
-        }
+        return redirect()->route('checkups.index')->with('success', '✅ Checkup updated successfully.');
     }
 
     /**
@@ -182,12 +174,8 @@ class CheckupController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            DB::table('checkups')->where('id', $id)->delete();
-            return redirect()->route('checkups.index')->with('success', '🗑️ Checkup deleted successfully.');
-        } catch (\Exception $e) {
-            return back()->with('error', '❌ Error deleting checkup: ' . $e->getMessage());
-        }
+        DB::table('checkups')->where('id', $id)->delete();
+        return redirect()->route('checkups.index')->with('success', '🗑️ Checkup deleted successfully.');
     }
 
     /**
@@ -195,64 +183,37 @@ class CheckupController extends Controller
      */
     public function show($id)
     {
-        try {
-            $checkup = DB::table('checkups')
-                ->join('patients', 'checkups.patient_id', '=', 'patients.id')
-                ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
-                ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
-                ->select(
-                    'checkups.*',
-                    'patients.name as patient_name',
-                    'patients.phone as patient_phone',
-                    'patients.gender',
-                    DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
-                    'branches.name as branch_name'
-                )
-                ->where('checkups.id', $id)
-                ->first();
+        $checkup = DB::table('checkups')
+            ->join('patients', 'checkups.patient_id', '=', 'patients.id')
+            ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+            ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
+            ->select(
+                'checkups.*',
+                'patients.name as patient_name',
+                'patients.phone as patient_phone',
+                'patients.gender',
+                DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                'branches.name as branch_name'
+            )
+            ->where('checkups.id', $id)
+            ->first();
 
-            if (!$checkup) abort(404);
+        if (!$checkup) abort(404);
 
-            return view('consultations.show', [
-                'checkup'      => $checkup,
-                'consultation' => $checkup,
-            ]);
-
-        } catch (\Exception $e) {
-            return back()->with('error', '❌ Error loading checkup details: ' . $e->getMessage());
-        }
+        return view('consultations.show', [
+            'checkup'      => $checkup,
+            'consultation' => $checkup,
+        ]);
     }
 
     /**
-     * 8️⃣ Print slip
-     */
-    public function printSlip($id)
-    {
-        try {
-            $checkup = Checkup::with(['patient', 'doctor', 'branch'])->findOrFail($id);
-
-            return view('consultations.print', [
-                'checkup'      => $checkup,
-                'consultation' => $checkup,
-            ]);
-
-        } catch (\Exception $e) {
-            return back()->with('error', '❌ Error printing slip: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * 9️⃣ Ajax: Get fee by branch
+     * 8️⃣ Ajax: Get fee by branch
      */
     public function getCheckupFee($patientId)
     {
-        try {
-            $patient = DB::table('patients')->where('id', $patientId)->first();
-            $fee = $patient ? $this->getFeeByBranch($patient->branch_id) : 0;
-            return response()->json(['fee' => $fee]);
-        } catch (\Exception $e) {
-            return response()->json(['fee' => 0, 'error' => $e->getMessage()]);
-        }
+        $patient = DB::table('patients')->where('id', $patientId)->first();
+        $fee = $patient ? $this->getFeeByBranch($patient->branch_id) : 0;
+        return response()->json(['fee' => $fee]);
     }
 
     /**
@@ -260,31 +221,53 @@ class CheckupController extends Controller
      */
     public function history($patient_id)
     {
-        try {
-            $patient = DB::table('patients')->where('id', $patient_id)->first();
-            if (!$patient) abort(404, 'Patient not found.');
+        $patient = DB::table('patients')->where('id', $patient_id)->first();
+        if (!$patient) abort(404, 'Patient not found.');
 
-            $history = DB::table('checkups')
-                ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
-                ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
-                ->select(
-                    'checkups.*',
-                    DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
-                    'branches.name as branch_name'
-                )
-                ->where('checkups.patient_id', $patient_id)
-                ->orderBy('checkups.id', 'desc')
-                ->get();
+        $history = DB::table('checkups')
+            ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+            ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
+            ->select(
+                'checkups.*',
+                DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                'branches.name as branch_name'
+            )
+            ->where('checkups.patient_id', $patient_id)
+            ->orderBy('checkups.id', 'desc')
+            ->get();
 
-            return view('consultations.history', [
-                'history'       => $history,
-                'patient'       => $patient,
-                'consultations' => $history,
-            ]);
+        return view('consultations.history', [
+            'history'       => $history,
+            'patient'       => $patient,
+            'consultations' => $history,
+        ]);
+    }
 
-        } catch (\Exception $e) {
-            return back()->with('error', '❌ Error fetching patient history: ' . $e->getMessage());
-        }
+    /**
+     * 11️⃣ Print Checkup Slip
+     */
+    public function printSlip($id)
+    {
+        $checkup = DB::table('checkups')
+            ->join('patients', 'checkups.patient_id', '=', 'patients.id')
+            ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+            ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
+            ->select(
+                'checkups.*',
+                'patients.name as patient_name',
+                'patients.phone as patient_phone',
+                'patients.gender',
+                DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                'branches.name as branch_name'
+            )
+            ->where('checkups.id', $id)
+            ->first();
+
+        if (!$checkup) abort(404, 'Checkup not found.');
+
+        return view('consultations.print', [
+            'checkup' => $checkup,
+        ]);
     }
 
     /**
@@ -296,4 +279,3 @@ class CheckupController extends Controller
         return $setting ? $setting->default_checkup_fee : 0;
     }
 }
-
