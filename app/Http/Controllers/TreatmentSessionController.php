@@ -47,8 +47,6 @@ class TreatmentSessionController extends Controller
             $request->validate([
                 'checkup_id'      => 'required|exists:checkups,id',
                 'doctor_id'       => 'required|exists:doctors,id',
-                'session_fee'     => 'required|numeric|min:0',
-                'paid_amount'     => 'required|numeric|min:0',
                 'diagnosis'       => 'nullable|string|max:255',
                 'note'            => 'nullable|string',
                 'sessions'        => 'nullable|array',
@@ -59,21 +57,19 @@ class TreatmentSessionController extends Controller
             $checkup = Checkup::findOrFail($request->checkup_id);
 
             $sessionCount = $request->has('sessions') ? count($request->sessions) : 1;
-            $totalFee     = $request->session_fee * $sessionCount;
-            $paidAmount   = (float) $request->paid_amount;
-            $duesAmount   = $totalFee - $paidAmount;
+            // $totalFee     = $request->session_fee * $sessionCount;
+            // $paidAmount   = (float) $request->paid_amount;
+            // $duesAmount   = $totalFee - $paidAmount;
 
             $session = TreatmentSession::create([
                 'patient_id'    => $checkup->patient_id,
                 'branch_id'     => $checkup->doctor->branch_id ?? 1,
                 'checkup_id'    => $request->checkup_id,
                 'doctor_id'     => $request->doctor_id,
-                'session_fee'   => $request->session_fee,
-                'session_count' => $sessionCount,
-                'paid_amount'   => $paidAmount,
-                'dues_amount'   => $duesAmount,
+                'ss_dr_id'      => $request->ss_dr,
                 'diagnosis'     => $request->diagnosis,
                 'note'          => $request->note,
+                'con_status'    => 0,
                 'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
             ]);
 
@@ -81,39 +77,39 @@ class TreatmentSessionController extends Controller
             Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
 
             // Add session times
-            if ($request->has('sessions')) {
-                foreach ($request->sessions as $time) {
-                    if (!empty($time['date']) && !empty($time['time'])) {
-                        SessionTime::create([
-                            'treatment_session_id' => $session->id,
-                            'session_datetime'     => $time['date'].' '.$time['time'],
-                        ]);
-                    }
-                }
-            }
+            // if ($request->has('sessions')) {
+            //     foreach ($request->sessions as $time) {
+            //         if (!empty($time['date']) && !empty($time['time'])) {
+            //             SessionTime::create([
+            //                 'treatment_session_id' => $session->id,
+            //                 'session_datetime'     => $time['date'].' '.$time['time'],
+            //             ]);
+            //         }
+            //     }
+            // }
 
             // Add installment
-            if ($paidAmount > 0) {
-                SessionInstallment::create([
-                    'session_id'     => $session->id,
-                    'amount'         => $paidAmount,
-                    'payment_date'   => now(),
-                    'payment_method' => 'cash',
-                ]);
-            }
+            // if ($paidAmount > 0) {
+            //     SessionInstallment::create([
+            //         'session_id'     => $session->id,
+            //         'amount'         => $paidAmount,
+            //         'payment_date'   => now(),
+            //         'payment_method' => 'cash',
+            //     ]);
+            // }
 
             // Add transaction
-            DB::table('transactions')->insert([
-                'p_id'      => $checkup->patient_id,
-                'dr_id'     => $request->doctor_id,
-                'amount'    => $paidAmount,
-                'type'      => '+',
-                'b_id'      => $checkup->doctor->branch_id ?? 1,
-                'entery_by' => auth()->user()->id,
-                'Remx'      => 'Treatment Session Payment',
-                'created_at'=> now(),
-                'updated_at'=> now(),
-            ]);
+            // DB::table('transactions')->insert([
+            //     'p_id'      => $checkup->patient_id,
+            //     'dr_id'     => $request->doctor_id,
+            //     'amount'    => $paidAmount,
+            //     'type'      => '+',
+            //     'b_id'      => $checkup->doctor->branch_id ?? 1,
+            //     'entery_by' => auth()->user()->id,
+            //     'Remx'      => 'Treatment Session Payment',
+            //     'created_at'=> now(),
+            //     'updated_at'=> now(),
+            // ]);
 
             return redirect()->route('treatment-sessions.index')
                 ->with('success', '✅ Treatment session created successfully.');
