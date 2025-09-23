@@ -23,7 +23,7 @@
             <a href="{{ url('admin/dashboard') }}">
               <div class="parent-icon"><i class="material-icons-outlined">home</i>
               </div>
-              <div class="menu-title">Doctor Dashboard</div>
+              <div class="menu-title">Dashboard</div>
             </a>
           </li>
 
@@ -213,7 +213,7 @@
             </li>
 
           @endrole
-
+{{-- ==================Docter Menu==================== --}}
           @auth('doctor')
           <li>
             <a href="{{ url('doctor/dashboard') }}">

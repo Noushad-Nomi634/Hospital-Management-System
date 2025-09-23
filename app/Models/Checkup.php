@@ -15,9 +15,9 @@ class Checkup extends Model
         'doctor_id',
         'branch_id',
         'fee',
-        'paid_amount',     
-        'payment_method',   
-        'checkup_status',   
+        'paid_amount',
+        'payment_method',
+        'checkup_status',
     ];
 
     // Relations
