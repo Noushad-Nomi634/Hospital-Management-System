@@ -136,3 +136,30 @@
     </div>
 </div>
 @endsection
+
+@push('script')
+    <!-- Plugins -->
+    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/select2/js/select2.min.js') }}"></script>
+
+    <!-- Initialize Select2 Dropdowns -->
+    <script>
+        $(document).ready(function() {
+            $('#status').select2({
+                placeholder: "Select Status",
+                allowClear: true,
+                dropdownParent: $('#status').parent()
+            });
+            $('#branch_id').select2({
+                placeholder: "Select Branch",
+                allowClear: true,
+                dropdownParent: $('#branch_id').parent()
+            });
+        });
+    </script>
+
+    <!-- Main JS -->
+    <script src="{{ URL::asset('build/js/main.js') }}"></script>
+@endpush

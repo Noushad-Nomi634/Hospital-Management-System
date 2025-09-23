@@ -5,6 +5,7 @@
 @endsection
 
 @push('css')
+    {{-- Select2 CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
 @endpush
@@ -88,10 +89,19 @@
 @endsection
 
 @push('script')
+    {{-- jQuery + Select2 --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    {{-- Layout Plugins --}}
+    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+    <script src="{{ URL::asset('build/js/main.js') }}"></script>
+
     <script>
         $(document).ready(function() {
+            // Select2 init
             $('#patient_id, #doctor_id, #payment_method').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
@@ -99,7 +109,7 @@
                 allowClear: true
             });
 
-            // Automatically fetch fee when patient is selected
+            // Auto fetch fee from patient
             $('#patient_id').on('change', function() {
                 var patientId = $(this).val();
                 if (patientId) {

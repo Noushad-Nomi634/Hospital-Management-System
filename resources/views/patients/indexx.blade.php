@@ -41,7 +41,6 @@
                                     <th>Gender</th>
                                     <th>Age</th>
                                     <th>Branch</th>
-
                                     <th style="width:200px;">Actions</th>
                                 </tr>
                             </thead>
@@ -78,7 +77,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center">No patients found.</td>
+                                        <td colspan="9" class="text-center">No patients found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -108,6 +107,7 @@
 
     <script>
         $(document).ready(function() {
+            // DataTable init
             $('#patientsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -115,10 +115,29 @@
                 lengthMenu: [5, 10, 25, 50, 100],
                 ordering: true,
                 columnDefs: [
-                    { orderable: false, targets: 6 } // Actions column
+                    { orderable: false, targets: 8 } // Disable sorting on Actions column
                 ],
+            });
+
+            // Initialize plugins
+            // Perfect Scrollbar
+            const container = document.querySelector('.table-responsive');
+            if(container){
+                new PerfectScrollbar(container);
+            }
+
+            // MetisMenu (for side menu if present)
+            if($("#menu").length){
+                $("#menu").metisMenu();
+            }
+
+            // Input Tags
+            $('input[data-role=tagsinput]').tagsinput();
+
+            // SimpleBar
+            $('[data-simplebar]').each(function(){
+                new SimpleBar(this);
             });
         });
     </script>
 @endpush
-

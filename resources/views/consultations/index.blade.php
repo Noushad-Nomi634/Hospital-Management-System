@@ -112,6 +112,13 @@
 <script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+<!-- Layout Plugins -->
+<script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+<script src="{{ URL::asset('build/js/main.js') }}"></script>
+
 <script>
 $(document).ready(function() {
     $('#consultations-table').DataTable({

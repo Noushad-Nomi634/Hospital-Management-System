@@ -5,6 +5,7 @@
 @endsection
 
 @push('css')
+    {{-- FontAwesome for icons --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -171,8 +172,6 @@
                 </div>
             </div>
 
-
-
             <div class="card-content">
                 <!-- Left -->
                 <div class="left-section">
@@ -213,3 +212,10 @@
         </button>
     </div>
 @endsection
+
+@push('script')
+    <!-- Same Plugins as Dashboard -->
+    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+    <script src="{{ URL::asset('build/js/main.js') }}"></script>
+@endpush
