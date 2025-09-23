@@ -64,14 +64,14 @@
                                                     <span class="visually-hidden">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
-                                                    <a href="{{ url('/patients/'.$patient->id) }}" class="btn btn-sm btn-info mb-1 w-100">View</a>
+                                                    <a href="{{ url('/patients/'.$patient->id) }}" class="btn btn-sm btn-info mb-1 w-100">Print Card</a>
                                                     <a href="{{ url('/patients/'.$patient->id.'/edit') }}" class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
                                                     <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this patient?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger mb-1 w-100">Delete</button>
                                                     </form>
-                                                    <a href="{{ url('/checkups/create?patient_id='.$patient->id) }}" class="btn btn-sm btn-primary mb-1 w-100">Checkups</a>
+                                                    <a href="{{ url('/checkups/create?patient_id='.$patient->id) }}" class="btn btn-sm btn-primary mb-1 w-100">Make Appointment</a>
                                                 </div>
                                             </div>
                                         </td>

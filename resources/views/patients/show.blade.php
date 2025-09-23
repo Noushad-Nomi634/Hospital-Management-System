@@ -153,16 +153,32 @@
 
     <div class="card-container">
         <div class="patient-card">
-            <div class="card-header">
-                HOSPITAL ID CARD
+            <div class="card-header d-flex align-items-center">
+                <!-- Logo in circle -->
+                <div style="width:45px; height:45px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-right:12px;">
+                    <img src="{{ URL::asset('build/images/bodylogo.png') }}" alt="Logo" style="width:40px; height:40px; object-fit:contain;">
+                </div>
+
+                <!-- Hospital Name & Subtitle -->
+                <div style="text-align:left; color:#fff;">
+                    <div style="font-size:16px; font-weight:700; line-height:1.2;">
+                        BODY EXPERTS
+                    </div>
+                    <div style="font-size:11px; font-weight:500; line-height:1.2;">
+                        Ortho-Neuro-Sports Physiotherapy,<br>
+                        Rehabilitation Center & Institute of Autism
+                    </div>
+                </div>
             </div>
+
+
 
             <div class="card-content">
                 <!-- Left -->
                 <div class="left-section">
                     <!-- QR Code -->
                     <div class="qr-code">
-                        {!! QrCode::size(80)->generate($patient->mr ?? '') !!}
+                        {!! QrCode::size(80)->generate($patient->mr ?? 'N/A') !!}
                     </div>
                     <span class="patient-id">MR:{{ $patient->mr ?? 'N/A' }}</span>
                 </div>
@@ -174,8 +190,8 @@
                     <p class="card-detail"><i class="fas fa-calendar-alt text-primary"></i>
                         {{ $patient->created_at->format('d M Y') ?? 'N/A' }}
                     </p>
-                    <p class="card-detail"><i class="fas fa-hospital text-primary"></i>
-                        {{ $patient->branch->name ?? 'N/A' }}
+                    <p class="card-detail"><i class="fas fa-map-marker-alt text-primary"></i>
+                        {{ $patient->branch->address ?? 'N/A' }}
                     </p>
                 </div>
             </div>
@@ -185,7 +201,7 @@
                     <i class="fas fa-phone-alt footer-icon"></i> {{ $patient->branch->phone ?? 'N/A' }}
                 </div>
                 <div class="footer-item branch-info">
-                    <i class="fas fa-map-marker-alt footer-icon"></i> {{ $patient->branch->address ?? 'N/A' }}
+                    <i class="fas fa-hospital  footer-icon"></i> {{ $patient->branch->name ?? 'N/A' }}
                 </div>
             </div>
         </div>
