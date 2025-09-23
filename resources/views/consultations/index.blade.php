@@ -39,21 +39,21 @@
                                 <th>Date</th>
                                 <th>Doctor</th>
                                 <th>Fee</th>
-                                <th>Paid Amount</th>          <!-- New column -->
-                                <th>Payment Method</th>       <!-- New column -->
+                                <th>Paid Amount</th>
+                                <th>Payment Method</th>
                                 <th>Checkup Status</th>
                                 <th style="width:220px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($consultations as $consultation)
-                                <tr>
+                                <tr id="row-{{ $consultation->id }}">
                                     <td>{{ $consultation->patient_name ?? 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($consultation->created_at)->format('d-m-Y') }}</td>
                                     <td>{{ $consultation->doctor_name }}</td>
                                     <td>Rs. {{ $consultation->fee }}</td>
-                                    <td>Rs. {{ $consultation->paid_amount ?? 0 }}</td>      <!-- New column data -->
-                                    <td>{{ $consultation->payment_method ?? 'N/A' }}</td>   <!-- New column data -->
+                                    <td>Rs. {{ $consultation->paid_amount ?? 0 }}</td>
+                                    <td>{{ $consultation->payment_method ?? 'N/A' }}</td>
                                     <td>
                                         @php $status = (int)($consultation->checkup_status ?? 0); @endphp
                                         @if($status === 0)
@@ -86,17 +86,13 @@
                                                 <a href="{{ route('consultations.print', $consultation->id) }}" class="btn btn-secondary btn-sm mb-1 w-100">
                                                     <i class="fas fa-print"></i> Print
                                                 </a>
-                                                <!-- ✅ Pass checkup_id instead of consultation_id -->
                                                 <a href="{{ route('treatment-sessions.create', ['checkup_id' => $consultation->id]) }}" class="btn btn-success btn-sm mb-1 w-100">
                                                     <i class="fas fa-layer-group"></i> Sessions
                                                 </a>
-                                                <form method="POST" action="{{ url('/consultations/' . $consultation->id) }}" onsubmit="return confirm('Are you sure?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm w-100" type="submit">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </button>
-                                                </form>
+                                                <!-- AJAX Delete -->
+                                                <button class="btn btn-danger btn-sm w-100 btn-delete" data-id="{{ $consultation->id }}">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
                                             </div>
                                         </div>
                                     </td>
@@ -115,6 +111,7 @@
 @push('script')
 <script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#consultations-table').DataTable({
@@ -127,7 +124,26 @@ $(document).ready(function() {
             { orderable: false, targets: 7 } // Actions column
         ],
     });
+
+    // AJAX Delete
+    $('.btn-delete').click(function(e){
+        e.preventDefault();
+        var id = $(this).data('id');
+        if(!confirm('Are you sure you want to delete this consultation?')) return;
+
+        $.ajax({
+            url: '/consultations/' + id,
+            type: 'POST',
+            data: {_token: '{{ csrf_token() }}', _method: 'DELETE'},
+            success: function(response){
+                $('#row-' + id).fadeOut();
+                alert('Consultation deleted successfully.');
+            },
+            error: function(xhr){
+                alert('Failed to delete consultation.');
+            }
+        });
+    });
 });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 @endpush
