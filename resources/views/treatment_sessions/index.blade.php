@@ -30,57 +30,40 @@
                     <table id="sessions-table" class="table table-bordered table-hover mb-0">
                         <thead class="table-dark">
                             <tr>
-                                <th>Session ID</th>
-                                <th>Checkup ID</th>
+                                <th>Sr No</th>
+                                <th>Invoice</th>
                                 <th>Patient</th>
                                 <th>Doctor</th>
                                 <th>Diagnosis</th>
                                 <th>Note</th>
-                                <th>Fee</th>
-                                <th>Payment Details</th>
-                                <th>Sessions</th>
+                                <th>Sanction Doctor</th>
+                                <th>Sanction Status</th>
                                 <th style="width:220px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $count = 0;
+                            @endphp
                             @foreach($sessions as $session)
                                 @php
+                                    $count++;
                                     $total = $session->sessionTimes->count();
                                     $completed = $session->sessionTimes->where('is_completed', true)->count();
                                     $remaining = $total - $completed;
                                 @endphp
                                 <tr>
-                                    <td>{{ $session->id }}</td>
+                                    <td>{{ $count }}</td>
                                     <td>{{ $session->checkup_id }}</td>
                                     <td>{{ $session->patient?->name ?? 'N/A' }}</td>
                                     <td>{{ $session->checkup?->doctor ? $session->checkup->doctor->first_name.' '.$session->checkup->doctor->last_name : 'N/A' }}</td>
                                     <td>{{ $session->diagnosis ?? '-' }}</td>
                                     <td>{{ $session->note ?? '-' }}</td>
-                                    <td>Rs. {{ number_format($session->session_fee, 0) }}</td>
-
-                                    {{-- Payment Details --}}
-                                    <td>
-                                        <strong>Total Fee:</strong> Rs. {{ number_format($session->session_fee, 0) }}<br>
-                                        <strong>Total Paid:</strong> Rs. {{ number_format($session->installments->sum('amount'), 0) }}<br>
-                                        <strong>Dues:</strong> 
-                                        <span class="{{ ($session->session_fee - $session->installments->sum('amount')) > 0 ? 'text-danger' : 'text-success' }}">
-                                            Rs. {{ number_format($session->session_fee - $session->installments->sum('amount'), 0) }}
-                                        </span>
-                                        <br>
-                                        <button class="btn btn-sm btn-success mt-2" data-bs-toggle="modal" data-bs-target="#installmentModal{{ $session->id }}">
-                                            + Add Installment
-                                        </button>
-                                    </td>
+                                    <td>{{ doctor_get_name($session->ss_dr_id)}}</td>
 
                                     {{-- Sessions Info --}}
                                     <td>
-                                        <small>Total: {{ $total }}</small><br>
-                                        <small class="text-success">Completed: {{ $completed }}</small><br>
-                                        <small class="text-warning">Remaining: {{ $remaining }}</small>
-                                        <br>
-                                        <button class="btn btn-info btn-sm mt-1" data-bs-toggle="modal" data-bs-target="#sessionModal{{ $session->id }}">
-                                            View
-                                        </button>
+
                                     </td>
 
                                     {{-- Actions Dropdown --}}

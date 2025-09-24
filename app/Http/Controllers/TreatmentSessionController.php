@@ -47,6 +47,7 @@ class TreatmentSessionController extends Controller
             $request->validate([
                 'checkup_id'      => 'required|exists:checkups,id',
                 'doctor_id'       => 'required|exists:doctors,id',
+                'ss_dr'           => 'required|exists:doctors,id',
                 'diagnosis'       => 'nullable|string|max:255',
                 'note'            => 'nullable|string',
                 'sessions'        => 'nullable|array',
@@ -54,9 +55,11 @@ class TreatmentSessionController extends Controller
                 'sessions.*.time' => 'nullable|date_format:H:i',
             ]);
 
+
+
             $checkup = Checkup::findOrFail($request->checkup_id);
 
-            $sessionCount = $request->has('sessions') ? count($request->sessions) : 1;
+            //$sessionCount = $request->has('sessions') ? count($request->sessions) : 1;
             // $totalFee     = $request->session_fee * $sessionCount;
             // $paidAmount   = (float) $request->paid_amount;
             // $duesAmount   = $totalFee - $paidAmount;
@@ -70,8 +73,9 @@ class TreatmentSessionController extends Controller
                 'diagnosis'     => $request->diagnosis,
                 'note'          => $request->note,
                 'con_status'    => 0,
-                'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
+                // 'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
             ]);
+
 
             // Mark checkup completed
             Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
