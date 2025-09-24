@@ -9,6 +9,8 @@ use App\Models\TreatmentSession;
 use App\Models\SessionInstallment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Patient;
+
 
 class TreatmentSessionController extends Controller
 {
@@ -138,6 +140,89 @@ class TreatmentSessionController extends Controller
             return redirect()->back()->with('error', '❌ Failed to load edit form: ' . $e->getMessage());
         }
     }
+
+
+
+
+
+    //Enrollment update
+    public function enrollmentUpdate(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction(); 
+            $request->validate([
+                'session_fee'     => 'required|numeric|min:0',
+                'paid_amount'     => 'required|numeric|min:0',
+                'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
+
+            ]);
+
+         
+
+            //treatment session
+            $session = TreatmentSession::findOrFail($id);
+            TreatmentSession::where('id', $id)->update([
+                'session_fee'   => $request->session_fee,
+                'session_count' => $request->session_count,
+                'paid_amount'   => $request->paid_amount,
+                'dues_amount'   => $request->dues_amount,
+                'session_date'  => $request->session_date,
+            ]);
+           
+            //Add session times
+            if ($request->has('sessions')) {
+                foreach ($request->sessions as $time) {
+                    if (!empty($time['date']) && !empty($time['time'])) {
+                        SessionTime::create([
+                            'treatment_session_id' => $session->id,
+                            'session_datetime'     => $time['date'].' '.$time['time'],
+                        ]);
+                    }
+                }
+            }
+            // Add installment
+                SessionInstallment::create([
+                    'session_id'     => $session->id,
+                    'amount'         => $request->paid_amount,
+                    'payment_date'   => now(),
+                    'payment_method' => 'cash',
+                ]);
+            // Add transaction
+            DB::table('transactions')->insert([
+                'p_id'      => $session->patient_id,
+                'dr_id'     => $session->doctor_id,
+                'amount'    => $request->paid_amount,
+                'payment_type'=>'sessions',
+                'payment_method'=>'cash',
+                'invoice_id' =>$session->id,
+                'type'      => '+',
+                'b_id'      => $session->branch_id,
+                'entery_by' => auth()->user()->id,
+                'Remx'      => 'Treatment Session Payment',
+                'created_at'=> now(),
+                'updated_at'=> now(),
+            ]);
+
+            
+            
+
+            DB::commit();
+            return redirect()->route('treatment-sessions.index')
+                ->with('success', '✅ Enrollment status updated successfully.');
+        } catch (\Exception $e) {
+            DB::Rollback();
+            return redirect()->back()->with('error', '❌ Failed to update enrollment status: ' . $e->getMessage());
+        }
+    }
+
+
+
+
+
+
+
+
+
 
     public function update(Request $request, $id)
     {
@@ -285,5 +370,27 @@ class TreatmentSessionController extends Controller
         ]);
 
         return redirect()->back()->with('success', '✅ Session entry added successfully.');
+        
+    }
+    // 🔹 Show ongoing sessions for a patient
+public function showOngoingSessions($session_id)
+{
+    try {
+        // 🔹 Fetch ongoing sessions
+        $ongoingSessions = TreatmentSession::where('id', $session_id)->first();
+
+        $Checkup = Checkup::where('id', $ongoingSessions->checkup_id)->update(['checkup_status' => 1]);
+        // 🔹 Get patient info for form heading
+        $patient = Patient::find($ongoingSessions->patient_id);
+
+        return view('treatment_sessions.sessions', compact('ongoingSessions', 'patient', 'Checkup'));
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', '❌ Failed to load ongoing sessions: ' . $e->getMessage());
     }
 }
+
+}
+
+
+
+

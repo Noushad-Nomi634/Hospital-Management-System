@@ -94,6 +94,11 @@
                     <div class="menu-title">Dr Consultations</div>
                 </a>
                 <ul>
+                     <li>
+                    <a href="{{ url('/treatment-sessions') }}">
+                        <i class="material-icons-outlined">fact_check</i> Enrollments
+                    </a>
+                    </li>
                     <li>
                     <a href="{{ url('/treatment-sessions') }}">
                         <i class="material-icons-outlined">fact_check</i> Patient Checkup

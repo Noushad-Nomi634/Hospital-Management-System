@@ -227,5 +227,11 @@ Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, '
     ->middleware('auth');
 
 
+ Route::get('/treatment-sessions/sessions/{session_id}', [TreatmentSessionController::class, 'showOngoingSessions'])
+    ->name('treatment-sessions.sessions');
+// Enrollment Update Route
+Route::put('/treatment-sessions/{id}/enrollment-update', [TreatmentSessionController::class, 'enrollmentUpdate'])
+    ->name('treatment-sessions.enrollmentUpdate');
+    
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');
