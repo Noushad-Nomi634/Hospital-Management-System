@@ -15,10 +15,11 @@ use App\Models\Patient;
 class TreatmentSessionController extends Controller
 {
     //Doctor Consultation Index
-    public function index()
+    public function index($status)
     {
         try {
             $sessions = TreatmentSession::with(['doctor', 'patient', 'sessionTimes', 'installments', 'checkup'])
+                ->where('con_status', $status)
                 ->orderByDesc('created_at')
                 ->get();
 
@@ -63,12 +64,7 @@ class TreatmentSessionController extends Controller
 
 
             $checkup = Checkup::findOrFail($request->checkup_id);
-
-            //$sessionCount = $request->has('sessions') ? count($request->sessions) : 1;
-            // $totalFee     = $request->session_fee * $sessionCount;
-            // $paidAmount   = (float) $request->paid_amount;
-            // $duesAmount   = $totalFee - $paidAmount;
-
+            // Create treatment session
             $session = TreatmentSession::create([
                 'patient_id'    => $checkup->patient_id,
                 'branch_id'     => $checkup->doctor->branch_id ?? 1,
@@ -78,51 +74,16 @@ class TreatmentSessionController extends Controller
                 'diagnosis'     => $request->diagnosis,
                 'note'          => $request->note,
                 'con_status'    => 0,
-                // 'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
+                'session_fee'   => 0,
+
             ]);
-
-
             // Mark checkup completed
             Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
 
-            // Add session times
-            // if ($request->has('sessions')) {
-            //     foreach ($request->sessions as $time) {
-            //         if (!empty($time['date']) && !empty($time['time'])) {
-            //             SessionTime::create([
-            //                 'treatment_session_id' => $session->id,
-            //                 'session_datetime'     => $time['date'].' '.$time['time'],
-            //             ]);
-            //         }
-            //     }
-            // }
 
-            // Add installment
-            // if ($paidAmount > 0) {
-            //     SessionInstallment::create([
-            //         'session_id'     => $session->id,
-            //         'amount'         => $paidAmount,
-            //         'payment_date'   => now(),
-            //         'payment_method' => 'cash',
-            //     ]);
-            // }
-
-            // Add transaction
-            // DB::table('transactions')->insert([
-            //     'p_id'      => $checkup->patient_id,
-            //     'dr_id'     => $request->doctor_id,
-            //     'amount'    => $paidAmount,
-            //     'type'      => '+',
-            //     'b_id'      => $checkup->doctor->branch_id ?? 1,
-            //     'entery_by' => auth()->user()->id,
-            //     'Remx'      => 'Treatment Session Payment',
-            //     'created_at'=> now(),
-            //     'updated_at'=> now(),
-            // ]);
-
-            return redirect()->route('treatment-sessions.index')
-                ->with('success', '✅ Treatment session created successfully.');
+            return redirect()->route('doctor-consultations.index')->with('success', '✅ Treatment session created successfully.');
         } catch (\Exception $e) {
+
             return redirect()->back()->with('error', '❌ Failed to create session: ' . $e->getMessage());
         }
     }
@@ -210,7 +171,7 @@ class TreatmentSessionController extends Controller
 
 
             DB::commit();
-            return redirect()->route('admin.enrollments', ['status' => 1])
+            return redirect()->route('enrollments', ['status' => 1])
                 ->with('success', '✅ Enrollment status updated successfully.');
         } catch (\Exception $e) {
             DB::Rollback();
@@ -421,10 +382,46 @@ public function show()
                 return redirect()->back()->with('error', '❌ Failed to load enrollments: ' . $e->getMessage());
             }
         }
+
+    // Update Satisfactory session status
+    public function updateStatus(Request $request)
+    {
+        try {
+            $request->validate([
+                'con_status' => 'required|in:0,1',
+                'diagnosis'  => 'nullable|string|max:255',
+                'note'       => 'nullable|string',
+                'session_id' => 'required|exists:treatment_sessions,id',
+            ]);
+
+            $session = TreatmentSession::findOrFail($request->session_id);
+            $session->con_status = $request->con_status;
+            $session->diagnosis = $request->diagnosis;
+            $session->note = $request->note;
+            $session->save();
+
+            return redirect()->route('doctor-consultations.index')->with('success', '✅ Consultation status updated successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Failed to update consultation status: ' . $e->getMessage());
+        }
+    }
+
+    // View Satisfactory session status
+    public function viewssStatus($id)
+    {
+        try {
+            $session = TreatmentSession::where('con_status', 0)
+                ->where('id', $id)
+                ->orderByDesc('created_at')
+                ->first();
+
+
+            return view('treatment_sessions.ss_update', compact('session'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Failed to load consultation status: ' . $e->getMessage());
+        }
+    }
 }
-
-
-
 
 
 

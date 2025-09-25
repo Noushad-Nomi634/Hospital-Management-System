@@ -95,13 +95,13 @@
                 </a>
                 <ul>
                     <li>
-                    <a href="{{ url('admin/doctor-consultations') }}">
+                    <a href="{{ url('doctor-consultations/0') }}">
                         <i class="material-icons-outlined">medical_information</i> Dr Checkup
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/sessions') }}">
-                        <i class="material-icons-outlined">history</i> Session Follow-up
+                    <a href="{{ url('/doctor-consultations/1') }}">
+                        <i class="material-icons-outlined">history</i> Completed Consultations
                     </a>
                     </li>
                 </ul>
@@ -117,12 +117,12 @@
                 </a>
                 <ul>
                      <li>
-                    <a href="{{ url('/admin/enrollments/0') }}">
+                    <a href="{{ url('/enrollments/0') }}">
                         <i class="material-icons-outlined">fact_check</i> Pending Enrollments
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/admin/enrollments/1') }}">
+                    <a href="{{ url('/enrollments/1') }}">
                         <i class="material-icons-outlined">fact_check</i> Completed Enrollments
                     </a>
                     </li>

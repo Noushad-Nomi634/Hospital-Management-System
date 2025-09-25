@@ -267,15 +267,15 @@
                         <div class="col-md-6">
                             <div class="info-row">
                                 <span class="info-label">Name:</span>
-                                <span>{{ $checkup->patient->name ?? 'N/A' }}</span>
+                                <span>{{ $checkup->patient_name ?? 'N/A' }}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Date:</span>
-                                <span>{{ $checkup->patient->created_at ?? 'N/A' }}</span>
+                                <span>{{ format_date($checkup->created_at ?? 'N/A') }}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">MR#:</span>
-                                <span>{{ $checkup->patient->mr ?? 'N/A' }}</span>
+                                <span>{{ $checkup->patient_mr ?? 'N/A' }}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Invoice#:</span>
@@ -285,19 +285,19 @@
                         <div class="col-md-6">
                             <div class="info-row">
                                 <span class="info-label">Phone:</span>
-                                <span>{{ $checkup->patient->phone ?? 'N/A' }}</span>
+                                <span>{{ $checkup->patient_phone ?? 'N/A' }}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Age/Gender:</span>
-                                <span>{{ $checkup->patient->age ?? 'N/A' }}/ {{ $checkup->patient->gender ?? 'N/A' }}</span>
+                                <span>{{ $checkup->patient_age ?? 'N/A' }}y / {{ $checkup->gender ?? 'N/A' }}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Payment Mode:</span>
-                                <span>{{ $checkup->id ?? 'N/A' }}</span>
+                                <span>{{ bank_get_name($checkup->payment_method) ?? 'N/A' }}</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Printed By:</span>
-                                <span>Dr of body</span>
+                                <span>{{ auth()->user()->name ?? 'N/A' }}</span>
                             </div>
                         </div>
                     </div>
@@ -314,7 +314,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Dr {{ $checkup->doctor->name ?? 'N/A' }} Consultation Charges</td>
+                                <td>Dr {{ $checkup->doctor_name ?? 'N/A' }} Consultation Charges</td>
                                 <td class="text-center">{{ number_format($checkup->fee ?? 'N/A' )}}</td>
                             </tr>
 
@@ -347,7 +347,7 @@
                                     <strong>Discount:</strong>
                                 </div>
                                 <div class="col-6 text-end">
-                                    Rs. 0.00
+                                   {{ number_format( $checkup->fee -$checkup->paid_amount ?? 'N/A' )}}
                                 </div>
                             </div>
                             <div class="row pt-2 border-top">
@@ -355,7 +355,7 @@
                                     <h5 class="mb-0"><strong>Total:</strong></h5>
                                 </div>
                                 <div class="col-6 text-end">
-                                    <h5 class="mb-0">Rs. {{ number_format($checkup->fee ?? 'N/A' )}}</h5>
+                                    <h5 class="mb-0">Rs. {{ number_format($checkup->paid_amount ?? 'N/A' )}}</h5>
                                 </div>
                             </div>
                         </div>
@@ -371,38 +371,16 @@
             <!-- Footer with Branches -->
             <div class="card-footer footer-section">
                 <div class="branches-section">
-                    <div class="branch-card">
-                        <div class="branch-title">Main Branch</div>
-                        <div class="branch-info">
-                            <div><i class="bi bi-geo-alt"></i> Lahore</div>
-                            <div><i class="bi bi-house"></i> 123 Health Street, Medical Town</div>
-                            <div><i class="bi bi-telephone"></i> 042-1234567</div>
+                    @foreach($branches as $branch)
+                        <div class="branch-card">
+                            <div class="branch-title">{{ $branch->name }}</div>
+                            <div class="branch-info">
+                                <div><i class="bi bi-geo-alt"></i> {{ $branch->city }}</div>
+                                <div><i class="bi bi-house"></i> {{ $branch->address }}</div>
+                                <div><i class="bi bi-telephone"></i> {{ $branch->phone }}</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="branch-card">
-                        <div class="branch-title">Gulberg Branch</div>
-                        <div class="branch-info">
-                            <div><i class="bi bi-geo-alt"></i> Lahore</div>
-                            <div><i class="bi bi-house"></i> 45 Main Boulevard, Gulberg</div>
-                            <div><i class="bi bi-telephone"></i> 042-7654321</div>
-                        </div>
-                    </div>
-                    <div class="branch-card">
-                        <div class="branch-title">DHA Branch</div>
-                        <div class="branch-info">
-                            <div><i class="bi bi-geo-alt"></i> Lahore</div>
-                            <div><i class="bi bi-house"></i> Phase 5, DHA Commercial Area</div>
-                            <div><i class="bi bi-telephone"></i> 042-5551234</div>
-                        </div>
-                    </div>
-                    <div class="branch-card">
-                        <div class="branch-title">Model Town Branch</div>
-                        <div class="branch-info">
-                            <div><i class="bi bi-geo-alt"></i> Lahore</div>
-                            <div><i class="bi bi-house"></i> H-Block, Model Town</div>
-                            <div><i class="bi bi-telephone"></i> 042-9876543</div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
 
                 <div class="text-center mt-2">

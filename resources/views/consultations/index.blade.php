@@ -52,9 +52,9 @@
                                         <td>{{ $consultation->patient_name ?? 'N/A' }}</td>
                                         <td>{{ \Carbon\Carbon::parse($consultation->created_at)->format('d-m-Y') }}</td>
                                         <td>{{ $consultation->doctor_name }}</td>
-                                        <td>Rs. {{ $consultation->fee }}</td>
-                                        <td>Rs. {{ $consultation->paid_amount ?? 0 }}</td>
-                                        <td>{{ $consultation->payment_method ?? 'N/A' }}</td>
+                                        <td>Rs. {{ number_format($consultation->fee) }}</td>
+                                        <td>Rs. {{ number_format($consultation->paid_amount) }}</td>
+                                        <td>{{ bank_get_name($consultation->payment_method) ?? 'N/A' }}</td>
                                         <td>
                                             @php $status = (int)($consultation->checkup_status ?? 0); @endphp
                                             @if ($status === 0)

@@ -43,11 +43,10 @@ Route::get('/clear', function() {
 Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    //Doctor Consultation Route
-    Route::get('/doctor-consultations', [TreatmentSessionController::class, 'index'])->name('doctor-consultations.index');
 
-    // Enrollment Admin Route
-    Route::get('/enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])->name('enrollments');
+
+
+
     // Add more admin-specific routes here
 });
 
@@ -77,6 +76,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.card');
     Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
     Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
+
+
+    //Update Satisfactory session Route
+    Route::get('/doctor-consultations/{id}/status-view', [TreatmentSessionController::class, 'viewssStatus'])->name('doctor-consultations.status-view');
+    Route::post('/doctor-consultations/update-status', [TreatmentSessionController::class, 'updateStatus'])->name('doctor-consultations.update-status');
+
+     //Doctor Consultation Route
+    Route::get('/doctor-consultations/{status}', [TreatmentSessionController::class, 'index'])->name('doctor-consultations.index');
+
+    // Enrollment Admin Route
+    Route::get('/enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])->name('enrollments');
 });
 
 

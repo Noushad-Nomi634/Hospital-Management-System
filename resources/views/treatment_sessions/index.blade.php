@@ -95,8 +95,13 @@
                                                     <span class="visually-hidden">Toggle Dropdown</span>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
+
+                                                    <a href="{{ route('doctor-consultations.status-view', $session->id) }}"
+                                                        class="btn btn-sm btn-warning mb-1 w-100">Satisfactory Session Update</a>
+
                                                     <a href="{{ route('treatment-sessions.edit', $session->id) }}"
                                                         class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
+
                                                     <form action="{{ route('treatment-sessions.destroy', $session->id) }}"
                                                         method="POST">
                                                         @csrf

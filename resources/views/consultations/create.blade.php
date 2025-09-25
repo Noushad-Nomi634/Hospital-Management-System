@@ -37,7 +37,7 @@
                                 <option value="">Select Patient</option>
                                 @foreach($patients as $patient)
                                     <option value="{{ $patient->id }}">
-                                        {{ $patient->name }}
+                                        {{ $patient->mr }} | {{ $patient->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -55,25 +55,28 @@
                         </div>
 
                         <!-- Consultation Fee -->
-                        <div class="col-md-12">
+                        <div class="col-md-3">
                             <label for="fee" class="form-label">Consultation Fee</label>
                             <input type="number" name="fee" id="fee" class="form-control" value="{{ old('fee') ?? 0 }}" readonly>
                         </div>
 
                         <!-- Paid Amount -->
-                        <div class="col-md-12">
+                        <div class="col-md-3">
                             <label for="paid_amount" class="form-label">Paid Amount</label>
                             <input type="number" name="paid_amount" id="paid_amount" class="form-control" value="{{ old('paid_amount') ?? 0 }}" step="0.01">
                         </div>
 
                         <!-- Payment Method -->
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label for="payment_method" class="form-label">Payment Method</label>
                             <select name="payment_method" id="payment_method" class="form-select">
                                 <option value="">Select Payment Method</option>
-                                <option value="cash" {{ old('payment_method')=='cash' ? 'selected' : '' }}>Cash</option>
-                                <option value="card" {{ old('payment_method')=='card' ? 'selected' : '' }}>Card</option>
-                                <option value="bank_transfer" {{ old('payment_method')=='bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                <option value="0" {{ old('payment_method')=='0' ? 'selected' : '' }}>Cash</option>
+                                @foreach ($banks as $bank)
+                                    <option value="{{ $bank->id }}" {{ old('payment_method')=='bank'.$bank->id ? 'selected' : '' }}>
+                                        Bank {{ $bank->bank_name }} | ({{ $bank->account_no }}) | {{ $bank->account_title }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 

@@ -22,12 +22,15 @@ class CheckupController extends Controller
                     'checkups.*',
                     'patients.name as patient_name',
                     'patients.gender',
+                    'patients.mr',
                     'patients.phone as patient_phone',
                     DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                     'branches.name as branch_name'
                 )
                 ->orderBy('checkups.id', 'desc')
                 ->get();
+
+                //echo "<pre>"; print_r($checkups); echo "</pre>"; exit;
 
             return view('consultations.index', [
                 'checkups'      => $checkups,
@@ -45,22 +48,14 @@ class CheckupController extends Controller
     public function create(Request $request)
     {
         try {
-            $patients = DB::table('patients')->select('id', 'name', 'phone', 'branch_id')->get();
+            $patients = DB::table('patients')->select('id', 'name', 'mr', 'phone', 'branch_id')->get();
             $doctors  = DB::table('doctors')
                 ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
                 ->get();
 
-            $selectedPatient = null;
-            $fee = 0;
+            $banks = DB::table('banks')->get();
 
-            if ($request->has('patient_id')) {
-                $selectedPatient = DB::table('patients')->where('id', $request->patient_id)->first();
-                if ($selectedPatient) {
-                    $fee = $this->getFeeByBranch($selectedPatient->branch_id);
-                }
-            }
-
-            return view('consultations.create', compact('patients', 'doctors', 'selectedPatient', 'fee'));
+            return view('consultations.create', compact('patients', 'doctors', 'banks'));
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to load create form: ' . $e->getMessage());
@@ -72,16 +67,22 @@ class CheckupController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'patient_id'     => 'required|exists:patients,id',
-            'doctor_id'      => 'required|exists:doctors,id',
-            'fee'            => 'required|numeric|min:0',
-            'paid_amount'    => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string',
-        ]);
 
         try {
+            $request->validate([
+                'patient_id'     => 'required|exists:patients,id',
+                'doctor_id'      => 'required|exists:doctors,id',
+                'fee'            => 'required|numeric|min:0',
+                'paid_amount'    => 'nullable|numeric|min:0',
+                'payment_method' => 'nullable|string',
+            ]);
+
             DB::beginTransaction();
+
+            $paymentMethod = 'Cash';
+            if ($request->payment_method != '' && $request->payment_method != '0') {
+                $paymentMethod = 'bank_transfer';
+            }
 
             $patient = DB::table('patients')->where('id', $request->patient_id)->first();
             if (!$patient) {
@@ -101,6 +102,9 @@ class CheckupController extends Controller
 
             // Insert Transaction (Safe auth check)
             DB::table('transactions')->insert([
+                'invoice_id'    => $checkup->id,
+                'bank_id'     => $request->payment_method,
+                'payment_method'=> $paymentMethod,
                 'p_id'       => $request->patient_id,
                 'dr_id'      => $request->doctor_id,
                 'amount'     => $request->paid_amount ?? 0,
@@ -112,15 +116,23 @@ class CheckupController extends Controller
                 'updated_at' => now(),
             ]);
 
+            // Insert into branch_transactions
+            // No need to insert into branches table, just update the balance (already done below)
             // Increment Branch Balance
-            DB::table('branches')->where('id', $patient->branch_id)
-                ->increment('balance', $request->paid_amount ?? 0);
+            if ($request->payment_method == 1) {
+                DB::table('branches')->where('id', $patient->branch_id)
+                    ->increment('balance', $request->paid_amount ?? 0);
+            } elseif ($request->payment_method >= 1) {
+                DB::table('banks')->where('id', $request->payment_method)
+                    ->increment('balance', $request->paid_amount ?? 0);
+            }
 
             DB::commit();
-            return redirect()->route('checkups.index')->with('success', '✅ Checkup added successfully.');
+            return redirect()->route('consultations.print', $checkup->id)->with('success', '✅ Checkup added successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            echo "<pre>"; print_r($e->getMessage()); echo "</pre>"; exit;
             return back()->with('error', '❌ Error saving checkup: ' . $e->getMessage());
         }
     }
@@ -211,10 +223,19 @@ class CheckupController extends Controller
      */
     public function getCheckupFee($patientId)
     {
-        $patient = DB::table('patients')->where('id', $patientId)->first();
-        $fee = $patient ? $this->getFeeByBranch($patient->branch_id) : 0;
-        return response()->json(['fee' => $fee]);
+        // Join patients with branches to get branch fee
+            $data = DB::table('patients')
+                ->leftJoin('branches', 'patients.branch_id', '=', 'branches.id')
+                ->where('patients.id', $patientId)
+                ->select('branches.fee')
+                ->first();
+
+            // If branch or fee is missing, return 0
+            $fee = $data && $data->fee ? $data->fee : 0;
+
+            return response()->json(['fee' => $fee]);
     }
+
 
     /**
      * 🔟 Patient History
@@ -257,16 +278,25 @@ class CheckupController extends Controller
                 'patients.name as patient_name',
                 'patients.phone as patient_phone',
                 'patients.gender',
+                'patients.age as patient_age',
+                'patients.mr as patient_mr',
+
                 DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                 'branches.name as branch_name'
             )
             ->where('checkups.id', $id)
             ->first();
 
+            //Branches Table show
+            $branches = DB::table('branches')->get();
+
+
+
         if (!$checkup) abort(404, 'Checkup not found.');
 
         return view('consultations.print', [
             'checkup' => $checkup,
+            'branches' => $branches,
         ]);
     }
 
