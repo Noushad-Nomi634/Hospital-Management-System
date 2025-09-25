@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('title')
-    Treatment Sessions
+    Doctor Consultations
 @endsection
 
 @push('css')
-    <link href="{{ URL::asset('build/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
-    <link href="{{ URL::asset('build/plugins/input-tags/css/tagsinput.css') }}" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet"> {{-- 👈 Buttons CSS --}}
     <style>
         /* Allow dropdowns to overflow */
         .table-responsive {
@@ -16,7 +16,7 @@
 @endpush
 
 @section('content')
-    <x-page-title title="Treatment Sessions" subtitle="List of all treatment sessions" />
+    <x-page-title title="Doctor Consultations" subtitle="List of all Doctor consultations" />
 
     <div class="row">
         <div class="col-xl-12">
@@ -36,7 +36,8 @@
                                     <th>Sr No</th>
                                     <th>Invoice</th>
                                     <th>Date</th>
-                                    <th>MR-Patient</th>
+                                    <th>MR</th>
+                                    <th>Patient</th>
                                     <th>Doctor</th>
                                     <th>Diagnosis</th>
                                     <th>Note</th>
@@ -60,7 +61,8 @@
                                         <td>{{ $count }}</td>
                                         <td>{{ $session->checkup_id }}</td>
                                         <td>{{ date('d-m-Y', strtotime($session->created_at)) ?? 'N/A' }}</td>
-                                        <td>{{ $session->patient?->mr ?? ('N/A' . '-' . $session->patient?->name ?? 'N/A') }}</td>
+                                        <td>{{ $session->patient?->mr ?? 'N/A' }}</td>
+                                        <td>{{ $session->patient?->name ?? 'N/A' }}</td>
                                         <td>{{ $session->checkup?->doctor ? $session->checkup->doctor->first_name . ' ' . $session->checkup->doctor->last_name : 'N/A' }}
                                         </td>
                                         <td>{{ $session->diagnosis ?? '-' }}</td>
@@ -110,19 +112,12 @@
                                         </td>
                                     </tr>
 
-                                    {{-- Actions Dropdown --}}
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-outline-primary btn-sm">Actions</button>
-                                            <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                                                <span class="visually-hidden">Toggle Dropdown</span>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
-                                                <!-- New Sessions Button -->
-                                            <a href="{{ route('treatment-sessions.sessions', $session->id) }}" class="btn btn-sm btn-info mb-1 w-100">Sessions</a>
-
-                                                <a href="{{ route('treatment-sessions.edit', $session->id) }}" class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
-                                                <form action="{{ route('treatment-sessions.destroy', $session->id) }}" method="POST">
+                                    {{-- Installment Modal --}}
+                                    <div class="modal fade" id="installmentModal{{ $session->id }}" tabindex="-1"
+                                        aria-labelledby="installmentModalLabel{{ $session->id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form action="{{ route('installments.store') }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="session_id" value="{{ $session->id }}">
                                                     <div class="modal-header">
@@ -239,13 +234,32 @@
 @endsection
 
 @push('script')
+    {{-- jQuery --}}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    {{-- DataTables JS --}}
+    {{-- DataTables JS --}}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    {{-- Buttons Extension JS --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+     {{-- Core Plugins --}}
     <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ URL::asset('build/js/main.js') }}"></script>
+
+
+
 
     <script>
         $(document).ready(function() {
@@ -278,31 +292,12 @@
                 dom: "<'row mb-3'<'col-md-4'l><'col-md-4 text-end'B><'col-md-4'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
-                buttons: [{
-                        extend: 'copy',
-                        text: 'Copy',
-                        className: 'btn btn-outline-secondary btn-sm'
-                    },
-                    {
-                        extend: 'csv',
-                        text: 'CSV',
-                        className: 'btn btn-outline-info btn-sm'
-                    },
-                    {
-                        extend: 'excel',
-                        text: 'Excel',
-                        className: 'btn btn-outline-success btn-sm'
-                    },
-                    {
-                        extend: 'pdf',
-                        text: 'PDF',
-                        className: 'btn btn-outline-danger btn-sm'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        className: 'btn btn-outline-primary btn-sm'
-                    }
+                buttons: [
+                    { extend: 'copy', text: 'Copy', className: 'btn btn-sm btn-light' },
+                    { extend: 'csv', text: 'CSV', className: 'btn btn-sm btn-light' },
+                    { extend: 'excel', text: 'Excel', className: 'btn btn-sm btn-light' },
+                    { extend: 'pdf', text: 'PDF', className: 'btn btn-sm btn-light' },
+                    { extend: 'print', text: 'Print', className: 'btn btn-sm btn-light' }
                 ]
             });
 

@@ -89,32 +89,44 @@
             <li>
                 <a class="has-arrow" href="javascript:;">
                     <div class="parent-icon">
-                    <i class="material-icons-outlined">assignment</i>
+                    <i class="material-icons-outlined">local_hospital</i>
                     </div>
                     <div class="menu-title">Dr Consultations</div>
                 </a>
                 <ul>
-                     <li>
-                    <a href="{{ url('/treatment-sessions') }}">
-                        <i class="material-icons-outlined">fact_check</i> Enrollments
-                    </a>
-                    </li>
                     <li>
-                    <a href="{{ url('/treatment-sessions') }}">
-                        <i class="material-icons-outlined">fact_check</i> Patient Checkup
+                    <a href="{{ url('admin/doctor-consultations') }}">
+                        <i class="material-icons-outlined">medical_information</i> Dr Checkup
                     </a>
                     </li>
                     <li>
                     <a href="{{ url('/sessions') }}">
-                        <i class="material-icons-outlined">add_circle</i> Assign Follow-up
+                        <i class="material-icons-outlined">history</i> Session Follow-up
                     </a>
                     </li>
+                </ul>
+            </li>
 
-                    <li>
-                        <a href="{{ url('/sessions/create') }}">
-                            <i class="material-icons-outlined">add_circle</i> Session Histor
-                        </a>
+             <!-- Enrollments -->
+            <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                    <i class="material-icons-outlined">school</i>
+                    </div>
+                    <div class="menu-title">Enrollments</div>
+                </a>
+                <ul>
+                     <li>
+                    <a href="{{ url('/admin/enrollments/0') }}">
+                        <i class="material-icons-outlined">fact_check</i> Pending Enrollments
+                    </a>
                     </li>
+                    <li>
+                    <a href="{{ url('/admin/enrollments/1') }}">
+                        <i class="material-icons-outlined">fact_check</i> Completed Enrollments
+                    </a>
+                    </li>
+                    <li>
                 </ul>
             </li>
 

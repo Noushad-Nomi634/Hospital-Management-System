@@ -42,6 +42,12 @@ Route::get('/clear', function() {
 // For admin only
 Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    //Doctor Consultation Route
+    Route::get('/doctor-consultations', [TreatmentSessionController::class, 'index'])->name('doctor-consultations.index');
+
+    // Enrollment Admin Route
+    Route::get('/enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])->name('enrollments');
     // Add more admin-specific routes here
 });
 
@@ -126,7 +132,7 @@ Route::get('/installments/create/{session_id}', [SessionInstallmentController::c
 Route::post('/installments/store', [SessionInstallmentController::class, 'store'])->name('installments.store');
 
 
-Route::get('/treatment-sessions', [TreatmentSessionController::class, 'index'])->name('treatment-sessions.index');
+
 Route::get('/treatment-sessions/create', [TreatmentSessionController::class, 'create'])->name('treatment-sessions.create');
 Route::post('/treatment-sessions', [TreatmentSessionController::class, 'store'])->name('treatment-sessions.store');
 
@@ -232,6 +238,8 @@ Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, '
 // Enrollment Update Route
 Route::put('/treatment-sessions/{id}/enrollment-update', [TreatmentSessionController::class, 'enrollmentUpdate'])
     ->name('treatment-sessions.enrollmentUpdate');
-    
+
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');

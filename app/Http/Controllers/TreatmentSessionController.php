@@ -14,6 +14,7 @@ use App\Models\Patient;
 
 class TreatmentSessionController extends Controller
 {
+    //Doctor Consultation Index
     public function index()
     {
         try {
@@ -28,6 +29,8 @@ class TreatmentSessionController extends Controller
             return redirect()->back()->with('error', '❌ Failed to load sessions: ' . $e->getMessage());
         }
     }
+
+
 
     public function create()
     {
@@ -149,7 +152,7 @@ class TreatmentSessionController extends Controller
     public function enrollmentUpdate(Request $request, $id)
     {
         try {
-            DB::beginTransaction(); 
+            DB::beginTransaction();
             $request->validate([
                 'session_fee'     => 'required|numeric|min:0',
                 'paid_amount'     => 'required|numeric|min:0',
@@ -157,7 +160,6 @@ class TreatmentSessionController extends Controller
 
             ]);
 
-         
 
             //treatment session
             $session = TreatmentSession::findOrFail($id);
@@ -167,8 +169,9 @@ class TreatmentSessionController extends Controller
                 'paid_amount'   => $request->paid_amount,
                 'dues_amount'   => $request->dues_amount,
                 'session_date'  => $request->session_date,
+                'enrollment_status' => 1,
             ]);
-           
+
             //Add session times
             if ($request->has('sessions')) {
                 foreach ($request->sessions as $time) {
@@ -203,11 +206,11 @@ class TreatmentSessionController extends Controller
                 'updated_at'=> now(),
             ]);
 
-            
-            
+
+
 
             DB::commit();
-            return redirect()->route('treatment-sessions.index')
+            return redirect()->route('admin.enrollments', ['status' => 1])
                 ->with('success', '✅ Enrollment status updated successfully.');
         } catch (\Exception $e) {
             DB::Rollback();
@@ -370,7 +373,7 @@ class TreatmentSessionController extends Controller
         ]);
 
         return redirect()->back()->with('success', '✅ Session entry added successfully.');
-        
+
     }
     // 🔹 Show ongoing sessions for a patient
 public function showOngoingSessions($session_id)
@@ -388,8 +391,39 @@ public function showOngoingSessions($session_id)
         return redirect()->back()->with('error', '❌ Failed to load ongoing sessions: ' . $e->getMessage());
     }
 }
+//------------------------------------------Enrollment list---------------------------------------------
+public function show()
+{
+    try {
+        $enrollments = $sessions = TreatmentSession::with(['doctor', 'patient', 'sessionTimes', 'installments', 'checkup'])
+                ->where('con_status', 1)
+                ->orderByDesc('created_at')
+                ->get();
 
+
+        return view('treatment_sessions.enrollments', compact('enrollments'));
+    } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Failed to load enrollments: ' . $e->getMessage());
+        }
+    }
+
+
+    public function showEnrollments($status)
+    {
+        try {
+                $enrollments = $sessions = TreatmentSession::with(['doctor', 'patient', 'checkup'])
+                    ->where('con_status', 1)
+                    ->where('enrollment_status', $status)
+                    ->orderByDesc('created_at')
+                    ->get();
+                return view('treatment_sessions.enrollments', compact('enrollments'));
+        } catch (\Exception $e) {
+                return redirect()->back()->with('error', '❌ Failed to load enrollments: ' . $e->getMessage());
+            }
+        }
 }
+
+
 
 
 
