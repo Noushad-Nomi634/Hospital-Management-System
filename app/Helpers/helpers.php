@@ -24,7 +24,6 @@ function patient_get_name($id)
     $patient =Patient::find($id);
     return $patient ? $patient->name : 'Unknown Patient';
 }
-<<<<<<< Updated upstream
 
 function patient_get_mr($id)
 {
@@ -47,5 +46,3 @@ function format_date($date)
 {
     return Carbon::parse($date)->format('d/m/Y - h:i A');
 }
-=======
->>>>>>> Stashed changes

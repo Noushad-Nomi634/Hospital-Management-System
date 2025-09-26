@@ -5,37 +5,16 @@
     Patient Appointments
 @endsection
 
-<<<<<<< Updated upstream
 @section('content')
     <x-page-title title="Patient Records" subtitle="Appointments List" />
-=======
-@push('css')
-    <link href="{{ URL::asset('build/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
-    <style>
-        .table-responsive {
-            overflow: visible;
-            /* Dropdown visible outside table */
-        }
-    </style>
-@endpush
-
-@section('content')
-    <x-page-title title="Patient Records" subtitle="Consultations List" />
->>>>>>> Stashed changes
 
     <div class="row">
         <div class="col-xl-12">
             <div class="card">
-<<<<<<< Updated upstream
                 <div class="card-header d-flex justify-content-between align-items-center"
                     style="background-color: #f8f9fa;">
                     <h5 class="mb-0 text-dark">Appointments List</h5>
                     <a href="{{ url('/consultations/create') }}" class="btn btn-primary btn-sm" style="font-weight: 500;">
-=======
-                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #f8f9fa;">
-                    <h5 class="mb-0 text-dark">Consultations List</h5>
-                    <a href="{{ url('/consultations/create') }}" class="btn btn-primary btn-lg" style="font-weight: 500;">
->>>>>>> Stashed changes
                         Add New Consultation
                     </a>
                 </div>
@@ -65,15 +44,9 @@
                                         <td>{{ $consultation->patient_name ?? 'N/A' }}</td>
                                         <td>{{ \Carbon\Carbon::parse($consultation->created_at)->format('d-m-Y') }}</td>
                                         <td>{{ $consultation->doctor_name }}</td>
-<<<<<<< Updated upstream
                                         <td>Rs. {{ number_format($consultation->fee) }}</td>
                                         <td>Rs. {{ number_format($consultation->paid_amount) }}</td>
                                         <td>{{ bank_get_name($consultation->payment_method) ?? 'N/A' }}</td>
-=======
-                                        <td>Rs. {{ $consultation->fee }}</td>
-                                        <td>Rs. {{ $consultation->paid_amount ?? 0 }}</td>
-                                        <td>{{ $consultation->payment_method ?? 'N/A' }}</td>
->>>>>>> Stashed changes
                                         <td>
                                             @php $status = (int)($consultation->checkup_status ?? 0); @endphp
                                             @if ($status === 0)
@@ -138,7 +111,6 @@
 @endsection
 
 @push('script')
-<<<<<<< Updated upstream
     {{-- jQuery --}}
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
@@ -224,55 +196,6 @@
             // Fix search + dropdown style
             $('.dataTables_filter input').addClass('form-control form-control-sm');
             $('.dataTables_length select').addClass('form-select form-select-sm');
-=======
-    <script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-
-    <!-- Layout Plugins -->
-    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/main.js') }}"></script>
-
-    <script>
-        $(document).ready(function() {
-            $('#consultations-table').DataTable({
-                responsive: true,
-                autoWidth: false,
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50, 100],
-                ordering: true,
-                columnDefs: [{
-                        orderable: false,
-                        targets: 7
-                    } // Actions column
-                ],
-            });
-
-            // AJAX Delete
-            $('.btn-delete').click(function(e) {
-                e.preventDefault();
-                var id = $(this).data('id');
-                if (!confirm('Are you sure you want to delete this consultation?')) return;
-
-                $.ajax({
-                    url: '/consultations/' + id,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        _method: 'DELETE'
-                    },
-                    success: function(response) {
-                        $('#row-' + id).fadeOut();
-                        alert('Consultation deleted successfully.');
-                    },
-                    error: function(xhr) {
-                        alert('Failed to delete consultation.');
-                    }
-                });
-            });
->>>>>>> Stashed changes
         });
     </script>
 @endpush
