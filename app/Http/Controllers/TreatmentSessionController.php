@@ -421,6 +421,28 @@ public function show()
             return redirect()->back()->with('error', '❌ Failed to load consultation status: ' . $e->getMessage());
         }
     }
+    // ✅ Custom method for session summary report
+public function sessionSummary()
+{
+    try {
+        $sessions = TreatmentSession::with(['doctor', 'patient'])
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'session_id'        => $session->id,
+                    'patient_name'      => $session->patient->name ?? 'N/A',
+                    'doctor_name'       => $session->doctor->name ?? 'N/A',
+                    'total_sessions'    => $session->session_count,
+                    'remaining_sessions'=> max(0, $session->session_count - $session->sessionTimes()->where('is_completed', true)->count()),
+                ];
+            });
+
+        return view('treatment_sessions.sessionsdata', compact('sessions'));
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', '❌ Failed to load session summary: ' . $e->getMessage());
+    }
+}
+
 }
 
 

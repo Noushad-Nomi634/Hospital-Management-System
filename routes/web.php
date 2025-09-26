@@ -152,6 +152,11 @@ Route::post('/sessions/{id}/complete', [TreatmentSessionController::class, 'mark
 Route::get('/treatment-sessions/{id}/edit', [TreatmentSessionController::class, 'edit'])->name('treatment-sessions.edit');
 Route::put('/treatment-sessions/{id}', [TreatmentSessionController::class, 'update'])->name('treatment-sessions.update');
 Route::delete('/treatment-sessions/{id}', [TreatmentSessionController::class, 'destroy'])->name('treatment-sessions.destroy');
+
+// ✅ Pehle likho
+Route::get('/treatment-sessions/summary', [TreatmentSessionController::class, 'sessionSummary'])
+    ->name('treatment-sessions.summary');
+
 Route::get('/treatment-sessions/{id}', [TreatmentSessionController::class, 'show'])->name('treatment-sessions.show');
 
 
