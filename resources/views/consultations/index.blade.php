@@ -1,28 +1,20 @@
 @extends('layouts.app')
-
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
 @section('title')
-    Patient Consultations
+    Patient Appointments
 @endsection
 
-@push('css')
-    <link href="{{ URL::asset('build/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
-    <style>
-        .table-responsive {
-            overflow: visible;
-            /* Dropdown visible outside table */
-        }
-    </style>
-@endpush
-
 @section('content')
-    <x-page-title title="Patient Records" subtitle="Consultations List" />
+    <x-page-title title="Patient Records" subtitle="Appointments List" />
 
     <div class="row">
         <div class="col-xl-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #f8f9fa;">
-                    <h5 class="mb-0 text-dark">Consultations List</h5>
-                    <a href="{{ url('/consultations/create') }}" class="btn btn-primary btn-lg" style="font-weight: 500;">
+                <div class="card-header d-flex justify-content-between align-items-center"
+                    style="background-color: #f8f9fa;">
+                    <h5 class="mb-0 text-dark">Appointments List</h5>
+                    <a href="{{ url('/consultations/create') }}" class="btn btn-primary btn-sm" style="font-weight: 500;">
                         Add New Consultation
                     </a>
                 </div>
@@ -119,53 +111,91 @@
 @endsection
 
 @push('script')
-    <script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    {{-- jQuery --}}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
-    <!-- Layout Plugins -->
+    {{-- DataTables JS --}}
+    {{-- DataTables JS --}}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    {{-- Buttons Extension JS --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    {{-- Core Plugins --}}
     <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+    <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ URL::asset('build/js/main.js') }}"></script>
 
+
+
+
     <script>
         $(document).ready(function() {
-            $('#consultations-table').DataTable({
-                responsive: true,
-                autoWidth: false,
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50, 100],
+            var table = $('#consultations-table').DataTable({
+                responsive: false,
+                scrollX: true,
                 ordering: true,
-                columnDefs: [{
-                        orderable: false,
-                        targets: 7
-                    } // Actions column
+                searching: true,
+                pageLength: 5,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
                 ],
-            });
-
-            // AJAX Delete
-            $('.btn-delete').click(function(e) {
-                e.preventDefault();
-                var id = $(this).data('id');
-                if (!confirm('Are you sure you want to delete this consultation?')) return;
-
-                $.ajax({
-                    url: '/consultations/' + id,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        _method: 'DELETE'
+                autoWidth: false,
+                columnDefs: [{
+                    targets: [7], // only Actions col
+                    orderable: false,
+                    searchable: false
+                }],
+                drawCallback: function() {
+                    $('#consultations-table').css('width', '100%');
+                },
+                createdRow: function(row, data, dataIndex) {
+                    $(row).find('td').css('vertical-align', 'middle');
+                },
+                dom: "<'row mb-3'<'col-md-4'l><'col-md-4 text-end'B><'col-md-4'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
+                buttons: [{
+                        extend: 'copy',
+                        text: 'Copy',
+                        className: 'btn btn-sm btn-light'
                     },
-                    success: function(response) {
-                        $('#row-' + id).fadeOut();
-                        alert('Consultation deleted successfully.');
+                    {
+                        extend: 'csv',
+                        text: 'CSV',
+                        className: 'btn btn-sm btn-light'
                     },
-                    error: function(xhr) {
-                        alert('Failed to delete consultation.');
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        className: 'btn btn-sm btn-light'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        className: 'btn btn-sm btn-light'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'btn btn-sm btn-light'
                     }
-                });
+                ]
             });
+
+            // Fix search + dropdown style
+            $('.dataTables_filter input').addClass('form-control form-control-sm');
+            $('.dataTables_length select').addClass('form-select form-select-sm');
         });
     </script>
 @endpush

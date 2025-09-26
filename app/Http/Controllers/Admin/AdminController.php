@@ -45,7 +45,7 @@ class AdminController extends Controller
                     $q->where('branch_id', $branch->id);
                 })
                 ->whereDate('created_at', Carbon::today())
-                ->sum('fee');
+                ->sum('paid_amount');
 
             // ────────────── Total Payments Today ──────────────
             $totalPaymentsToday = $checkupPaymentsToday + $sessionPaymentsToday;

@@ -26,9 +26,6 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #f8f9fa;">
                     <h5 class="mb-0 text-dark">Consultations List</h5>
-                    <a href="{{ route('consultations.create') }}" class="btn btn-primary btn-sm" style="font-weight: 500;">
-                        Add New Consultation
-                    </a>
                 </div>
 
                 <div class="card-body">
