@@ -67,4 +67,31 @@ class SessionTimeController extends Controller
             return redirect()->back()->with('error', 'Unable to delete session.');
         }
     }
+
+    // Update Section Completed Status
+    public function updateSectionCompleted(Request $request)
+    {
+        try {
+            $request->validate([
+                'session_id' => 'required',
+                'doctor_id' => 'required|exists:doctors,id',
+                'status' => 'required|in:0,1',
+            ]);
+
+            $session = SessionTime::findOrFail($request->session_id);
+            $session->is_completed = $request->status;
+            $session->completed_by_doctor_id = $request->doctor_id;
+            $session->updated_at = now();
+            $session->save();
+
+            // Parent TreatmentSession ko id se update karein
+            $treatmentSession = TreatmentSession::findOrFail($session->treatment_session_id);
+            $treatmentSession->refreshStatus();
+
+            return redirect()->back()->with('success', '✅ Session marked as completed successfully.');
+        } catch (\Exception $e) {
+            echo $e->getMessage(); exit; // Debugging line
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 }

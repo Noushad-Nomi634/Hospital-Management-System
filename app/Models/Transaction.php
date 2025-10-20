@@ -13,13 +13,20 @@ class Transaction extends Model
     protected $table = 'transactions'; // Correct table name
 
     protected $fillable = [
-        'p_id',        // Patient ID
-        'dr_id',       // Doctor ID
+        'patient_id',        // Patient ID
+        'doctor_id',       // Doctor ID
         'amount',      // Payment amount
         'type',        // '+' for income, '-' for expense
-        'b_id',        // Branch ID
-        'entery_by',   // User who entered the transaction
+        'branch_id',        // Branch ID
+        'entry_by',   // User who entered the transaction
         'Remx',        // Remark e.g. "Checkup Fee", "Treatment Session Payment"
+        'payment_type',// e.g. 'checkup', 'sessions'
+        'bank_id',     // Bank ID if payment_method is bank_transfer
+        'invoice_id',  // Link to treatment session or checkup
+        'post_cash_balance',
+        'post_bank_balance',
+        'post_branch_balance',
+        'post_total_balance',
     ];
 
     protected $casts = [
@@ -27,6 +34,20 @@ class Transaction extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    // 👇 Accessor for human readable payment type
+    public function getPaymentTypeNameAttribute()
+    {
+        $types = [
+            1 => 'Appointment',
+            2 => 'Session',
+            3 => 'Expense',
+            4 => 'Salary',
+            5 => 'Return',
+        ];
+
+        return $types[$this->payment_type] ?? 'Unknown';
+    }
 
     // ───────────── Relationships ─────────────
 
@@ -52,6 +73,11 @@ class Transaction extends Model
     public function enteredByUser()
     {
         return $this->belongsTo(User::class, 'entery_by');
+    }
+    // Treatment Session associated with the transaction (if any)
+    public function TreatmentSession()
+    {
+        return $this->belongsTo(TreatmentSession::class, 'invoice_id');
     }
 
     // ───────────── Helper Methods ─────────────

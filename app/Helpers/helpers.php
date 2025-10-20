@@ -1,14 +1,12 @@
 <?php
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\Bank;
+use App\Models\Branch;
+use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
-if (! function_exists('example_helper')) {
-    function example_helper()
-    {
-        return 'This is an example helper function.';
-    }
-}
 
 function doctor_get_name($id)
 {
@@ -39,7 +37,32 @@ function bank_get_name($id)
     }
 }
 
+//
+
 function format_date($date)
+{
+    return Carbon::parse($date)->format('d/m/Y');
+}
+
+function format_time($date)
+{
+    return Carbon::parse($date)->format('h:i A');
+}
+function format_datetime($date)
 {
     return Carbon::parse($date)->format('d/m/Y - h:i A');
 }
+
+function get_doctors()
+{
+    if (auth()->user()->role == 'admin') {
+        return Doctor::where('status', 'Active')->get();
+    }
+    return Doctor::select('id', 'first_name', 'last_name')->where('status', 'Active')->get();
+}
+
+//Transaction Function
+
+
+
+

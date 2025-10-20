@@ -10,6 +10,7 @@ use App\Models\SessionInstallment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Patient;
+use App\Models\Bank;
 
 
 class TreatmentSessionController extends Controller
@@ -81,7 +82,7 @@ class TreatmentSessionController extends Controller
             Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
 
 
-            return redirect()->route('doctor-consultations.index')->with('success', '✅ Treatment session created successfully.');
+            return redirect()->route('doctor-consultations.index', 0)->with('success', '✅ Treatment session created successfully.');
         } catch (\Exception $e) {
 
             return redirect()->back()->with('error', '❌ Failed to create session: ' . $e->getMessage());
@@ -118,6 +119,7 @@ class TreatmentSessionController extends Controller
                 'session_fee'     => 'required|numeric|min:0',
                 'paid_amount'     => 'required|numeric|min:0',
                 'session_date'  => $request->sessions[0]['date'] ?? now()->toDateString(),
+                'payment_method' => 'nullable|string|max:100',
 
             ]);
 
@@ -144,32 +146,22 @@ class TreatmentSessionController extends Controller
                     }
                 }
             }
-            // Add installment
-                SessionInstallment::create([
-                    'session_id'     => $session->id,
-                    'amount'         => $request->paid_amount,
-                    'payment_date'   => now(),
-                    'payment_method' => 'cash',
-                ]);
-            // Add transaction
-            DB::table('transactions')->insert([
-                'p_id'      => $session->patient_id,
-                'dr_id'     => $session->doctor_id,
-                'amount'    => $request->paid_amount,
-                'payment_type'=>'sessions',
-                'payment_method'=>'cash',
-                'invoice_id' =>$session->id,
-                'type'      => '+',
-                'b_id'      => $session->branch_id,
-                'entery_by' => auth()->user()->id,
-                'Remx'      => 'Treatment Session Payment',
-                'created_at'=> now(),
-                'updated_at'=> now(),
-            ]);
 
+            if ($request->paid_amount > 0) {
+                handleGeneralTransaction(
+                branch_id: $session->branch_id,
+                bank_id: $request->payment_method,
+                patient_id: $session->patient_id,
+                doctor_id: $session->doctor_id,
+                type: '+',
+                amount: $request->paid_amount ?? 0,
+                note: 'Session Payment',
+                invoice_id: $session->id,
+                payment_type: 2,
+                entry_by: auth()->id()
+            );
 
-
-
+            }
             DB::commit();
             return redirect()->route('enrollments', ['status' => 1])
                 ->with('success', '✅ Enrollment status updated successfully.');
@@ -223,6 +215,7 @@ class TreatmentSessionController extends Controller
                 'diagnosis'     => $request->diagnosis,
                 'note'          => $request->note,
                 'session_date'  => $request->sessions[0]['date'] ?? $session->session_date,
+                'status'        => 1, // Mark as ongoing
             ]);
 
             // Update session times
@@ -346,17 +339,18 @@ public function showOngoingSessions($session_id)
         $Checkup = Checkup::where('id', $ongoingSessions->checkup_id)->update(['checkup_status' => 1]);
         // 🔹 Get patient info for form heading
         $patient = Patient::find($ongoingSessions->patient_id);
+        $banks = Bank::all();
 
-        return view('treatment_sessions.sessions', compact('ongoingSessions', 'patient', 'Checkup'));
+        return view('treatment_sessions.create_sessions', compact('ongoingSessions', 'patient', 'Checkup', 'banks'));
     } catch (\Exception $e) {
         return redirect()->back()->with('error', '❌ Failed to load ongoing sessions: ' . $e->getMessage());
     }
 }
 //------------------------------------------Enrollment list---------------------------------------------
-public function show()
+public function show($status)
 {
     try {
-        $enrollments = $sessions = TreatmentSession::with(['doctor', 'patient', 'sessionTimes', 'installments', 'checkup'])
+        $enrollments = $sessions = TreatmentSession::with(['doctor', 'patient', 'checkup'])
                 ->where('con_status', 1)
                 ->orderByDesc('created_at')
                 ->get();
@@ -368,6 +362,32 @@ public function show()
         }
     }
 
+    // Show OngoingSessionsOnly based on status (1 = Ongoing, 2 = Completed, 3 = Cancelled)
+    public function OngoingSessionsOnly($status)
+    {
+        try {
+                $sessions = TreatmentSession::with(['doctor', 'patient', 'checkup'])
+                    ->withCount([
+                        'sessionTimes as pending_count' => function ($query) {
+                            $query->where('is_completed', 0);
+                        },
+                        'sessionTimes as completed_count' => function ($query) {
+                            $query->where('is_completed', 1);
+                        },
+                    ])
+                    ->where('status', $status)
+                    ->where('enrollment_status', 1)
+                    ->orderByDesc('created_at')
+                    ->get();
+                    //echo '<pre>'; print_r($sessions->toArray()); echo '</pre>'; exit; // Debugging line
+                return view('treatment_sessions.sessions', compact('sessions'));
+        } catch (\Exception $e) {
+                return redirect()->back()->with('error', '❌ Failed to load enrollments: ' . $e->getMessage());
+            }
+        }
+
+        // Show enrollments based on status (1 = Ongoing, 2 = Completed, 3 = Cancelled)
+
 
     public function showEnrollments($status)
     {
@@ -377,6 +397,7 @@ public function show()
                     ->where('enrollment_status', $status)
                     ->orderByDesc('created_at')
                     ->get();
+                    //echo '<pre>'; print_r($enrollments->toArray()); echo '</pre>'; exit; // Debugging line
                 return view('treatment_sessions.enrollments', compact('enrollments'));
         } catch (\Exception $e) {
                 return redirect()->back()->with('error', '❌ Failed to load enrollments: ' . $e->getMessage());
@@ -400,7 +421,7 @@ public function show()
             $session->note = $request->note;
             $session->save();
 
-            return redirect()->route('doctor-consultations.index')->with('success', '✅ Consultation status updated successfully.');
+            return redirect()->route('doctor-consultations.index', 0)->with('success', '✅ Consultation status updated successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to update consultation status: ' . $e->getMessage());
         }
@@ -415,35 +436,30 @@ public function show()
                 ->orderByDesc('created_at')
                 ->first();
 
+               // echo '<pre>'; print_r($session->toArray()); echo '</pre>'; exit; // Debugging line
 
-            return view('treatment_sessions.ss_update', compact('session'));
+
+           return view('treatment_sessions.ss_update', compact('session'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '❌ Failed to load consultation status: ' . $e->getMessage());
         }
     }
-    // ✅ Custom method for session summary report
-public function sessionSummary()
-{
-    try {
-        $sessions = TreatmentSession::with(['doctor', 'patient'])
-            ->get()
-            ->map(function ($session) {
-                return [
-                    'session_id'        => $session->id,
-                    'patient_name'      => $session->patient->name ?? 'N/A',
-                    'doctor_name'       => $session->doctor->name ?? 'N/A',
-                    'total_sessions'    => $session->session_count,
-                    'remaining_sessions'=> max(0, $session->session_count - $session->sessionTimes()->where('is_completed', true)->count()),
-                ];
-            });
 
-        return view('treatment_sessions.sessionsdata', compact('sessions'));
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', '❌ Failed to load session summary: ' . $e->getMessage());
+    // Session Details
+    public function sessionDetails($id)
+    {
+        try {
+            $session = TreatmentSession::with(['patient', 'sessionTimes'])
+                ->findOrFail($id);
+
+                //echo '<pre>'; print_r($session->toArray()); echo '</pre>'; exit; // Debugging line
+
+            return view('treatment_sessions.session_detail', compact('session'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '❌ Failed to load session details: ' . $e->getMessage());
+        }
     }
+
+
+
 }
-
-}
-
-
-

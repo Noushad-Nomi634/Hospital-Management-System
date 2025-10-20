@@ -15,15 +15,17 @@ return new class extends Migration
              $table->id();
         $table->unsignedBigInteger('checkup_id');
         $table->unsignedBigInteger('doctor_id');
-      
+
         $table->decimal('session_fee', 8, 2);
-        $table->enum('status', ['scheduled', 'completed', 'missed'])->default('scheduled');
         $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
         $table->timestamps();
 
         $table->foreign('checkup_id')->references('id')->on('checkups')->onDelete('cascade');
         $table->foreign('doctor_id')->references('id')->on('doctors')->onDelete('cascade');
-    
+        $table->tinyInteger('status') // Status column
+                  ->default(0)
+                  ->comment('0 = Not Enrolled, 1 = Ongoing, 2 = Completed');
+
         });
     }
 

@@ -23,9 +23,9 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #f8f9fa;">
                     <h5 class="mb-0 text-dark">Consultations List</h5>
-                    <a href="{{ route('consultations.create') }}" class="btn btn-primary btn-sm" style="font-weight: 500;">
+                    {{-- <a href="{{ route('consultations.create') }}" class="btn btn-primary btn-sm" style="font-weight: 500;">
                         Add New Consultation
-                    </a>
+                    </a> --}}
                 </div>
 
                 <div class="card-body">
@@ -39,9 +39,9 @@
                                     <th>MR</th>
                                     <th>Patient</th>
                                     <th>Doctor</th>
+                                    <th>Sanction Doctor</th>
                                     <th>Diagnosis</th>
                                     <th>Note</th>
-                                    <th>Sanction Doctor</th>
                                     <th>Sanction Status</th>
                                     <th style="width:220px;">Actions</th>
                                 </tr>
@@ -59,15 +59,16 @@
                                     @endphp
                                     <tr>
                                         <td>{{ $count }}</td>
-                                        <td>{{ $session->checkup_id }}</td>
+                                        <td>{{ $session->id }}</td>
                                         <td>{{ date('d-m-Y', strtotime($session->created_at)) ?? 'N/A' }}</td>
                                         <td>{{ $session->patient?->mr ?? 'N/A' }}</td>
                                         <td>{{ $session->patient?->name ?? 'N/A' }}</td>
                                         <td>{{ $session->checkup?->doctor ? $session->checkup->doctor->first_name . ' ' . $session->checkup->doctor->last_name : 'N/A' }}
                                         </td>
+                                        <td>{{ doctor_get_name($session->ss_dr_id) }}</td>
                                         <td>{{ $session->diagnosis ?? '-' }}</td>
                                         <td>{{ $session->note ?? '-' }}</td>
-                                        <td>{{ doctor_get_name($session->ss_dr_id) }}</td>
+
 
                                         {{-- Sessions Info --}}
                                         <td>

@@ -14,7 +14,9 @@ class Branch extends Model
         'phone',
         'prefix',
         'status',
-         'fee',
+        'fee',
+        'balance',
+        'city',
     ];
 
     public function patients()

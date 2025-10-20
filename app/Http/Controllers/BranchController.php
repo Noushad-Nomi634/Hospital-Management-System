@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class BranchController extends Controller
 {
@@ -24,17 +26,55 @@ class BranchController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'address' => 'nullable|string',
-            'prefix' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'status' => 'required|string|in:active,inactive',
-            'fee' => 'required|numeric|min:0', // Fee validation added
+            'name'            => 'required|string|max:255',
+            'address'         => 'nullable|string',
+            'prefix'          => 'nullable|string',
+            'phone'           => 'nullable|string|max:20',
+            'status'          => 'required|string|in:active,inactive',
+            'fee'             => 'required|numeric|min:0',
+            'opening_balance' => 'required|numeric|min:0',
+            'city'            => 'required|string|max:255',
         ]);
 
-        Branch::create($request->all());
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('branches.index')->with('success', 'Branch added successfully.');
+            // Branch create
+            $branch = Branch::create([
+                'name'             => $request->name,
+                'address'          => $request->address,
+                'prefix'           => $request->prefix,
+                'phone'            => $request->phone,
+                'status'           => $request->status,
+                'fee'              => $request->fee,
+                'balance'          => 0,
+                'city'             => $request->city,
+            ]);
+
+            if ($request->opening_balance > 0) {
+                    createOpeningBalance(
+                    branch_id: $branch->id,
+                    bank_id: 0,
+                    patient_id: null,
+                    doctor_id: null,
+                    type: '+',
+                    amount: $request->opening_balance ?? 0,
+                    note: 'Opening Balance for Branch ID ' . $branch->id,
+                    invoice_id: null,
+                    payment_type: 0,
+                    entry_by: auth()->id()
+                );
+            }
+
+
+            DB::commit();
+
+            return redirect()->route('branches.index')->with('success', 'Branch added successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
 
     // Show edit form

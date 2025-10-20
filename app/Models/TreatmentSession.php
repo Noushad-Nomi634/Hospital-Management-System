@@ -27,6 +27,7 @@ class TreatmentSession extends Model
         'note',
         'ss_dr_id',
 
+
     ];
 
     protected $casts = [
@@ -59,6 +60,11 @@ class TreatmentSession extends Model
     {
         return $this->hasMany(SessionTime::class, 'treatment_session_id')
                     ->orderBy('session_datetime', 'asc');
+    }
+    // Transactions related to this treatment session
+   public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'invoice_id');
     }
 
     public function installments()
@@ -105,13 +111,13 @@ class TreatmentSession extends Model
         $completed = $this->sessionTimes()->where('is_completed', true)->count();
 
         if ($total === 0) {
-            $this->status = 'scheduled';
+            $this->status = '1';
         } elseif ($completed === 0) {
-            $this->status = 'scheduled';
+            $this->status = '1';
         } elseif ($completed < $total) {
-            $this->status = 'in_progress';
+            $this->status = '1';
         } else {
-            $this->status = 'completed';
+            $this->status = '2';
         }
 
         $this->save();

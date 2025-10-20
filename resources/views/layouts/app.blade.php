@@ -17,9 +17,9 @@
     <link rel="stylesheet" href="{{ URL::asset('build/plugins/notifications/css/lobibox.min.css') }}">
 
  <!-- 👇 Custom Dashboard CSS -->
-    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+    {{-- <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet"> --}}
 
-    
+
 </head>
 
 <body>
