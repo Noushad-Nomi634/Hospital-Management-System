@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Doctor;
 use App\Models\Patient;
-use App\Models\Checkup;
-use App\Models\TreatmentSession;
+use App\Models\Transaction;
 use Carbon\Carbon;
 
 class AdminController extends Controller
@@ -18,50 +17,52 @@ class AdminController extends Controller
 
         $branchStats = $branches->map(function ($branch) {
 
-            // ────────────── Total Doctors, Patients, Checkups ──────────────
+            // ────────────── Basic Counts ──────────────
             $totalDoctors  = Doctor::where('branch_id', $branch->id)->count();
             $totalPatients = Patient::where('branch_id', $branch->id)->count();
-            $totalCheckups = Checkup::where('branch_id', $branch->id)->count();
 
-            // ────────────── Sessions Today (Patient Branch ke hisaab se) ──────────────
-            $sessionsTodayQuery = TreatmentSession::whereHas('patient', function ($q) use ($branch) {
-                    $q->where('branch_id', $branch->id);
-                })
-                ->where(function ($query) {
-                    $query->whereDate('session_date', Carbon::today())
-                          ->orWhere(function ($q2) {
-                              $q2->whereNull('session_date')
-                                 ->whereDate('created_at', Carbon::today());
-                          });
-                });
+            // ────────────── Transactions Today ──────────────
+            $transactionsToday = Transaction::where('branch_id', $branch->id)
+                ->whereDate('created_at', Carbon::today());
 
-            $totalSessionsToday = $sessionsTodayQuery->count();
+            // Sessions Today (payment_type = 2)
+            $totalSessionsToday = (clone $transactionsToday)->where('payment_type', 2)->count();
+            $sessionPaymentsToday = (clone $transactionsToday)
+                ->where('payment_type', 2)
+                ->where('type', '+')
+                ->sum('amount');
 
-            // ────────────── Session Payments Today (Only Paid Amount) ──────────────
-            $sessionPaymentsToday = $sessionsTodayQuery->sum('paid_amount');
+            // Consultations Today (payment_type = 1)
+            $totalConsultationsToday = (clone $transactionsToday)->where('payment_type', 1)->count();
+            $checkupPaymentsToday = (clone $transactionsToday)
+                ->where('payment_type', 1)
+                ->where('type', '+')
+                ->sum('amount');
 
-            // ────────────── Checkup Payments Today (Patient Branch ke hisaab se) ──────────────
-            $checkupPaymentsToday = Checkup::whereHas('patient', function ($q) use ($branch) {
-                    $q->where('branch_id', $branch->id);
-                })
-                ->whereDate('created_at', Carbon::today())
-                ->sum('paid_amount');
+            // ────────────── Total Payments (Today only) ──────────────
+            $totalPaymentsToday = (clone $transactionsToday)
+                ->where('type', '+')
+                ->sum('amount');
 
-            // ────────────── Total Payments Today ──────────────
-            $totalPaymentsToday = $checkupPaymentsToday + $sessionPaymentsToday;
+            // ────────────── Total Payments (All Time) ──────────────
+            $totalPaymentsAll = Transaction::where('branch_id', $branch->id)
+                ->where('type', '+')
+                ->sum('amount');
 
             return [
-                'branch_name'           => $branch->name,
-                'totalDoctors'          => $totalDoctors,
-                'totalPatients'         => $totalPatients,
-                'totalCheckups'         => $totalCheckups,
-                'totalSessionsToday'    => $totalSessionsToday,
-                'checkupPaymentsToday'  => $checkupPaymentsToday,
-                'sessionPaymentsToday'  => $sessionPaymentsToday,
-                'totalPaymentsToday'    => $totalPaymentsToday,
+                'branch_name'             => $branch->name,
+                'totalDoctors'            => $totalDoctors,
+                'totalPatients'           => $totalPatients,
+                'totalConsultationsToday' => $totalConsultationsToday,
+                'totalSessionsToday'      => $totalSessionsToday,
+                'checkupPaymentsToday'    => $checkupPaymentsToday,
+                'sessionPaymentsToday'    => $sessionPaymentsToday,
+                'totalPaymentsToday'      => $totalPaymentsToday,
+                'totalPaymentsAll'        => $totalPaymentsAll, // ✅ new field
             ];
         });
 
         return view('admin.dashboard', compact('branchStats'));
     }
 }
+

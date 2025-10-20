@@ -36,6 +36,11 @@
                             <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}" required>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City <span class="text-danger">*</span></label>
+                            <input type="text" id="city" name="city" class="form-control" value="{{ old('city') }}" required>
+                        </div>
+
                         <!-- Address -->
                         <div class="mb-3">
                             <label for="address" class="form-label">Address</label>
@@ -60,6 +65,12 @@
                             <input type="number" step="0.01" min="0" id="fee" name="fee" class="form-control" value="{{ old('fee') }}" required>
                         </div>
 
+                        <!-- Opening Balance -->
+                        <div class="mb-3">
+                            <label for="opening_balance" class="form-label">Opening Balance (Only in Cash) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0" id="opening_balance" name="opening_balance" class="form-control" value="{{ old('opening_balance') }}" required>
+                        </div>
+
                         <!-- Status -->
                         <div class="mb-3">
                             <label for="status" class="form-label">Status</label>
@@ -68,6 +79,8 @@
                                 <option value="inactive" {{ old('status')=='inactive' ? 'selected' : '' }}>Inactive</option>
                             </select>
                         </div>
+
+
 
                         <!-- Submit Buttons -->
                         <button type="submit" class="btn btn-primary">Save</button>

@@ -130,6 +130,62 @@
                 </ul>
             </li>
 
+            <!--  Sessions -->
+
+            <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                    <i class="material-icons-outlined">event</i>
+                    </div>
+                    <div class="menu-title">Sessions</div>
+                </a>
+                <ul>
+                    <li>
+                    <a href="{{ url('/ongoing-sessions/1') }}">
+                        <i class="material-icons-outlined">fact_check</i> Ongoing Sessions
+                    </a>
+                    </li>
+                    <li>
+                    <a href="{{ url('/ongoing-sessions/2') }}">
+                        <i class="material-icons-outlined">history</i> Completed Sessions
+                    </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Payments Menu -->
+            <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                        <i class="material-icons-outlined">account_balance_wallet</i>
+                    </div>
+                    <div class="menu-title">Payments</div>
+                </a>
+                <ul>
+                    <li>
+                        <a href="{{ url('/payments/outstanding-invoices') }}">
+                            <i class="material-icons-outlined">receipt_long</i> Outstanding Invoices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/payments/completed-invoices') }}">
+                            <i class="material-icons-outlined">task_alt</i> Completed Invoices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/payments/receivable') }}">
+                            <i class="material-icons-outlined">payments</i> Payment Receivable
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/payments/return-payments') }}">
+                            <i class="material-icons-outlined">undo</i> Payment Returns
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
 
 
             <!-- Accounts Menu -->

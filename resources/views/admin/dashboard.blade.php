@@ -69,12 +69,24 @@
                             </div>
                         </div>
                         <!-- Total Payments -->
-                        <div class="col-12">
+                        <div class="col-6">
                             <div class="d-flex align-items-center p-3 stat-card-custom border border-danger">
                                 <i class="fas fa-coins fa-2x text-danger me-3"></i>
                                 <div>
                                     <h6 class="mb-0">
-                                        {{ number_format(($branch['checkupPaymentsToday'] ?? 0) + ($branch['sessionPaymentsToday'] ?? 0), 0) }}
+                                        {{ number_format($branch['totalPaymentsToday'] ?? 0) }}
+                                    </h6>
+                                    <small>Total Payments</small>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Total Payments -->
+                        <div class="col-6">
+                            <div class="d-flex align-items-center p-3 stat-card-custom border border-danger">
+                                <i class="fas fa-coins fa-2x text-danger me-3"></i>
+                                <div>
+                                    <h6 class="mb-0">
+                                        {{ number_format($branch['totalPaymentsAll'] ?? 0, 0) }}
                                     </h6>
                                     <small>Total Payments</small>
                                 </div>
@@ -85,7 +97,7 @@
             </div>
         </div>
     @endforeach
-</div>
+    </div>
 
 
 

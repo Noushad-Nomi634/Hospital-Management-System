@@ -20,41 +20,51 @@
                     <table id="outstandingTable" class="table table-striped table-bordered" style="width:100%">
                         <thead class="table-dark">
                             <tr>
-                                <th>Session ID</th>
-                                <th>Checkup ID</th>
+                                <th>Sr</th>
+                                <th>Date</th>
+                                <th>Invoic ID</th>
+
+                                <th>MR</th>
                                 <th>Patient Name</th>
-                                <th>Payment Details</th>
+                                <th>Dr Name</th>
+                                <th>Diagnosis</th>
+                                <th>Total Amount</th>
+                                <th>Paid</th>
+                                <th>Due</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $counter = 1;
+                            @endphp
                             @forelse($outstandings as $session)
                                 <tr>
+                                    <td>{{ $counter++ }}</td>
+                                    <td>{{ format_date($session->created_at) }}</td>
                                     <td>{{ $session->id }}</td>
-                                    <td>{{ $session->checkup_id }}</td>
-                                    <td>{{ $session->patient->name ?? 'N/A' }}</td>
+                                    <td>{{ patient_get_mr($session->patient_id) ?? 'N/A' }}</td>
+                                    <td>{{ patient_get_name($session->patient_id ) }}</td>
+                                    <td>{{ doctor_get_name($session->doctor_id) }}</td>
+                                    <td>{{ $session->diagnosis }}</td>
+                                    <td>{{ number_format($session->session_fee) }}</td>
+                                    <td>{{ number_format($session->paid_amount) }}</td>
+                                    <td>{{ number_format($session->dues_amount) }}</td>
                                     <td>
-                                        <strong>Total Fee:</strong> {{ $session->session_fee }} <br>
-                                        <strong>Paid:</strong> {{ $session->totalPaid() }} <br>
-                                        <strong>Due:</strong> {{ $session->remainingAmount() }} <br><br>
-
-                                        @if($session->installments && $session->installments->count())
-                                            <strong>Installments:</strong><br>
-                                            <ul style="margin: 0; padding-left: 16px;">
-                                                @foreach($session->installments as $installment)
-                                                    <li>
-                                                        {{ number_format($installment->amount, 2) }} 
-                                                        on {{ \Carbon\Carbon::parse($installment->date)->format('d M Y') }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
+                                        @if ($session->dues_amount > 0)
+                                            <span class="badge bg-danger">Outstanding</span>
                                         @else
-                                            <em>No installments</em>
+                                            <span class="badge bg-success">Paid</span>
                                         @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('invoice.ledger', $session->id) }}" class="btn btn-sm btn-primary">View</a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">No outstanding payments found.</td>
+                                    <td colspan="10" class="text-center">No outstanding payments found.</td>
                                 </tr>
                             @endforelse
                         </tbody>

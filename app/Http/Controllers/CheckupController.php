@@ -79,11 +79,6 @@ class CheckupController extends Controller
 
             DB::beginTransaction();
 
-            $paymentMethod = 'Cash';
-            if ($request->payment_method != '' && $request->payment_method != '0') {
-                $paymentMethod = 'bank_transfer';
-            }
-
             $patient = DB::table('patients')->where('id', $request->patient_id)->first();
             if (!$patient) {
                 return back()->with('error', '❌ Patient not found.');
@@ -100,32 +95,19 @@ class CheckupController extends Controller
                 'status'         => 'completed',
             ]);
 
-            // Insert Transaction (Safe auth check)
-            DB::table('transactions')->insert([
-                'invoice_id'    => $checkup->id,
-                'bank_id'     => $request->payment_method,
-                'payment_method'=> $paymentMethod,
-                'p_id'       => $request->patient_id,
-                'dr_id'      => $request->doctor_id,
-                'amount'     => $request->paid_amount ?? 0,
-                'type'       => '+',
-                'b_id'       => $patient->branch_id,
-                'entery_by'  => auth()->check() ? auth()->user()->id : null,
-                'Remx'       => 'Checkup Fee',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
 
-            // Insert into branch_transactions
-            // No need to insert into branches table, just update the balance (already done below)
-            // Increment Branch Balance
-            if ($request->payment_method == 1) {
-                DB::table('branches')->where('id', $patient->branch_id)
-                    ->increment('balance', $request->paid_amount ?? 0);
-            } elseif ($request->payment_method >= 1) {
-                DB::table('banks')->where('id', $request->payment_method)
-                    ->increment('balance', $request->paid_amount ?? 0);
-            }
+            handleGeneralTransaction(
+                branch_id: $patient->branch_id,
+                bank_id: $request->payment_method ?? null,
+                patient_id: $request->patient_id,
+                doctor_id: $request->doctor_id,
+                type: '+',
+                amount: $request->paid_amount ?? 0,
+                note: 'Appointment / Consultation Fee',
+                invoice_id: $checkup->id,
+                payment_type: 1,
+                entry_by: auth()->id()
+            );
 
             DB::commit();
             return redirect()->route('consultations.print', $checkup->id)->with('success', '✅ Checkup added successfully.');

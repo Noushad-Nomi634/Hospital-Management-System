@@ -37,6 +37,7 @@
                                     <th>Invoice</th>
                                     <th>Date</th>
                                     <th>MR-Patient</th>
+                                    <th>Patient</th>
                                     <th>Doctor</th>
                                     <th>Diagnosis</th>
                                     <th>Note</th>
@@ -60,7 +61,8 @@
                                         <td>{{ $count }}</td>
                                         <td>{{ $session->checkup_id }}</td>
                                         <td>{{ date('d-m-Y', strtotime($session->created_at)) ?? 'N/A' }}</td>
-                                        <td>{{ $session->patient?->mr ?? ('N/A' . '-' . $session->patient?->name ?? 'N/A') }}</td>
+                                        <td>{{ $session->patient?->mr ?? 'N/A' }}</td>
+                                        <td>{{ $session->patient?->name ?? 'N/A' }}</td>
                                         <td>{{ $session->checkup?->doctor ? $session->checkup->doctor->first_name . ' ' . $session->checkup->doctor->last_name : 'N/A' }}
                                         </td>
                                         <td>{{ $session->diagnosis ?? '-' }}</td>
@@ -84,7 +86,11 @@
 
                                         {{-- Actions Dropdown --}}
                                         <td class="text-center">
+                                            @if($session->enrollment_status ===0)
                                               <a href="{{ route('treatment-sessions.sessions', $session->id) }}" class="btn btn-sm btn-info mb-1 w-100">Sessions</a>
+                                            @else
+                                              <a href="{{ route('session-details', $session->id) }}" class="btn btn-sm btn-info mb-1 w-100">View Sessions</a>
+                                             @endif
                                         </td>
                                     </tr>
 

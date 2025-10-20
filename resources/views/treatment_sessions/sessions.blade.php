@@ -1,253 +1,218 @@
 @extends('layouts.app')
 
-@section('title', 'Treatment Slip & Sessions')
+@section('title')
+    Ongoing Sessions
+@endsection
+
+@push('css')
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    {{-- 👈 Buttons CSS --}}
+    <style>
+        /* Dropdown cut hone ka fix */
+        .dataTables_scrollBody {
+            overflow: visible !important;
+        }
+        .dropdown-menu {
+            z-index: 9999 !important;
+        }
+    </style>
+@endpush
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white d-flex align-items-center">
-                    <i class="material-icons-outlined me-2">assignment</i>
-                    <h5 class="mb-0 text-white">Treatment Session Overview</h5>
+    <x-page-title title="Ongoing Sessions" subtitle="List of all Ongoing Sessions" />
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary">
+                    <h5 class="mb-0 text-white">Ongoing Sessions</h5>
+                    {{-- <a href="{{ route('consultations.create') }}" class="btn btn-primary btn-sm" style="font-weight: 500;">
+                        Add New Consultation
+                    </a> --}}
                 </div>
+
                 <div class="card-body">
-                    <div class="row g-3">
-
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded bg-light d-flex align-items-center">
-                                <i class="material-icons-outlined text-primary me-2">person</i>
-                                <div>
-                                    <strong>Patient Name:</strong> {{ $patient->name ?? 'N/A' }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded bg-light d-flex align-items-center">
-                                <i class="material-icons-outlined text-success me-2">badge</i>
-                                <div>
-                                    <strong>MR No:</strong> {{ $patient->mr ?? 'N/A' }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded bg-light d-flex align-items-center">
-                                <i class="material-icons-outlined text-warning me-2">calendar_today</i>
-                                <div>
-                                    <strong>Date:</strong> {{ format_date($ongoingSessions->created_at ?? now()) }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded bg-light d-flex align-items-center">
-                                <i class="material-icons-outlined text-info me-2">local_hospital</i>
-                                <div>
-                                    <strong>DR Consultation:</strong> {{ doctor_get_name($ongoingSessions->doctor_id) }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 border rounded bg-light d-flex align-items-center">
-                                <i class="material-icons-outlined text-danger me-2">medical_information</i>
-                                <div>
-                                    <strong>Session DR:</strong> {{ doctor_get_name($ongoingSessions->ss_dr_id)}}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="p-3 border rounded bg-light">
-                                <i class="material-icons-outlined text-primary me-2">assignment_turned_in</i>
-                                <strong>Diagnosis:</strong>
-                                <p class="mt-2 mb-0">{{ $ongoingSessions->diagnosis ?? 'No diagnosis provided.' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="p-3 border rounded bg-light">
-                                <i class="material-icons-outlined text-secondary me-2">notes</i>
-                                <strong>Note:</strong>
-                                <p class="mt-2 mb-0">{{ $ongoingSessions->note ?? '-' }}</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-
-
-
-            <!-- Enrollment Update Form -->
-            <div class="card p-3">
-                <h5>Enroll {{ $patient->name ?? 'the Patient' }} in Treatment Sessions</h5>
-
-                <form method="POST" action="{{ route('treatment-sessions.enrollmentUpdate', $ongoingSessions->id ?? 0) }}">
-                    @csrf
-                    @method('PUT')
-
-                    <!-- Hidden IDs -->
-                    <input type="hidden" name="session_id" value="{{ $ongoingSessions->id ?? '' }}">
-                    <input type="hidden" id="session_count_input" name="session_count" value="0">
-                    <input type="hidden" id="dues_amount_input" name="dues_amount" value="0">
-
-                    <!-- Sessions Table -->
-                    <div class="mb-3">
-                        <label class="form-label">Session Dates & Times</label>
-                        <table id="sessionTable" class="table table-bordered">
-                            <thead>
+                    <div class="table-responsive">
+                        <table id="sessions-table" class="table table-bordered table-hover dataTable no-footer">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th>Session Date</th>
-                                    <th>Session Time</th>
-                                    <th>Actions</th>
+                                    <th>Sr No</th>
+                                    <th>Invoice</th>
+                                    <th>Date</th>
+                                    <th>MR</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Sanction Doctor</th>
+                                    <th>Diagnosis</th>
+                                    <th>Note</th>
+                                    <th>Total Sessions</th>
+                                    <th>Remaining Sessions</th>
+                                    <th>Completed Sessions</th>
+                                    <th>Status</th>
+                                    <th style="width:220px;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody>
+                                @php
+                                    $count = 0;
+                                @endphp
+                                @foreach ($sessions as $session)
+                                    @php
+                                        $count++;
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $count }}</td>
+                                        <td>{{ $session->id }}</td>
+                                        <td>{{ date('d-m-Y', strtotime($session->created_at)) ?? 'N/A' }}</td>
+                                        <td>{{ $session->patient?->mr ?? 'N/A' }}</td>
+                                        <td>{{ $session->patient?->name ?? 'N/A' }}</td>
+                                        <td>{{ $session->checkup?->doctor ? $session->checkup->doctor->first_name . ' ' . $session->checkup->doctor->last_name : 'N/A' }}
+                                        </td>
+                                        <td>{{ doctor_get_name($session->ss_dr_id) }}</td>
+                                        <td>{{ $session->diagnosis ?? '-' }}</td>
+                                        <td>{{ $session->note ?? '-' }}</td>
+                                        <td>{{ $session->session_count }}</td>
+                                        <td>{{ $session->pending_count }}</td>
+                                        <td>{{ $session->completed_count }}</td>
+
+
+
+                                        {{-- Sessions Info --}}
+                                        <td>
+                                            @if ($session->status === 0)
+                                                <span class="badge bg-warning text-dark">Not Enroll</span>
+                                            @elseif ($session->status === 1)
+                                                <span class="badge bg-success">Ongoing</span>
+                                            @elseif ($session->status === 2)
+                                                <span class="badge bg-success">Completed</span>
+                                            @elseif ($session->status === 3)
+                                                <span class="badge bg-danger">Cancelled</span>
+                                            @else
+                                                <span class="badge bg-secondary">Unknown</span>
+                                            @endif
+                                        </td>
+
+                                        {{-- Actions Dropdown --}}
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-sm">Action</button>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-sm dropdown-toggle dropdown-toggle-split"
+                                                    data-bs-toggle="dropdown">
+                                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
+
+                                                    <a href="{{ route('session-details', $session->id) }}"
+                                                        class="btn btn-sm btn-primary mb-1 w-100">Details</a>
+
+                                                    <a href="{{ route('treatment-sessions.edit', $session->id) }}"
+                                                        class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
                         </table>
-                        <p class="mt-2">Total Sessions: <span id="sessionCount">0</span></p>
                     </div>
-                    <!-- Fees & Payments -->
-                    <div class="row">
-                        <!-- Session Fee -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Total Session Fee</label>
-                            <input type="number" class="form-control" name="session_fee" id="session_fee" min="0" required>
-                        </div>
-
-                        <!-- Paid Amount -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Paid Amount</label>
-                            <input type="number" class="form-control" name="paid_amount" id="paid_amount" min="0" required>
-                        </div>
-                    </div>
-
-                    <!-- Fee Summary -->
-                    <!-- Fee Summary -->
-                    <div class="card mb-3">
-                        <div class="card-body bg-light">
-                            <h5 class="card-title mb-3">Payment Status</h5>
-                            <div class="row text-center">
-                                <div class="col-md-3 col-6 mb-2">
-                                    <div class="p-2 border rounded bg-white shadow-sm">
-                                        <small class="text-muted">Total Fee</small>
-                                        <h6 class="mb-0 text-primary" id="totalFee">0</h6>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6 mb-2">
-                                    <div class="p-2 border rounded bg-white shadow-sm">
-                                        <small class="text-muted">Per Session Fee</small>
-                                        <h6 class="mb-0 text-success" id="perSessionFee">0</h6>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6 mb-2">
-                                    <div class="p-2 border rounded bg-white shadow-sm">
-                                        <small class="text-muted">Paid Amount</small>
-                                        <h6 class="mb-0 text-info" id="paidAmount">0</h6>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6 mb-2">
-                                    <div class="p-2 border rounded bg-white shadow-sm">
-                                        <small class="text-muted">Due Amount</small>
-                                        <h6 class="mb-0 text-danger" id="dueAmount">0</h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="mb-3 text-end">
-                        <button type="submit" class="btn btn-primary">Save Sessions</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @push('script')
- {{-- Core Plugins --}}
+    {{-- jQuery --}}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    {{-- DataTables JS --}}
+    {{-- DataTables JS --}}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    {{-- Buttons Extension JS --}}
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    {{-- Core Plugins --}}
     <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ URL::asset('build/js/main.js') }}"></script>
-<script>
-let sessionIndex = 0;
 
-function formatDate(date) {
-    const d = new Date(date);
-    return d.getFullYear() + '-' +
-           String(d.getMonth()+1).padStart(2,'0') + '-' +
-           String(d.getDate()).padStart(2,'0');
-}
 
-function addRow(button=null){
-    let newDate = new Date();
-    const rows = document.querySelectorAll('#sessionTable tbody tr');
-    if(rows.length > 0){
-        const lastDateInput = rows[rows.length-1].querySelector('input[type="date"]');
-        const lastDate = new Date(lastDateInput.value);
-        newDate = new Date(lastDate);
-        newDate.setDate(newDate.getDate()+1);
-    }
 
-    const row = document.createElement('tr');
-    row.innerHTML = `
-        <td><input type="date" name="sessions[${sessionIndex}][date]" class="form-control" required value="${formatDate(newDate)}"></td>
-        <td><input type="time" name="sessions[${sessionIndex}][time]" class="form-control" required value="12:00"></td>
-        <td>
-            <button type="button" class="btn btn-success btn-sm me-1" onclick="addRow(this)">➕</button>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">❌</button>
-        </td>
-    `;
-    if(button){
-        button.closest('tr').after(row);
-    }else{
-        document.querySelector('#sessionTable tbody').appendChild(row);
-    }
 
-    sessionIndex++;
-    updateSessionCount();
-    calculateFees();
-}
+    <script>
+        $(document).ready(function() {
+            var table = $('#sessions-table').DataTable({
+                responsive: false, // ❌ disable responsive (so columns na hide ho)
+                scrollX: true, // ✅ horizontal scroll enable
+                ordering: true,
+                searching: true,
+                scrollCollapse: false,
+                pageLength: 5,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
+                // Remove fixed widths and let columns auto adjust
+                autoWidth: false,
+                scrollX: true,
+                columnDefs: [{
+                    targets: [8, 9],
+                    orderable: false,
+                    searchable: false
+                }],
+                drawCallback: function() {
+                    $('#sessions-table').css('width', '100%');
+                },
+                createdRow: function(row, data, dataIndex) {
+                    $(row).find('td').css('vertical-align', 'middle');
+                },
+                dom: "<'row mb-3'<'col-md-4'l><'col-md-4 text-end'B><'col-md-4'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
+                buttons: [{
+                        extend: 'copy',
+                        text: 'Copy',
+                        className: 'btn btn-sm btn-light'
+                    },
+                    {
+                        extend: 'csv',
+                        text: 'CSV',
+                        className: 'btn btn-sm btn-light'
+                    },
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        className: 'btn btn-sm btn-light'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        className: 'btn btn-sm btn-light'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'btn btn-sm btn-light'
+                    }
+                ]
+            });
 
-function removeRow(button){
-    button.closest('tr').remove();
-    updateSessionCount();
-    calculateFees();
-}
-
-function updateSessionCount(){
-    const count = document.querySelectorAll('#sessionTable tbody tr').length;
-    document.getElementById('sessionCount').innerText = count;
-    document.getElementById('session_count_input').value = count; // ✅ hidden update
-}
-
-function calculateFees(){
-    const sessionCount = document.querySelectorAll('#sessionTable tbody tr').length;
-    const sessionFee = parseFloat(document.getElementById('session_fee').value) || 0;
-    const paidAmount = parseFloat(document.getElementById('paid_amount').value) || 0;
-
-    const perSession = sessionCount > 0 ? (sessionFee/sessionCount).toFixed(2) : 0;
-    const due = (sessionFee - paidAmount).toFixed(2);
-
-    document.getElementById('totalFee').innerText = sessionFee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('perSessionFee').innerText = perSession.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('paidAmount').innerText = paidAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('dueAmount').innerText = due.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('dues_amount_input').value = due;
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-    addRow(); // add default first row
-    document.getElementById('session_fee').addEventListener('input', calculateFees);
-    document.getElementById('paid_amount').addEventListener('input', calculateFees);
-});
-</script>
+            // Styling fix for search + length dropdown
+            $('.dataTables_filter input').addClass('form-control form-control-sm');
+            $('.dataTables_length select').addClass('form-select form-select-sm');
+        });
+    </script>
 @endpush

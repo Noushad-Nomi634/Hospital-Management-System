@@ -12,11 +12,9 @@ return new class extends Migration
     public function up(): void
     {
        Schema::table('transactions', function (Blueprint $table) {
-            // 1. Payment type (appointment, sessions, salaries, expense)
-            $table->enum('payment_type', ['appointment', 'sessions', 'salaries', 'expense'])->after('id');
 
             // 2. Invoice id (nullable because har transaction ke liye zaroori nahi)
-            $table->unsignedBigInteger('invoice_id')->nullable()->after('payment_type');
+            $table->unsignedBigInteger('invoice_id')->nullable()->after('id');
 
             // 3. Payment method (cash, bank transfer)
             $table->enum('payment_method', ['cash', 'bank_transfer'])->after('invoice_id');

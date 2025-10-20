@@ -36,7 +36,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Balance</label>
+                            <label class="form-label">Opening Balance</label>
                             <input type="number" step="0.01" name="balance" class="form-control" required>
                         </div>
 

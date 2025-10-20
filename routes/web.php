@@ -85,8 +85,46 @@ Route::middleware(['auth'])->group(function () {
      //Doctor Consultation Route
     Route::get('/doctor-consultations/{status}', [TreatmentSessionController::class, 'index'])->name('doctor-consultations.index');
 
-    // Enrollment Admin Route
+    // Enrollment Session Route
     Route::get('/enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])->name('enrollments');
+    Route::get('/treatment-sessions/sessions/{session_id}', [TreatmentSessionController::class, 'showOngoingSessions'])
+    ->name('treatment-sessions.sessions');
+    // Enrollment Update Route
+    Route::put('/treatment-sessions/{id}/enrollment-update', [TreatmentSessionController::class, 'enrollmentUpdate'])
+        ->name('treatment-sessions.enrollmentUpdate');
+
+    // Ongoing Sessions Route
+    Route::get('/ongoing-sessions/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])->name('ongoing-sessions');
+    Route::get('/session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])->name('session-details');
+
+    // Completed Sessions Route
+    Route::post('/sessions/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])->name('sessions.mark-completed');
+
+
+    //Accounts Payments Routes
+    Route::get('/payments/outstanding-invoices', [PaymentOutstandingController::class, 'index'])->name('accounts.payments');
+    Route::get('//payments/completed-invoices', [PaymentOutstandingController::class, 'completedInvoices'])->name('accounts.completed-invoices');
+
+    // Invoice Ledger Route
+    Route::get('/invoice-ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedger'])->name('invoice.ledger');
+
+    // Add payment to invoice
+    Route::post('/invoice-ledger/add-payment', [PaymentOutstandingController::class, 'addPayment'])->name('invoice.add-payment');
+
+
+    //Return Payments Route
+    // page that lists returned payments (you already have)
+    Route::get('/payments/return-payments', [PaymentOutstandingController::class, 'returnPayments'])
+        ->name('payments.return-payments');
+
+    // AJAX: search patients (used by your patient search input)
+    Route::get('/payments/search-patient', [PaymentOutstandingController::class, 'searchPatient'])
+        ->name('payments.search-patient');
+
+    // AJAX: fetch payments HTML partial for a patient (used when clicking View Payments)
+    Route::get('/payments/fetch-patient-payments', [PaymentOutstandingController::class, 'fetchPatientPayments'])
+        ->name('payments.fetch-patient-payments');
+
 });
 
 
@@ -243,11 +281,7 @@ Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, '
     ->middleware('auth');
 
 
- Route::get('/treatment-sessions/sessions/{session_id}', [TreatmentSessionController::class, 'showOngoingSessions'])
-    ->name('treatment-sessions.sessions');
-// Enrollment Update Route
-Route::put('/treatment-sessions/{id}/enrollment-update', [TreatmentSessionController::class, 'enrollmentUpdate'])
-    ->name('treatment-sessions.enrollmentUpdate');
+
 
 
 
