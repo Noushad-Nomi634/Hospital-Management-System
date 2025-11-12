@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Patient;
 use App\Models\Bank;
-
+use Illuminate\Support\Facades\Auth;
 
 class TreatmentSessionController extends Controller
 {
@@ -363,23 +363,26 @@ public function show($status)
     }
 
     // Show OngoingSessionsOnly based on status (1 = Ongoing, 2 = Completed, 3 = Cancelled)
-    public function OngoingSessionsOnly($status)
-    {
-        try {
-                $sessions = TreatmentSession::with(['doctor', 'patient', 'checkup'])
-                    ->withCount([
-                        'sessionTimes as pending_count' => function ($query) {
-                            $query->where('is_completed', 0);
-                        },
-                        'sessionTimes as completed_count' => function ($query) {
-                            $query->where('is_completed', 1);
-                        },
-                    ])
-                    ->where('status', $status)
-                    ->where('enrollment_status', 1)
-                    ->orderByDesc('created_at')
-                    ->get();
-                    //echo '<pre>'; print_r($sessions->toArray()); echo '</pre>'; exit; // Debugging line
+   public function OngoingSessionsOnly($status)
+{
+    try {
+        $doctorId = Auth::id(); // Login doctor ka ID
+
+        $sessions = TreatmentSession::with(['doctor', 'patient', 'checkup'])
+            ->withCount([
+                'sessionTimes as pending_count' => function ($query) {
+                    $query->where('is_completed', 0);
+                },
+                'sessionTimes as completed_count' => function ($query) {
+                    $query->where('is_completed', 1);
+                },
+            ])
+            ->where('status', $status)
+            ->where('enrollment_status', 1)
+            ->where('doctor_id', $doctorId) // <-- Yahan filter add kiya
+            ->orderByDesc('created_at')
+            ->get();
+  //echo '<pre>'; print_r($sessions->toArray()); echo '</pre>'; exit; // Debugging line
                 return view('treatment_sessions.sessions', compact('sessions'));
         } catch (\Exception $e) {
                 return redirect()->back()->with('error', '❌ Failed to load enrollments: ' . $e->getMessage());

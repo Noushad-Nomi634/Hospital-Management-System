@@ -1,47 +1,62 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Doctors;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\Doctor;
-use App\Models\Patient;
 use App\Models\Checkup;
 use App\Models\TreatmentSession;
-use Carbon\Carbon;
 
-class DashboardController extends Controller
+class DoctorDashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // echo "<pre>";
-        // print_r(auth()->user());
-        // echo "</pre>";
+        $doctorId = Auth::id(); // Logged-in doctor
 
-        // ✅ Total counts
-        $totalDoctors = Doctor::count();
-        $totalPatients = Patient::count();
-        $totalCheckups = Checkup::count();
+        // ────────────── Appointments Pending & Completed ──────────────
+        $appointmentsPending = Checkup::where('doctor_id', $doctorId)
+                                      ->where('checkup_status', 0) // pending
+                                      ->count();
 
-        // ✅ Aaj ke sessions ka count (session_date pe filter)
-        $totalSessionsToday = TreatmentSession::whereDate('session_date', Carbon::today())->count();
+        $appointmentsCompleted = Checkup::where('doctor_id', $doctorId)
+                                        ->where('checkup_status', 1) // completed
+                                        ->count();
 
-        // ✅ Aaj ke checkups ki payment (checkup tabhi hota hai jab create hota hai, is liye created_at sahi hai)
-        $checkupPaymentsToday = Checkup::whereDate('created_at', Carbon::today())->sum('fee');
+        // ────────────── Satisfactory Sessions Pending & Completed ──────────────
+        $satisfactorySessionsPending = TreatmentSession::where('doctor_id', $doctorId)
+                                                        ->where('con_status', 0) // pending
+                                                        ->count();
 
-        // ✅ Aaj ke sirf paid sessions ki payment (session_date pe filter)
-        $sessionPaymentsToday = TreatmentSession::whereDate('session_date', Carbon::today())
-            ->where('payment_status', 'paid')
-            ->sum('session_fee');
+        $satisfactorySessionsCompleted = TreatmentSession::where('doctor_id', $doctorId)
+                                                          ->where('con_status', 1) // completed
+                                                          ->count();
 
-        // ✅ Aaj ki total paid payment (checkup + sessions)
-        $totalPaymentsToday = $checkupPaymentsToday + $sessionPaymentsToday;
+        // ────────────── Today’s Sessions Pending & Completed ──────────────
+        $sessionsTodayPending = TreatmentSession::where('doctor_id', $doctorId)
+                                                ->where('status', 0) // pending sessions
+                                                ->whereDate('session_date', now()->format('Y-m-d'))
+                                                ->count();
 
-        return view('dashboard', compact(
-            'totalDoctors',
-            'totalPatients',
-            'totalCheckups',
-            'totalSessionsToday',
-            'totalPaymentsToday'
+        $sessionsTodayCompleted = TreatmentSession::where('doctor_id', $doctorId)
+                                                  ->where('status', 1) // completed sessions
+                                                  ->whereDate('session_date', now()->format('Y-m-d'))
+                                                  ->count();
+
+        // ────────────── Today’s Patients (Checkups) ──────────────
+        $patientsTodayCount = Checkup::where('doctor_id', $doctorId)
+                                     ->whereDate('checkup_date', now()->format('Y-m-d'))
+                                     ->distinct('patient_id')
+                                     ->count('patient_id');
+
+        return view('doctor.dashboard', compact(
+            'appointmentsPending',
+            'appointmentsCompleted',
+            'satisfactorySessionsPending',
+            'satisfactorySessionsCompleted',
+            'sessionsTodayPending',
+            'sessionsTodayCompleted',
+            'patientsTodayCount'
         ));
     }
 }

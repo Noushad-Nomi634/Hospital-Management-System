@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Checkup;
 use App\Models\TreatmentSession;
@@ -12,52 +13,79 @@ class ReceptionistDashboardController extends Controller
 {
     public function index()
     {
-        $today = Carbon::today();
-        $thirtyDaysAgo = Carbon::today()->subDays(30);
+        // 🔹 Logged-in receptionist ka branch
+        $branch_id = auth()->user()->branch_id;
 
-        // ─────────── Today Consultations ───────────
-        $todayConsultations = Checkup::whereDate('date', $today)->get();
-        $todayConsultationFee = $todayConsultations->sum('fee');
+        $branch = auth()->user()->branch?->name ?? 'N/A';
+
+
+        // 🔹 Today ka date (timezone-safe)
+        $today = now()->toDateString(); // "2025-11-08"
+
+        // ─────────── Today Appointments / Checkups ───────────
+        $todayAppointmentsQuery = Checkup::where('branch_id', $branch_id)
+            ->whereDate('created_at', $today);
+
+        $todayAppointmentsCount = $todayAppointmentsQuery->count();
+        $todayAppointmentsFee   = $todayAppointmentsQuery->sum('fee');
 
         // ─────────── Today Sessions ───────────
-        $todaySessionsQuery = TreatmentSession::where(function ($query) use ($today) {
-            $query->whereDate('session_date', $today)
-                  ->orWhere(function ($q2) use ($today) {
-                      $q2->whereNull('session_date')
-                         ->whereDate('created_at', $today);
-                  });
-        });
+      $today = \Carbon\Carbon::today();
 
-        $todaySessions = $todaySessionsQuery->get();
-        $todaySessionFee = $todaySessionsQuery->sum('paid_amount'); // total paid amount today
-        $totalTodaySessions = $todaySessions->count();
+$todaySessionsQuery = TreatmentSession::where('branch_id', $branch_id)
+    ->where('status', 2) // sirf wo sessions jinka status = 1 hai
+    ->whereDate('created_at', $today); // aaj ki date ka filter
 
-        // ─────────── Today Payments ───────────
-        $todayPayments = Transaction::whereDate('created_at', $today)
-                                    ->where('type', '+')
-                                    ->get();
+$todaySessionsCount = $todaySessionsQuery->count();
+$todaySessionsFee   = $todaySessionsQuery->sum('session_fee');
 
-        $totalPaymentsInHand = $todayPayments->sum('amount');
 
-        // ─────────── Cash / Online Breakdown ───────────
-        $todayCashPayments = $todayPayments->filter(fn($p) => str_contains(strtolower($p->Remx), 'cash'))->sum('amount');
-        $todayOnlinePayments = $todayPayments->filter(fn($p) => str_contains(strtolower($p->Remx), 'online'))->sum('amount');
+        // ─────────── Satisfactory Sessions (Pending / Completed) ───────────
+        $todayPendingSatisfactorySessions = TreatmentSession::where('branch_id', $branch_id)
+            ->where('con_status', 0)
+            ->count();
 
-        // ─────────── Last 30 Days Income ───────────
-        $last30DaysIncome = Transaction::whereDate('created_at', '>=', $thirtyDaysAgo)
-                                       ->where('type', '+')
-                                       ->sum('amount');
+        $todayCompletedSatisfactorySessions = TreatmentSession::where('branch_id', $branch_id)
+            ->where('con_status', 1)
+            ->count();
 
+        // ─────────── Enrollment Pending / Completed ───────────
+        $enrollmentPending = TreatmentSession::where('branch_id', $branch_id)
+            ->where('enrollment_status', 0)
+            ->count();
+
+        $enrollmentCompleted = TreatmentSession::where('branch_id', $branch_id)
+            ->where('enrollment_status', 1)
+            ->count();
+
+        // ─────────── Pending Invoices ───────────
+        $pendingInvoicesQuery = TreatmentSession::where('branch_id', $branch_id)
+            ->where('payment_status', 'unpaid');
+
+        $pendingInvoicesCount = $pendingInvoicesQuery->count();
+        $pendingInvoicesTotal = $pendingInvoicesQuery->sum('session_fee');
+
+        // ─────────── Today Payments Received ───────────
+        $todayPayments = Transaction::where('branch_id', $branch_id)
+            ->whereDate('created_at', $today) // timezone-safe
+            ->where('type', '+')
+            ->sum('amount');
+
+        // ─────────── Return to Blade ───────────
         return view('receptionist.dashboard', compact(
-            'todayConsultations',
-            'todayConsultationFee',
-            'todaySessions',
-            'todaySessionFee',
-            'totalTodaySessions',
-            'totalPaymentsInHand',
-            'todayCashPayments',
-            'todayOnlinePayments',
-            'last30DaysIncome'
+            'todayAppointmentsCount',
+            'todayAppointmentsFee',
+            'todaySessionsCount',
+            'todaySessionsFee',
+            'todayPendingSatisfactorySessions',
+            'todayCompletedSatisfactorySessions',
+            'enrollmentPending',
+            'enrollmentCompleted',
+            'pendingInvoicesCount',
+            'pendingInvoicesTotal',
+            'todayPayments',
+            'today',
+            'branch'
         ));
     }
 }

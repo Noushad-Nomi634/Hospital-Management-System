@@ -32,8 +32,7 @@
                                     <th>MR No</th>
                                     <th>Patient Name</th>
                                     <th>Phone</th>
-                                    <th>Total Appointments</th>
-                                    <th>Total Sessions</th>
+                                    <th>Age</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -79,7 +78,7 @@ $(document).ready(function() {
         }
 
         $.ajax({
-            url: "{{ route('payments.search-patient') }}", // Backend route for patient search
+            url: "{{ route('payments.search-patient') }}",
             method: "GET",
             data: { q: query },
             success: function(response) {
@@ -92,14 +91,19 @@ $(document).ready(function() {
                                 <td>${p.mr}</td>
                                 <td>${p.name}</td>
                                 <td>${p.phone ?? '-'}</td>
-                                <td>${p.total_appointments}</td>
-                                <td>${p.total_sessions}</td>
-                                <td><button class="btn btn-sm btn-primary viewPayments" data-id="${p.id}" data-name="${p.name}">View Payments</button></td>
+                                <td>${p.age ?? '-'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary viewPayments" 
+                                            data-id="${p.id}" 
+                                            data-name="${p.name}">
+                                        View Payments
+                                    </button>
+                                </td>
                             </tr>
                         `;
                     });
                 } else {
-                    tableBody = '<tr><td colspan="6" class="text-center text-muted">No patients found</td></tr>';
+                    tableBody = '<tr><td colspan="5" class="text-center text-muted">No patients found</td></tr>';
                 }
                 $('#patients-table tbody').html(tableBody);
             }

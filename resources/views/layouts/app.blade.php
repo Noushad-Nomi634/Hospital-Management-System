@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark-theme">
 
@@ -13,13 +12,43 @@
 
     {{-- Common CSS & page-specific CSS --}}
     @include('layouts.head-css')
-    @stack('css') {{-- Page-specific CSS from @push('css') --}}
+    @stack('css')
     <link rel="stylesheet" href="{{ URL::asset('build/plugins/notifications/css/lobibox.min.css') }}">
 
- <!-- 👇 Custom Dashboard CSS -->
-    {{-- <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet"> --}}
+    <style>
+        /* ✅ Global Scroll Fix */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto !important;
+        }
 
+        /* ✅ Main Content Scroll */
+        .main-wrapper {
+            min-height: 100vh;
+            overflow-y: auto !important;
+        }
 
+        /* ✅ Sidebar Scroll Enabled */
+        .sidebar-wrapper {
+            height: 100vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+
+        /* Optional: nice scrollbar look */
+        .sidebar-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar-wrapper::-webkit-scrollbar-thumb {
+            background-color: #a0a0a0;
+            border-radius: 4px;
+        }
+        .sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+            background-color: #888;
+        }
+    </style>
 </head>
 
 <body>
@@ -28,7 +57,21 @@
     @include('layouts.topbar')
 
     {{-- Sidebar menu --}}
-    @include('layouts.sidebar')
+    @php
+        $role = auth()->user()->roles->first()->name ?? 'guest';
+    @endphp
+
+   @if($role === 'admin')
+    @include('layouts.sidebar', ['role' => $role])
+@elseif($role === 'manager')
+    @include('layouts.manager-sidebar', ['role' => $role])
+@elseif($role === 'doctor')
+    @include('layouts.doctor-sidebar', ['role' => $role])
+@elseif($role === 'receptionist')
+    @include('layouts.receptionist_sidebar', ['role' => $role])
+@else
+    <div class="sidebar-wrapper">No sidebar available</div>
+@endif
 
     <!--start main wrapper-->
     <main class="main-wrapper">
@@ -48,8 +91,31 @@
     {{-- Common JS scripts --}}
     @include('layouts.common-scripts')
 
-    {{-- Page-specific scripts from @push('scripts') --}}
-    @stack('script')
-</body>
+    {{-- Initialize MetisMenu & SimpleBar --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var role = "{{ $role ?? 'guest' }}";
+            var sidebarId = role + "-sidenav";
+            var element = document.getElementById(sidebarId);
 
+            // Initialize MetisMenu
+            if (element) {
+                if (window.metisMenuInstance) {
+                    window.metisMenuInstance.dispose();
+                }
+                window.metisMenuInstance = new MetisMenu(element, { toggle: true });
+            }
+
+            // Optional: Initialize SimpleBar (agar library load ho)
+            var sidebarWrapper = document.querySelector('.sidebar-wrapper[data-simplebar]');
+            if (sidebarWrapper && typeof SimpleBar !== "undefined") {
+                new SimpleBar(sidebarWrapper);
+            }
+        });
+    </script>
+
+    {{-- Page-specific scripts --}}
+    @stack('script')
+
+</body>
 </html>

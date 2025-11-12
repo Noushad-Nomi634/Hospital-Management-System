@@ -7,6 +7,9 @@
 @section('content')
     <x-page-title title="Patient" subtitle="Add New Patient" />
 
+   
+
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -62,19 +65,26 @@
                                       placeholder="Patient Address" rows="2" required>{{ old('address') }}</textarea>
                         </div>
 
+                        
+                        
+                         @if(auth()->user()->role == 'admin')
+    <div class="col-md-6">
+        <label for="branch_id" class="form-label">Branch</label>
+        <select name="branch_id" id="branch_id" class="form-select" required>
+            <option value="">Select Branch</option>
+            @foreach($branches as $branch)
+                <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                    {{ $branch->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+@else
+    <input type="hidden" name="branch_id" value="{{ auth()->user()->branch_id }}">
+@endif
 
-
-                        <div class="col-md-6">
-                            <label for="branch_id" class="form-label">Branch</label>
-                            <select name="branch_id" id="branch_id" class="form-select" required>
-                                <option value="">Select Branch</option>
-                                @foreach($branches as $branch)
-                                    <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
-                                        {{ $branch->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        
+                        
 
                         <div class="col-12 text-end">
                             <button type="submit" class="btn btn-primary px-4">Save Patient</button>

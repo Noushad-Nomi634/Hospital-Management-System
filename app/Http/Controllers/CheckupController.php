@@ -9,12 +9,14 @@ use App\Models\Checkup;
 class CheckupController extends Controller
 {
     /**
-     * 1️⃣ Show all checkups
+     * 1️⃣ Show all checkups (role-based)
      */
     public function index()
     {
         try {
-            $checkups = DB::table('checkups')
+            $user = auth()->user();
+
+            $query = DB::table('checkups')
                 ->join('patients', 'checkups.patient_id', '=', 'patients.id')
                 ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
                 ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
@@ -26,11 +28,22 @@ class CheckupController extends Controller
                     'patients.phone as patient_phone',
                     DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                     'branches.name as branch_name'
-                )
-                ->orderBy('checkups.id', 'desc')
-                ->get();
+                );
 
-                //echo "<pre>"; print_r($checkups); echo "</pre>"; exit;
+            // -------------------------
+            // Role-based Filtering
+            // -------------------------
+            if ($user->hasRole('admin')) {
+                // Admin → saari checkups
+            } elseif ($user->hasRole('doctor')) {
+                // Doctor → sirf apni checkups
+                $query->where('checkups.doctor_id', $user->id);
+            } else {
+                // Receptionist / Other branch-based users → sirf apni branch ke checkups
+                $query->where('checkups.branch_id', $user->branch_id);
+            }
+
+            $checkups = $query->orderBy('checkups.id', 'desc')->get();
 
             return view('consultations.index', [
                 'checkups'      => $checkups,
@@ -52,7 +65,6 @@ class CheckupController extends Controller
             $doctors  = DB::table('doctors')
                 ->select('id', DB::raw("CONCAT(first_name, ' ', last_name) as name"))
                 ->get();
-
             $banks = DB::table('banks')->get();
 
             return view('consultations.create', compact('patients', 'doctors', 'banks'));
@@ -63,11 +75,10 @@ class CheckupController extends Controller
     }
 
     /**
-     * 3️⃣ Store new checkup (Fully Safe Version)
+     * 3️⃣ Store new checkup
      */
     public function store(Request $request)
     {
-
         try {
             $request->validate([
                 'patient_id'     => 'required|exists:patients,id',
@@ -95,7 +106,6 @@ class CheckupController extends Controller
                 'status'         => 'completed',
             ]);
 
-
             handleGeneralTransaction(
                 branch_id: $patient->branch_id,
                 bank_id: $request->payment_method ?? null,
@@ -114,7 +124,6 @@ class CheckupController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            echo "<pre>"; print_r($e->getMessage()); echo "</pre>"; exit;
             return back()->with('error', '❌ Error saving checkup: ' . $e->getMessage());
         }
     }
@@ -205,19 +214,16 @@ class CheckupController extends Controller
      */
     public function getCheckupFee($patientId)
     {
-        // Join patients with branches to get branch fee
-            $data = DB::table('patients')
-                ->leftJoin('branches', 'patients.branch_id', '=', 'branches.id')
-                ->where('patients.id', $patientId)
-                ->select('branches.fee')
-                ->first();
+        $data = DB::table('patients')
+            ->leftJoin('branches', 'patients.branch_id', '=', 'branches.id')
+            ->where('patients.id', $patientId)
+            ->select('branches.fee')
+            ->first();
 
-            // If branch or fee is missing, return 0
-            $fee = $data && $data->fee ? $data->fee : 0;
+        $fee = $data && $data->fee ? $data->fee : 0;
 
-            return response()->json(['fee' => $fee]);
+        return response()->json(['fee' => $fee]);
     }
-
 
     /**
      * 🔟 Patient History
@@ -262,17 +268,13 @@ class CheckupController extends Controller
                 'patients.gender',
                 'patients.age as patient_age',
                 'patients.mr as patient_mr',
-
                 DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
                 'branches.name as branch_name'
             )
             ->where('checkups.id', $id)
             ->first();
 
-            //Branches Table show
-            $branches = DB::table('branches')->get();
-
-
+        $branches = DB::table('branches')->get();
 
         if (!$checkup) abort(404, 'Checkup not found.');
 
@@ -283,11 +285,34 @@ class CheckupController extends Controller
     }
 
     /**
-     * 🛠 Helper: Get fee by branch
+     * 12️⃣ Print Checkup Slip (Custom Blade)
      */
-    private function getFeeByBranch($branch_id)
+    public function printSlipCustom($id)
     {
-        $setting = DB::table('general_settings')->where('branch_id', $branch_id)->first();
-        return $setting ? $setting->default_checkup_fee : 0;
+        $checkup = DB::table('checkups')
+            ->join('patients', 'checkups.patient_id', '=', 'patients.id')
+            ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+            ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
+            ->select(
+                'checkups.*',
+                'patients.name as patient_name',
+                'patients.phone as patient_phone',
+                'patients.gender',
+                'patients.age as patient_age',
+                'patients.mr as patient_mr',
+                DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                'branches.name as branch_name'
+            )
+            ->where('checkups.id', $id)
+            ->first();
+
+        $branches = DB::table('branches')->get();
+
+        if (!$checkup) abort(404, 'Checkup not found.');
+
+        return view('consultations.print_custom', [
+            'checkup' => $checkup,
+            'branches' => $branches,
+        ]);
     }
 }

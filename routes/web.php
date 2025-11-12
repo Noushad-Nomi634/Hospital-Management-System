@@ -26,6 +26,15 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReceptionistDashboardController;
+use App\Http\Controllers\PaymentTransactionController;
+use App\Http\Controllers\LedgerController;
+use App\Http\Controllers\BankLedgerController;
+use App\Http\Controllers\IncomeReportController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\Manager\ManagerDashboardController;
+
+
+
 
 
 Auth::routes();
@@ -39,6 +48,18 @@ Route::get('/clear', function() {
     return "All caches cleared successfully!";
 })->name('clear');
 
+
+// ✅ Manager Dashboard Routes
+Route::prefix('manager')
+    ->middleware(['auth:web', 'role:manager'])
+    ->name('manager.')
+    ->group(function () {
+        Route::get('dashboard', [App\Http\Controllers\Manager\ManagerDashboardController::class, 'index'])
+            ->name('dashboard');
+    });
+
+
+
 // For admin only
 Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->group(function () {
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -50,23 +71,58 @@ Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->
     // Add more admin-specific routes here
 });
 
-// For Doctores only
+// For Doctores Dashboard only
 Route::prefix('doctor')->middleware(['auth:doctor', 'role:doctor'])->name('doctor.')->group(function () {
-    Route::get('dashboard', [DoctorDashboardController::class, 'index'])->name('dashboard');
-    // Add more admin-specific routes here
-});
 
-// Doctor Dashboard (for logged-in doctors only)
+    // Dashboard
+    Route::get('dashboard', [DoctorDashboardController::class, 'index'])
+        ->middleware('permission:view_dashboard')
+        ->name('dashboard');
+
+// Feedback (view-only)
+    Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->middleware('permission:view feedback');
+
+       //feedback List routes
+        Route::get('/feedback/doctor-list', [FeedbackController::class, 'doctorList'])
+    ->middleware('permission:view feedback')
+    ->name('feedback.doctor-list');
+
+Route::get('/feedback/patient-list', [FeedbackController::class, 'patientList'])
+    ->middleware('permission:view feedback')
+    ->name('feedback.patient-list');
 
 
-//For receptionist only
-Route::middleware(['auth', 'role:Receptionist'])->group(function () {
-    //Route::get('/receptionist/dashboard', [DashboardController::class, 'receptionistIndex']);
+
+    // Appointments
+  Route::get('appointments', [CheckupController::class, 'index'])
+       ->middleware('permission:manage_appointments')
+       ->name('appointments.index');
+
+    // Sessions
+    Route::get('sessions', [SessionController::class, 'index'])
+        ->middleware('permission:manage_sessions')
+        ->name('sessions.index');
+
+         // Ongoing Sessions Route
+    Route::get('/ongoing-sessions/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])->name('ongoing-sessions');
+    Route::get('/session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])->name('session-details');
+
+    // Completed Sessions Route
+    Route::post('/sessions/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])->name('sessions.mark-completed');
+
+
+
+
+    // Feedback (view only)
+    Route::get('feedback', [FeedbackController::class, 'index'])
+        ->middleware('permission:view feedback')
+        ->name('feedback.index');
+
 });
 
 
 // For all authenticated users
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:admin|receptionist|manager'])->group(function () {
     //patients
     Route::get('/patients', [PatientController::class, 'index']);
     Route::get('/patients/create', [PatientController::class, 'create']);
@@ -108,6 +164,17 @@ Route::middleware(['auth'])->group(function () {
     // Invoice Ledger Route
     Route::get('/invoice-ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedger'])->name('invoice.ledger');
 
+// Patient Ledger2
+Route::get('/patient-invoice-ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedgerr'])
+    ->name('invoice.ledgerr');
+
+    // New custom print route
+Route::get('/consultations/print-custom/{id}', [CheckupController::class, 'printSlipCustom'])->name('consultations.print.custom');
+
+    // Process Return Payment (Refund)
+Route::post('/payments/return', [PaymentOutstandingController::class, 'returnPayment'])->name('payments.returnPayment');
+
+
     // Add payment to invoice
     Route::post('/invoice-ledger/add-payment', [PaymentOutstandingController::class, 'addPayment'])->name('invoice.add-payment');
 
@@ -116,6 +183,43 @@ Route::middleware(['auth'])->group(function () {
     // page that lists returned payments (you already have)
     Route::get('/payments/return-payments', [PaymentOutstandingController::class, 'returnPayments'])
         ->name('payments.return-payments');
+
+     // Checkup Invoice & Refund
+Route::get('/checkups/invoice/{checkup_id}', [PaymentOutstandingController::class, 'invoiceLedgerCheckup'])->name('checkups.invoice');
+Route::post('/checkups/refund', [PaymentOutstandingController::class, 'returnCheckupPayment'])->name('checkups.refund');
+
+// Payment transfer page
+Route::get('/transfer', [PaymentTransactionController::class, 'index'])->name('transfer.index');
+
+// Transfer store karne ke liye
+Route::post('/transfer', [PaymentTransactionController::class, 'store'])->name('transfer.store');
+
+// AJAX routes for balances
+Route::get('/transfer/get-bank-balance/{id}', [PaymentTransactionController::class, 'getBankBalance'])->name('transfer.getBankBalance');
+Route::get('/transfer/get-branch-balance/{id}', [PaymentTransactionController::class, 'getBranchBalance'])->name('transfer.getBranchBalance');
+
+//Branch Ledger
+Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
+Route::get('/ledger/filter', [LedgerController::class, 'filter'])->name('ledger.filter');
+
+//Bank Ledger
+Route::get('bank-ledger', [BankLedgerController::class, 'index'])->name('bankledger.index');
+Route::get('bank-ledger/filter', [BankLedgerController::class, 'filter'])->name('bankledger.filter');
+
+// Income Report
+Route::get('income-report', [IncomeReportController::class, 'index'])->name('income.report');
+
+// Feedback List Pages (branch-wise)
+Route::get('/feedback/doctor-list', [FeedbackController::class, 'doctorFeedbackList'])->name('feedback.doctor-list');
+Route::get('/feedback/patient-list', [FeedbackController::class, 'patientFeedbackList'])->name('feedback.patient-list');
+
+// Doctor Feedback
+Route::get('/feedback/doctor/{sessionId}', [FeedbackController::class, 'doctorFeedbackForm'])->name('feedback.doctor');
+Route::post('/feedback/doctor-submit', [FeedbackController::class, 'doctorFeedbackSubmit'])->name('feedback.doctor-submit');
+
+// Patient Feedback
+Route::get('/feedback/patient/{session_id}', [FeedbackController::class, 'patientFeedbackForm']);
+Route::post('/feedback/patient-submit', [FeedbackController::class, 'patientFeedbackSubmit']);
 
     // AJAX: search patients (used by your patient search input)
     Route::get('/payments/search-patient', [PaymentOutstandingController::class, 'searchPatient'])
@@ -280,10 +384,32 @@ Route::get('users/edit/{id}', [UserController::class, 'edit'])->name('users.edit
 Route::post('users/update/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
-//Receptionist Dashboard
-Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, 'index'])
-    ->name('receptionist.dashboard')
-    ->middleware('auth');
+// For admin and receptionist
+Route::middleware(['role:receptionist'])->group(function () {
+  Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, 'index'])->name('receptionist.dashboard');
+
+    // Appointments Module
+    Route::get('/appointments', [App\Http\Controllers\AppointmentController::class, 'index'])->middleware('permission:view appointments');
+    Route::get('/appointments/create', [App\Http\Controllers\AppointmentController::class, 'create'])->middleware('permission:create appointments');
+    Route::post('/appointments/store', [App\Http\Controllers\AppointmentController::class, 'store'])->middleware('permission:create appointments');
+
+    // Consultation (view only)
+    Route::get('/consultations', [App\Http\Controllers\ConsultationController::class, 'index'])->middleware('permission:view consultation');
+
+    // Enrollment
+    Route::get('/enrollments', [App\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:view enrollment');
+    Route::get('/enrollments/create', [App\Http\Controllers\EnrollmentController::class, 'create'])->middleware('permission:create enrollment');
+
+    // Feedback (view-only)
+    Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->middleware('permission:view feedback');
+
+    // Payments
+    Route::get('/payments', [App\Http\Controllers\PaymentController::class, 'index'])->middleware('permission:view payments');
+    Route::get('/payments/create', [App\Http\Controllers\PaymentController::class, 'create'])->middleware('permission:create payments');
+});
+
+
+
 
 
 

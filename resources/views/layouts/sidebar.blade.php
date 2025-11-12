@@ -153,6 +153,30 @@
                 </ul>
             </li>
 
+            {{-- Feedback --}}
+          
+            <li class="{{ request()->is('feedback*') ? 'mm-active' : '' }}">
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon"><i class="material-icons-outlined">feedback</i></div>
+                    <div class="menu-title">Feedback</div>
+                </a>
+                <ul class="{{ request()->is('feedback*') ? 'mm-show' : '' }}">
+    <li class="{{ request()->is('feedback/doctor-list') ? 'mm-active' : '' }}">
+        <a href="{{ url('/feedback/doctor-list') }}">
+            <i class="material-icons-outlined">fact_check</i>Doctor Feedback
+        </a>
+    </li>
+    <li class="{{ request()->is('feedback/patient-list') ? 'mm-active' : '' }}">
+        <a href="{{ url('/feedback/patient-list') }}">
+            <i class="material-icons-outlined">history</i>Patient Feedback
+        </a>
+    </li>
+</ul>
+    </li>
+   
+
+
+
             <!-- Payments Menu -->
             <li>
                 <a class="has-arrow" href="javascript:;">
@@ -269,6 +293,36 @@
                 </ul>
             </li>
 
+               {{--Reporting--}}
+
+<li>
+    <a class="has-arrow" href="javascript:;">
+        <div class="parent-icon">
+            <i class="material-icons-outlined">bar_chart</i>
+        </div>
+        <div class="menu-title">Reporting</div>
+    </a>
+    <ul>
+        <li>
+            <a href="{{ url('/ledger') }}">
+                <i class="material-icons-outlined">store</i> Branch Ledger
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('/bank-ledger') }}">
+                <i class="material-icons-outlined">account_balance</i> Bank Ledger
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('/income-report') }}">
+                <i class="material-icons-outlined">list_alt</i> All Transaction
+            </a>
+        </li>
+    </ul>
+</li>
+
+            
+
             {{--session Table--}}
             <li>
                 <a href="{{ url('/payments/outstandings') }}">
@@ -285,6 +339,17 @@
                 </a>
             </li>
 
+             {{--Payments Transactions--}}
+            <li>
+                <a href="{{ url('/transfer') }}">
+                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
+                <div class="menu-title">Payments Transactions</div>
+                </a>
+            </li>
+
+
+          
+           
           @endrole
 {{-- ==================Docter Menu==================== --}}
           @auth('doctor')

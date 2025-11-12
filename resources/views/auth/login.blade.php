@@ -89,6 +89,9 @@
                                                 <option value="receptionist"
                                                     {{ old('role') == 'receptionist' ? 'selected' : '' }}>Receptionist
                                                 </option>
+                                                <option value="manager" {{ old('role') == 'manager' ? 'selected' : '' }}>
+                                                    Manager</option>
+
                                                 <option value="accountant"
                                                     {{ old('role') == 'accountant' ? 'selected' : '' }}>Accountant
                                                 </option>

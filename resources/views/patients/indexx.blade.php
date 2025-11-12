@@ -25,7 +25,7 @@
                     <!-- Header with Add New Button -->
                     <div class="d-flex justify-content-between mb-3">
                         <h5 class="mb-0">All Patients</h5>
-                        <a href="{{ url('/patients/create') }}" class="btn btn-primary">Add New Patient</a>
+                        <a href="{{ url('/patients/create') }}" class="btn btn-primary btn-sm">Add New Patient</a>
                     </div>
 
                     <!-- Patients Table -->
@@ -58,19 +58,21 @@
 
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-outline-primary">Actions</button>
-                                                <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <button type="button" class="btn btn-outline-primary btn-sm">Actions</button>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-sm dropdown-toggle dropdown-toggle-split"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
                                                     <span class="visually-hidden">Toggle Dropdown</span>
                                                 </button>
-                                                <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
-                                                    <a href="{{ url('/patients/'.$patient->id) }}" class="btn btn-sm btn-info mb-1 w-100">Print Card</a>
-                                                    <a href="{{ url('/patients/'.$patient->id.'/edit') }}" class="btn btn-sm btn-warning mb-1 w-100">Edit</a>
+                                                <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:180px;">
+                                                    <a href="{{ url('/patients/'.$patient->id) }}" class="btn btn-info btn-sm mb-1 w-100">Print Card</a>
+                                                    <a href="{{ url('/patients/'.$patient->id.'/edit') }}" class="btn btn-warning btn-sm mb-1 w-100">Edit</a>
+                                                    <a href="{{ url('/checkups/create?patient_id='.$patient->id) }}" class="btn btn-primary btn-sm mb-1 w-100">Make Appointment</a>
                                                     <form action="{{ route('patients.destroy', $patient->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this patient?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-danger mb-1 w-100">Delete</button>
+                                                        <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
                                                     </form>
-                                                    <a href="{{ url('/checkups/create?patient_id='.$patient->id) }}" class="btn btn-sm btn-primary mb-1 w-100">Make Appointment</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -107,7 +109,6 @@
 
     <script>
         $(document).ready(function() {
-            // DataTable init
             $('#patientsTable').DataTable({
                 responsive: true,
                 autoWidth: false,
@@ -115,28 +116,8 @@
                 lengthMenu: [5, 10, 25, 50, 100],
                 ordering: true,
                 columnDefs: [
-                    { orderable: false, targets: 8 } // Disable sorting on Actions column
+                    { orderable: false, targets: 8 }
                 ],
-            });
-
-            // Initialize plugins
-            // Perfect Scrollbar
-            const container = document.querySelector('.table-responsive');
-            if(container){
-                new PerfectScrollbar(container);
-            }
-
-            // MetisMenu (for side menu if present)
-            if($("#menu").length){
-                $("#menu").metisMenu();
-            }
-
-            // Input Tags
-            $('input[data-role=tagsinput]').tagsinput();
-
-            // SimpleBar
-            $('[data-simplebar]').each(function(){
-                new SimpleBar(this);
             });
         });
     </script>

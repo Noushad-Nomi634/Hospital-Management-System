@@ -6,6 +6,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 
+use App\Http\Controllers\AppointmentController;
+
 class Doctor extends Authenticatable
 {
     use HasRoles, Notifiable;

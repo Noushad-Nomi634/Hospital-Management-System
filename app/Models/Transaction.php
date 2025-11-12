@@ -105,4 +105,10 @@ class Transaction extends Model
     {
         return str_contains(strtolower($this->Remx), 'online');
     }
+
+    public function bank()
+{
+    return $this->belongsTo(Bank::class, 'bank_id');
+}
+
 }
