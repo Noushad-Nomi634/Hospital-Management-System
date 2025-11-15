@@ -63,7 +63,7 @@ class PatientController extends Controller
                 'guardian_name' => 'required|string|max:255',
                 'age'           => 'required|numeric',
                 'phone'         => 'required|string|max:20',
-                'cnic'         => 'string|max:15',
+               'cnic'           => 'nullable|string|max:15|unique:patients,cnic',
                 'address'       => 'required|string|max:500',
                 'branch_id'     => 'required|exists:branches,id',
             ]);

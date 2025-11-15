@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class BankLedgerController extends Controller
 {
     // 🏦 Show Bank Ledger
-    public function index(Request $request)
+    public function index()
     {
         // Join transactions with banks table
         $transactions = DB::table('transactions')
