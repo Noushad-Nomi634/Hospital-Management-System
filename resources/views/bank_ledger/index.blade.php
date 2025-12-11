@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mt-4">
 
-    <h4>🏦 Bank Ledger Report</h4>
+    <h4> Bank Ledger Report</h4>
 
     <!-- 🔍 Filter Form -->
     <form action="{{ route('bankledger.filter') }}" method="GET" class="row g-3 mb-3">

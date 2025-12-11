@@ -32,6 +32,8 @@ use App\Http\Controllers\BankLedgerController;
 use App\Http\Controllers\IncomeReportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Manager\ManagerDashboardController;
+use App\Http\Controllers\ExpenseTypeController;
+use App\Http\Controllers\ExpenseController;
 
 
 
@@ -295,7 +297,7 @@ Route::get('/treatment-sessions/{id}/edit', [TreatmentSessionController::class, 
 Route::put('/treatment-sessions/{id}', [TreatmentSessionController::class, 'update'])->name('treatment-sessions.update');
 Route::delete('/treatment-sessions/{id}', [TreatmentSessionController::class, 'destroy'])->name('treatment-sessions.destroy');
 
-// ✅ Pehle likho
+// ✅ Treatment Session Summary
 Route::get('/treatment-sessions/summary', [TreatmentSessionController::class, 'sessionSummary'])
     ->name('treatment-sessions.summary');
 
@@ -409,7 +411,14 @@ Route::middleware(['role:receptionist'])->group(function () {
 });
 
 
+// EXPENSE TYPES
+Route::get('/expense-types', [ExpenseTypeController::class, 'index'])->name('expense.types');
+Route::post('/expense-types/store', [ExpenseTypeController::class, 'store'])->name('expense.types.store');
 
+// EXPENSES
+Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
+Route::post('/expenses/store', [ExpenseController::class, 'store'])->name('expenses.store');
 
 
 

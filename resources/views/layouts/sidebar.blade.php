@@ -249,7 +249,7 @@
                 </a>
                 <ul>
                     <li>
-                    <a href="{{ url('/expenses/types') }}">
+                    <a href="{{ url('/expense-types') }}">
                         <i class="material-icons-outlined">category</i> Expense Types
                     </a>
                     </li>
