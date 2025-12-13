@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="{{ URL::asset('build/plugins/notifications/css/lobibox.min.css') }}">
 
     <style>
-        /* ✅ Global Scroll Fix */
         html, body {
             height: 100%;
             margin: 0;
@@ -24,20 +23,17 @@
             overflow-y: auto !important;
         }
 
-        /* ✅ Main Content Scroll */
         .main-wrapper {
             min-height: 100vh;
             overflow-y: auto !important;
         }
 
-        /* ✅ Sidebar Scroll Enabled */
         .sidebar-wrapper {
             height: 100vh !important;
             overflow-y: auto !important;
             overflow-x: hidden !important;
         }
 
-        /* Optional: nice scrollbar look */
         .sidebar-wrapper::-webkit-scrollbar {
             width: 8px;
         }
@@ -58,20 +54,22 @@
 
     {{-- Sidebar menu --}}
     @php
-        $role = auth()->user()->roles->first()->name ?? 'guest';
+        $role = auth()->check() ? auth()->user()->roles->first()->name : null;
     @endphp
 
-   @if($role === 'admin')
-    @include('layouts.sidebar', ['role' => $role])
-@elseif($role === 'manager')
-    @include('layouts.manager-sidebar', ['role' => $role])
-@elseif($role === 'doctor')
-    @include('layouts.doctor-sidebar', ['role' => $role])
-@elseif($role === 'receptionist')
-    @include('layouts.receptionist_sidebar', ['role' => $role])
-@else
-    <div class="sidebar-wrapper">No sidebar available</div>
-@endif
+    @if($role === 'admin')
+        @include('layouts.sidebar', ['role' => $role])
+    @elseif($role === 'manager')
+        @include('layouts.manager-sidebar', ['role' => $role])
+    @elseif($role === 'doctor')
+        @include('layouts.doctor-sidebar', ['role' => $role])
+    @elseif($role === 'receptionist')
+        @include('layouts.receptionist_sidebar', ['role' => $role])
+    @else
+        <div class="sidebar-wrapper">
+            <p style="color:red; padding:10px;">Please login first to access the menu.</p>
+        </div>
+    @endif
 
     <!--start main wrapper-->
     <main class="main-wrapper">
