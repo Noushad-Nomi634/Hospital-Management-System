@@ -20,7 +20,8 @@ class UserController extends Controller
     // Show create form
     public function create() {
         $branches = Branch::all();
-        return view('users.create', compact('branches'));
+         $roles = Role::all();
+        return view('users.create',  compact('branches', 'roles'));
     }
 
     // Store new user
@@ -42,9 +43,7 @@ class UserController extends Controller
         ]);
 
         // Assign Spatie role for web guard
-        $roleName = strtolower($request->role);
-        Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-        $user->syncRoles([$roleName]);
+        $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
@@ -57,34 +56,36 @@ class UserController extends Controller
     }
 
     // Update user
-    public function update(Request $request, $id) {
-        $user = User::findOrFail($id);
+  public function update(Request $request, $id) {
 
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'branch_id' => 'required',
-            'role' => 'required',
-        ]);
+    $user = User::findOrFail($id);
 
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users,email,'.$user->id,
+        'branch_id' => 'required',
+        'role' => 'required',
+    ]);
+
+    $user->update([
+        'name' => $request->name,
+        'email' => $request->email,
+        'branch_id' => $request->branch_id,
+    ]);
+
+    // ✅ role update
+    $user->syncRoles([$request->role]);
+
+    if ($request->password) {
         $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'branch_id' => $request->branch_id,
-            'role' => $request->role,
+            'password' => Hash::make($request->password)
         ]);
-
-        // Sync Spatie role if changed
-        $updatedRoleName = strtolower($request->role);
-        Role::firstOrCreate(['name' => $updatedRoleName, 'guard_name' => 'web']);
-        $user->syncRoles([$updatedRoleName]);
-
-        if($request->password){
-            $user->update(['password' => Hash::make($request->password)]);
-        }
-
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
+
+    return redirect()->route('users.index')
+        ->with('success', 'User updated successfully.');
+}
+
 
     // Delete user
     public function destroy($id) {

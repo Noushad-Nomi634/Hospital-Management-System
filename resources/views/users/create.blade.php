@@ -44,10 +44,19 @@
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Role</label>
-                            <input type="text" name="role" class="form-control" required>
-                        </div>
+                       <div class="mb-3">
+    <label class="form-label">Login As <span class="text-danger">*</span></label>
+    <select name="role" class="form-control" required>
+        <option value="">Select Role</option>
+
+        @foreach($roles as $role)
+            <option value="{{ $role->name }}">
+                {{ ucfirst($role->name) }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
                         <!-- Save + Back Buttons -->
                         <div class="d-flex justify-content-start gap-2 mt-3">

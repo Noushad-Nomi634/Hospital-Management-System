@@ -34,108 +34,75 @@ Dr Consultations
                     @endphp
 
                     <div class="row">
-                    <!-- Checkup -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Checkup</label>
-                        <select class="form-select" name="checkup_id" id="checkup_id" required>
-                            <option value="">Select Checkup</option>
-                            @foreach($checkups as $checkup)
-                                <option value="{{ $checkup->id }}"
-                                    {{ $selectedCheckupId == $checkup->id ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::parse($checkup->created_at)->format('Y-m-d') }} - {{ $checkup->patient->name ?? 'No Patient' }}
-                                    ({{ $checkup->doctor ? $checkup->doctor->first_name.' '.$checkup->doctor->last_name : 'No Doctor' }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Patient Info -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Patient</label>
-                        <input type="text" class="form-control" id="patient_name"
-                               value="{{ $selectedPatientName }}" readonly>
-                    </div>
-
-                    <!-- Doctor Info -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Doctor</label>
-                        <input type="text" class="form-control" id="doctor_name"
-                               value="{{ $selectedDoctorName }}" readonly>
-                        <input type="hidden" name="doctor_id" id="doctor_id" value="{{ $selectedDoctorId }}">
-                    </div>
-
-
-                    <!-- Note -->
-                    <div class="mb-3">
-                        <label class="form-label">Note</label>
-                        <textarea class="form-control" name="note" id="note" rows="3"
-                                  placeholder="Enter any notes">{{ old('note') }}</textarea>
-                    </div>
-
-
-                    <!-- Diagnosis -->
-                    <div class="mb-3">
-                        <label class="form-label">Diagnosis</label>
-                        <input type="text" class="form-control" name="diagnosis" id="diagnosis"
-                               value="{{ old('diagnosis') }}" placeholder="Enter diagnosis" required>
-                    </div>
-
-                    {{-- satisfactory sanction Docter --}}
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Docter (Satisfactory Sanction)</label>
-                        <select class="form-select" name="ss_dr" id="ss_dr" required>
-                            <option value="">Select Doctor</option>
-                            @foreach($doctors as $doctors)
-                                <option value="{{ $doctors->id }}">
-                                    Dr. {{ $doctors->name ?? 'NL' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Total Fee -->
-                    {{-- <div class="mb-3">
-                        <label class="form-label">Total Session Fee</label>
-                        <input type="number" class="form-control" name="session_fee" id="session_fee" value="{{ old('session_fee',0) }}" min="0" required>
-                    </div> --}}
-
-                    <!-- Paid Amount -->
-                    {{-- <div class="mb-3">
-                        <label class="form-label">Paid Amount</label>
-                        <input type="number" class="form-control" name="paid_amount" id="paid_amount" value="{{ old('paid_amount',0) }}" min="0" required>
-                    </div> --}}
-
-                    <!-- Fee Summary -->
-                    {{-- <div class="card mb-3">
-                        <div class="card-body bg-light">
-                            <h5 class="card-title">Fee Summary</h5>
-                            <p>Total Fee: <strong id="totalFee">0</strong></p>
-                            <p>Per Session Fee: <strong id="perSessionFee">0</strong></p>
-                            <p>Paid Amount: <strong id="paidAmount">0</strong></p>
-                            <p>Due Amount: <strong id="dueAmount">0</strong></p>
+                        <!-- Checkup -->
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Checkup</label>
+                            <select class="form-select" name="checkup_id" id="checkup_id" required>
+                                <option value="">Select Checkup</option>
+                                @foreach($checkups as $checkup)
+                                    <option value="{{ $checkup->id }}"
+                                        {{ $selectedCheckupId == $checkup->id ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::parse($checkup->created_at)->format('Y-m-d') }} - {{ $checkup->patient->name ?? 'No Patient' }}
+                                        ({{ $checkup->doctor ? $checkup->doctor->first_name.' '.$checkup->doctor->last_name : 'No Doctor' }})
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                    </div> --}}
 
-                    <!-- Sessions Table -->
-                    {{-- <div class="mb-3">
-                        <label class="form-label">Session Dates & Times</label>
-                        <table id="sessionTable" class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Session Date</th>
-                                    <th>Session Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                        <p class="mt-2">Total Sessions: <span id="sessionCount">0</span></p>
-                    </div> --}}
+                        <!-- Patient Info -->
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Patient</label>
+                            <input type="text" class="form-control" id="patient_name"
+                                   value="{{ $selectedPatientName }}" readonly>
+                        </div>
 
-                    <!-- Submit -->
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Save Session</button>
-                    </div>
+                        <!-- Doctor Info -->
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Doctor</label>
+                            <input type="text" class="form-control" id="doctor_name"
+                                   value="{{ $selectedDoctorName }}" readonly>
+                            <input type="hidden" name="doctor_id" id="doctor_id" value="{{ $selectedDoctorId }}">
+                        </div>
+
+                        <!-- Note -->
+                        <div class="mb-3">
+                            <label class="form-label">Note</label>
+                            <textarea class="form-control" name="note" id="note" rows="3"
+                                      placeholder="Enter any notes">{{ old('note') }}</textarea>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div class="mb-3">
+                            <label class="form-label">Diagnosis</label>
+                            <input type="text" class="form-control" name="diagnosis" id="diagnosis"
+                                   value="{{ old('diagnosis') }}" placeholder="Enter diagnosis" required>
+                        </div>
+
+                        <!-- Satisfactory Checkbox -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="satisfactory_check" name="satisfactory_check">
+                            <label class="form-check-label" for="satisfactory_check">
+                                Require Satisfactory Sanction?
+                            </label>
+                        </div>
+
+                        <!-- Satisfactory Doctor Dropdown -->
+                        <div class="col-md-6 mb-3" id="ss_dr_div" style="display:none;">
+                            <label class="form-label">Doctor (Satisfactory Sanction)</label>
+                            <select class="form-select" name="ss_dr" id="ss_dr">
+                                <option value="">Select Doctor</option>
+                                @foreach($doctors as $doctor)
+                                    <option value="{{ $doctor->id }}">
+                                        Dr. {{ $doctor->name ?? 'NL' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Save Session</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -151,75 +118,7 @@ Dr Consultations
 <script src="{{ URL::asset('build/js/main.js') }}"></script>
 
 <script>
-let sessionIndex = 0;
-
-// function formatDate(date) {
-//     const d = new Date(date);
-//     return d.getFullYear() + '-' +
-//            String(d.getMonth()+1).padStart(2,'0') + '-' +
-//            String(d.getDate()).padStart(2,'0');
-// }
-
-// function addRow(button=null){
-//     let newDate = new Date();
-//     const rows = document.querySelectorAll('#sessionTable tbody tr');
-//     if(rows.length > 0){
-//         const lastDateInput = rows[rows.length-1].querySelector('input[type="date"]');
-//         const lastDate = new Date(lastDateInput.value);
-//         newDate = new Date(lastDate);
-//         newDate.setDate(newDate.getDate()+1);
-//     }
-
-//     const row = document.createElement('tr');
-//     row.innerHTML = `
-//         <td><input type="date" name="sessions[${sessionIndex}][date]" class="form-control" required value="${formatDate(newDate)}"></td>
-//         <td><input type="time" name="sessions[${sessionIndex}][time]" class="form-control" required value="12:00"></td>
-//         <td>
-//             <button type="button" class="btn btn-success btn-sm me-1" onclick="addRow(this)">➕</button>
-//             <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">❌</button>
-//         </td>
-//     `;
-//     if(button){
-//         button.closest('tr').after(row);
-//     }else{
-//         document.querySelector('#sessionTable tbody').appendChild(row);
-//     }
-
-//     sessionIndex++;
-//     updateSessionCount();
-//     calculateFees();
-// }
-
-// function removeRow(button){
-//     button.closest('tr').remove();
-//     updateSessionCount();
-//     calculateFees();
-// }
-
-// function updateSessionCount(){
-//     const count = document.querySelectorAll('#sessionTable tbody tr').length;
-//     document.getElementById('sessionCount').innerText = count;
-// }
-
-// function calculateFees(){
-//     const sessionCount = document.querySelectorAll('#sessionTable tbody tr').length;
-//     const sessionFee = parseFloat(document.getElementById('session_fee').value) || 0;
-//     const paidAmount = parseFloat(document.getElementById('paid_amount').value) || 0;
-
-//     const perSession = sessionCount > 0 ? (sessionFee/sessionCount).toFixed(2) : 0;
-//     const due = (sessionFee - paidAmount).toFixed(2);
-
-//     document.getElementById('totalFee').innerText = sessionFee.toFixed(2);
-//     document.getElementById('perSessionFee').innerText = perSession;
-//     document.getElementById('paidAmount').innerText = paidAmount.toFixed(2);
-//     document.getElementById('dueAmount').innerText = due;
-// }
-
 document.addEventListener('DOMContentLoaded', function(){
-    //addRow(); // default first row
-    //document.getElementById('session_fee').addEventListener('input', calculateFees);
-    //document.getElementById('paid_amount').addEventListener('input', calculateFees);
-
     // Update Patient & Doctor names when checkup changes
     const checkups = @json($checkups->keyBy('id'));
     document.getElementById('checkup_id').addEventListener('change', function(){
@@ -233,6 +132,22 @@ document.addEventListener('DOMContentLoaded', function(){
             document.getElementById('doctor_name').value = '';
             document.getElementById('doctor_id').value = '';
             document.getElementById('patient_name').value = '';
+        }
+    });
+
+    // Satisfactory Checkbox Logic
+    const checkbox = document.getElementById('satisfactory_check');
+    const ssDiv = document.getElementById('ss_dr_div');
+    const ssSelect = document.getElementById('ss_dr');
+
+    checkbox.addEventListener('change', function(){
+        if(this.checked){
+            ssDiv.style.display = 'block';  // show dropdown
+            ssSelect.required = true;       // make it required
+        } else {
+            ssDiv.style.display = 'none';   // hide dropdown
+            ssSelect.required = false;      // not required
+            ssSelect.value = '';            // reset value
         }
     });
 });

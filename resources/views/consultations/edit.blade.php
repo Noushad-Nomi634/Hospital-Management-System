@@ -23,7 +23,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('consultations.update', $consultation->id) }}" class="row g-3">
+                <form method="POST" action="{{ url('/consultations/' . $consultation->id) }}" class="row g-3">
                     @csrf
                     @method('PUT')
 
@@ -33,7 +33,7 @@
                         <select name="patient_id" id="patient_id" class="form-select" required>
                             <option value="">Select Patient</option>
                             @foreach($patients as $patient)
-                                <option value="{{ $patient->id }}" {{ old('patient_id', $consultation->patient_id) == $patient->id ? 'selected' : '' }}>
+                                <option value="{{ $patient->id }}" {{ $consultation->patient_id == $patient->id ? 'selected' : '' }}>
                                     {{ $patient->name }}
                                 </option>
                             @endforeach
@@ -46,7 +46,7 @@
                         <select name="doctor_id" id="doctor_id" class="form-select" required>
                             <option value="">Select Doctor</option>
                             @foreach($doctors as $doctor)
-                                <option value="{{ $doctor->id }}" {{ old('doctor_id', $consultation->doctor_id) == $doctor->id ? 'selected' : '' }}>
+                                <option value="{{ $doctor->id }}" {{ $consultation->doctor_id == $doctor->id ? 'selected' : '' }}>
                                     {{ $doctor->name }}
                                 </option>
                             @endforeach
@@ -57,43 +57,21 @@
                     <div class="col-md-6">
                         <label for="fee" class="form-label">Consultation Fee (Rs)</label>
                         <input type="number" name="fee" id="fee" class="form-control"
-                               step="0.01" value="{{ old('fee', $consultation->fee) }}" required>
+                               step="0.01" value="{{ $consultation->fee }}" required>
                     </div>
 
                     <!-- Paid Amount -->
                     <div class="col-md-6">
                         <label for="paid_amount" class="form-label">Paid Amount (Rs)</label>
                         <input type="number" name="paid_amount" id="paid_amount" class="form-control"
-                               step="0.01" value="{{ old('paid_amount', $consultation->paid_amount ?? 0) }}">
-                    </div>
-
-                    <!-- Payment Method -->
-                    <div class="col-md-6">
-                        <label for="payment_method" class="form-label">Payment Method</label>
-                        @php
-                            $paymentMethods = [
-                                'cash'          => 'Cash',
-                                'card'          => 'Card',
-                                'bank_transfer' => 'Bank Transfer',
-                                'other'         => 'Other'
-                            ];
-                            $selectedMethod = old('payment_method', $consultation->payment_method ?? '');
-                        @endphp
-                        <select name="payment_method" id="payment_method" class="form-select">
-                            <option value="">Select Payment Method</option>
-                            @foreach($paymentMethods as $value => $label)
-                                <option value="{{ $value }}" {{ $selectedMethod == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
+                               step="0.01" value="{{ $consultation->paid_amount ?? 0 }}">
                     </div>
 
                     <!-- Submit -->
                     <div class="col-12 mt-3">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Update Consultation</button>
-                            <a href="{{ route('consultations.index') }}" class="btn btn-secondary">Cancel</a>
+                            <a href="{{ url('/consultations') }}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </div>
 

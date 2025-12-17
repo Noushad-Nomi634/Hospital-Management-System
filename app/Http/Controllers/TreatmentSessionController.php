@@ -48,46 +48,43 @@ class TreatmentSessionController extends Controller
         }
     }
 
-    public function store(Request $request)
-    {
-        try {
-            $request->validate([
-                'checkup_id'      => 'required|exists:checkups,id',
-                'doctor_id'       => 'required|exists:doctors,id',
-                'ss_dr'           => 'required|exists:doctors,id',
-                'diagnosis'       => 'nullable|string|max:255',
-                'note'            => 'nullable|string',
-                'sessions'        => 'nullable|array',
-                'sessions.*.date' => 'nullable|date',
-                'sessions.*.time' => 'nullable|date_format:H:i',
-            ]);
+   public function store(Request $request)
+{
+    try {
+        $request->validate([
+       'checkup_id'      => 'required|exists:checkups,id',
+    'doctor_id'       => 'required|exists:doctors,id',
+    'ss_dr'           => $request->input('satisfactory_check') ? 'required|exists:doctors,id' : 'nullable|exists:doctors,id',
+    'diagnosis'       => 'nullable|string|max:255',
+    'note'            => 'nullable|string',
+    'sessions'        => 'nullable|array',
+    'sessions.*.date' => 'nullable|date',
+    'sessions.*.time' => 'nullable|date_format:H:i',
+        ]);
 
+        $checkup = Checkup::findOrFail($request->checkup_id);
 
+        // Create treatment session
+        $session = TreatmentSession::create([
+            'patient_id'  => $checkup->patient_id,
+            'branch_id'   => $checkup->doctor->branch_id ?? 1,
+            'checkup_id'  => $request->checkup_id,
+            'doctor_id'   => $request->doctor_id,
+            'ss_dr_id'    => $request->ss_dr ?? null,
+            'diagnosis'   => $request->diagnosis,
+            'note'        => $request->note,
+            'con_status'  => 0,
+            'session_fee' => 0,
+        ]);
 
-            $checkup = Checkup::findOrFail($request->checkup_id);
-            // Create treatment session
-            $session = TreatmentSession::create([
-                'patient_id'    => $checkup->patient_id,
-                'branch_id'     => $checkup->doctor->branch_id ?? 1,
-                'checkup_id'    => $request->checkup_id,
-                'doctor_id'     => $request->doctor_id,
-                'ss_dr_id'      => $request->ss_dr,
-                'diagnosis'     => $request->diagnosis,
-                'note'          => $request->note,
-                'con_status'    => 0,
-                'session_fee'   => 0,
+        // Mark checkup completed
+        Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
 
-            ]);
-            // Mark checkup completed
-            Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
-
-
-            return redirect()->route('doctor-consultations.index', 0)->with('success', '✅ Treatment session created successfully.');
-        } catch (\Exception $e) {
-
-            return redirect()->back()->with('error', '❌ Failed to create session: ' . $e->getMessage());
-        }
+        return redirect()->route('doctor-consultations.index', 0)->with('success', '✅ Treatment session created successfully.');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', '❌ Failed to create session: ' . $e->getMessage());
     }
+}
 
     public function edit($id)
     {
@@ -171,28 +168,20 @@ class TreatmentSessionController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
     public function update(Request $request, $id)
     {
         try {
             $request->validate([
-                'checkup_id'      => 'required|exists:checkups,id',
-                'doctor_id'       => 'required|exists:doctors,id',
-                'session_fee'     => 'required|numeric|min:0',
-                'paid_amount'     => 'required|numeric|min:0',
-                'diagnosis'       => 'nullable|string|max:255',
-                'note'            => 'nullable|string',
-                'sessions'        => 'nullable|array',
-                'sessions.*.date' => 'nullable|date',
-                'sessions.*.time' => 'nullable|date_format:H:i',
+              'checkup_id'      => 'required|exists:checkups,id',
+    'doctor_id'       => 'required|exists:doctors,id',
+    'ss_dr'           => $request->input('satisfactory_check') ? 'required|exists:doctors,id' : 'nullable|exists:doctors,id',
+    'session_fee'     => 'required|numeric|min:0',
+    'paid_amount'     => 'required|numeric|min:0',
+    'diagnosis'       => 'nullable|string|max:255',
+    'note'            => 'nullable|string',
+    'sessions'        => 'nullable|array',
+    'sessions.*.date' => 'nullable|date',
+    'sessions.*.time' => 'nullable|date_format:H:i',
             ]);
 
             $session = TreatmentSession::findOrFail($id);
