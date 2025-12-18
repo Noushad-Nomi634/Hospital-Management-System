@@ -70,12 +70,28 @@
 
             {{-- Doctor Consultations --}}
             @can('view consultation')
-            <li class="{{ request()->is('doctor-consultations*') ? 'mm-active' : '' }}">
-                <a href="{{ url('/doctor-consultations/0') }}">
-                    <div class="parent-icon"><i class="material-icons-outlined">local_hospital</i></div>
+            <!-- Doctor Consultation Checkups -->
+            <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                    <i class="material-icons-outlined">local_hospital</i>
+                    </div>
                     <div class="menu-title">Dr Consultations</div>
                 </a>
+                <ul>
+                    <li>
+                    <a href="{{ url('doctor-consultations/0') }}">
+                        <i class="material-icons-outlined">medical_information</i> Dr Checkup
+                    </a>
+                    </li>
+                    <li>
+                    <a href="{{ url('/doctor-consultations/1') }}">
+                        <i class="material-icons-outlined">history</i> Completed Consultations
+                    </a>
+                    </li>
+                </ul>
             </li>
+
             @endcan
 
             {{-- Enrollments --}}
@@ -125,9 +141,64 @@
         </a>
     </li>
 </ul>
-
             </li>
             @endcan
+
+ <!-- Expenses Management -->
+            <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                    <i class="material-icons-outlined">money_off</i>
+                    </div>
+                    <div class="menu-title">Expenses</div>
+                </a>
+                <ul>
+                    <li>
+                    <a href="{{ url('/expense-types') }}">
+                        <i class="material-icons-outlined">category</i> Expense Types
+                    </a>
+                    </li>
+                    <li>
+                    <a href="{{ url('/expenses/create') }}">
+                        <i class="material-icons-outlined">add_circle</i> Create Expense
+                    </a>
+                    </li>
+                    <li>
+                    <a href="{{ url('/expenses') }}">
+                        <i class="material-icons-outlined">visibility</i> View Expenses
+                    </a>
+                    </li>
+                </ul>
+            </li>
+
+
+
+ <!-- Payments Menu -->
+            <li>
+                <a class="has-arrow" href="javascript:;">
+                    <div class="parent-icon">
+                        <i class="material-icons-outlined">account_balance_wallet</i>
+                    </div>
+                    <div class="menu-title">Payments</div>
+                </a>
+                <ul>
+                    <li>
+                        <a href="{{ url('/payments/outstanding-invoices') }}">
+                            <i class="material-icons-outlined">receipt_long</i> Outstanding Invoices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/payments/completed-invoices') }}">
+                            <i class="material-icons-outlined">task_alt</i> Completed Invoices
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/payments/receivable') }}">
+                            <i class="material-icons-outlined">payments</i> Payment Receivable
+                        </a>
+                    </li>
+                    <li>
+
 
             {{-- Payments Returns --}}
             @can('view returns')
@@ -137,6 +208,8 @@
                     <div class="menu-title">Payments Returns</div>
                 </a>
             </li>
+
+            
             @endcan
 
         </ul>
