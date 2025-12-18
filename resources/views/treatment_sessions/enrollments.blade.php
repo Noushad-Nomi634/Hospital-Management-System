@@ -71,13 +71,13 @@
 
                                         {{-- Sessions Info --}}
                                         <td>
-                                            @if ($session->enrollment_status === 0)
+                                            @if ($session->enrollment_status == 0)
                                                 <span class="badge bg-warning text-dark">Pending</span>
-                                            @elseif ($session->enrollment_status === 1)
+                                            @elseif ($session->enrollment_status == 1)
                                                 <span class="badge bg-success">Completed</span>
-                                            @elseif ($session->enrollment_status === 2)
+                                            @elseif ($session->enrollment_status == 2)
                                                 <span class="badge bg-success">Completed</span>
-                                            @elseif ($session->enrollment_status === 3)
+                                            @elseif ($session->enrollment_status == 3)
                                                 <span class="badge bg-danger">Cancelled</span>
                                             @else
                                                 <span class="badge bg-secondary">Unknown</span>
@@ -86,7 +86,7 @@
 
                                         {{-- Actions Dropdown --}}
                                         <td class="text-center">
-                                            @if($session->enrollment_status ===0)
+                                            @if($session->enrollment_status == 0)
                                               <a href="{{ route('treatment-sessions.sessions', $session->id) }}" class="btn btn-sm btn-info mb-1 w-100">Sessions</a>
                                             @else
                                               <a href="{{ route('session-details', $session->id) }}" class="btn btn-sm btn-info mb-1 w-100">View Sessions</a>

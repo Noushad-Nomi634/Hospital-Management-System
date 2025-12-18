@@ -424,6 +424,5 @@ Route::post('/expenses/store', [ExpenseController::class, 'store'])->name('expen
 
 
 
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');
