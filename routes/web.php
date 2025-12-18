@@ -419,7 +419,7 @@ Route::post('/expense-types/store', [ExpenseTypeController::class, 'store'])->na
 Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
 Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
 Route::post('/expenses/store', [ExpenseController::class, 'store'])->name('expenses.store');
-
+//testing
 
 
 
