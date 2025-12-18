@@ -73,7 +73,7 @@ class UserController extends Controller
         'branch_id' => $request->branch_id,
     ]);
 
-    // ✅ role update
+    // ✅ role update//
     $user->syncRoles([$request->role]);
 
     if ($request->password) {
