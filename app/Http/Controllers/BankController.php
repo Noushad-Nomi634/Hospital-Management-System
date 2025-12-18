@@ -17,6 +17,7 @@ class BankController extends Controller
     }
 
     // Show create form
+    //
     public function create()
     {
         return view('banks.create');
