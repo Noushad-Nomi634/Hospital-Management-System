@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class BankController extends Controller
 {
     // Show all banks
+    //banks changes
     public function index()
     {
         $banks = Bank::all();
