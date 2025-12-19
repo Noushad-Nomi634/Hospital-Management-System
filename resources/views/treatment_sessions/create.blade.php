@@ -78,25 +78,26 @@ Dr Consultations
                                    value="{{ old('diagnosis') }}" placeholder="Enter diagnosis" required>
                         </div>
 
-                        <!-- Satisfactory Checkbox -->
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="satisfactory_check" name="satisfactory_check">
-                            <label class="form-check-label" for="satisfactory_check">
-                                Require Satisfactory Sanction?
-                            </label>
-                        </div>
+                        <!-- Satisfactory Doctor -->
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="ss_toggle">
+                                <label class="form-check-label" for="ss_toggle">
+                                    Take Satisfactory Session
+                                </label>
+                            </div>
 
-                        <!-- Satisfactory Doctor Dropdown -->
-                        <div class="col-md-6 mb-3" id="ss_dr_div" style="display:none;">
-                            <label class="form-label">Doctor (Satisfactory Sanction)</label>
-                            <select class="form-select" name="ss_dr" id="ss_dr">
-                                <option value="">Select Doctor</option>
-                                @foreach($doctors as $doctor)
-                                    <option value="{{ $doctor->id }}">
-                                        Dr. {{ $doctor->name ?? 'NL' }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div id="ss_dropdown_container" style="display: none;">
+                                <label class="form-label">Doctor (Satisfactory Sanction)</label>
+                                <select class="form-select" name="ss_dr" id="ss_dr">
+                                    <option value="">Select Doctor</option>
+                                    @foreach($doctors as $doctor)
+                                        <option value="{{ $doctor->id }}">
+                                            Dr. {{ $doctor->name ?? 'NL' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Submit -->
@@ -135,19 +136,20 @@ document.addEventListener('DOMContentLoaded', function(){
         }
     });
 
-    // Satisfactory Checkbox Logic
-    const checkbox = document.getElementById('satisfactory_check');
-    const ssDiv = document.getElementById('ss_dr_div');
-    const ssSelect = document.getElementById('ss_dr');
+    // Satisfactory Doctor checkbox logic
+    const ssToggle = document.getElementById('ss_toggle');
+    const ssContainer = document.getElementById('ss_dropdown_container');
+    const ssDropdown = document.getElementById('ss_dr');
 
-    checkbox.addEventListener('change', function(){
+    ssToggle.addEventListener('change', function(){
         if(this.checked){
-            ssDiv.style.display = 'block';  // show dropdown
-            ssSelect.required = true;       // make it required
+            ssContainer.style.display = 'block'; // show dropdown
+            ssDropdown.required = true;          // make required
+            ssDropdown.focus();                  // focus to open
         } else {
-            ssDiv.style.display = 'none';   // hide dropdown
-            ssSelect.required = false;      // not required
-            ssSelect.value = '';            // reset value
+            ssContainer.style.display = 'none'; // hide dropdown
+            ssDropdown.required = false;         // remove required
+            ssDropdown.value = '';               // reset value
         }
     });
 });

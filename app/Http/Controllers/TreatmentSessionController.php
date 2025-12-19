@@ -407,11 +407,19 @@ public function show($status)
                 'session_id' => 'required|exists:treatment_sessions,id',
             ]);
 
-            $session = TreatmentSession::findOrFail($request->session_id);
-            $session->con_status = $request->con_status;
-            $session->diagnosis = $request->diagnosis;
-            $session->note = $request->note;
-            $session->save();
+          $session = TreatmentSession::findOrFail($request->session_id);
+
+// 🔹 Automatic Completed Logic
+if (empty($session->ss_dr_id) || $session->sessionTimes->where('is_completed', false)->count() === 0) {
+    $session->con_status = 1; // Completed automatically
+} else {
+    $session->con_status = $request->con_status; // Manual select
+}
+
+$session->diagnosis = $request->diagnosis;
+$session->note      = $request->note;
+$session->save();
+
 
             return redirect()->route('doctor-consultations.index', 0)->with('success', '✅ Consultation status updated successfully.');
         } catch (\Exception $e) {

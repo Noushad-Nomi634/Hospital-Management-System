@@ -36,7 +36,8 @@
                             <select name="patient_id" id="patient_id" class="form-select" required>
                                 <option value="">Select Patient</option>
                                 @foreach($patients as $patient)
-                                    <option value="{{ $patient->id }}">
+                                    <option value="{{ $patient->id }}" 
+                                        {{ request('patient_id') == $patient->id ? 'selected' : '' }}>
                                         {{ $patient->mr }} | {{ $patient->name }}
                                     </option>
                                 @endforeach
@@ -80,7 +81,7 @@
                             </select>
                         </div>
 
-                        <!-- Submit Buttons -->
+                        <!-- Submit Button -->
                         <div class="col-md-12">
                             <button type="submit" class="btn btn-primary px-4">Add Consultation</button>
                         </div>
@@ -104,7 +105,7 @@
 
     <script>
         $(document).ready(function() {
-            // Select2 init
+            // Initialize Select2
             $('#patient_id, #doctor_id, #payment_method').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
@@ -112,7 +113,7 @@
                 allowClear: true
             });
 
-            // Auto fetch fee from patient
+            // Fetch fee when patient changes
             $('#patient_id').on('change', function() {
                 var patientId = $(this).val();
                 if (patientId) {
@@ -123,6 +124,9 @@
                     $('#fee').val(0);
                 }
             });
+
+            // Trigger change on page load to auto-load fee if patient_id is in query
+            $('#patient_id').trigger('change');
         });
     </script>
 @endpush
