@@ -20,6 +20,11 @@ class PatientController extends Controller
         try {
             $query = Patient::with('branch');
 
+            if (auth()->user()->role !== 'admin') {
+    $query->where('branch_id', auth()->user()->branch_id);
+}
+
+
             // Filter by patient ID if provided
             if ($request->filled('search_id')) {
                 $query->where('id', $request->search_id);
@@ -31,8 +36,6 @@ class PatientController extends Controller
         } catch (\Exception $e) {
             Log::error('Patient index error: ' . $e->getMessage());
             return back()->with('error', 'Unable to fetch patients. Please try again.');
-        } finally{
-            Log::error('Something went wrong!');
         }
     }
 

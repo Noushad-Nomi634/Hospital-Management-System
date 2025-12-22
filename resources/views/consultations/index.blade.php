@@ -74,17 +74,21 @@
                                                 class="btn btn-info btn-sm mb-1 w-100">View</a>
                                             <a href="{{ route('consultations.history', $consultation->patient_id) }}"
                                                 class="btn btn-dark btn-sm mb-1 w-100">History</a>
-                                            <a href="{{ url('/consultations/' . $consultation->id . '/edit') }}"
-                                                class="btn btn-warning btn-sm mb-1 w-100">Edit</a>
+                                
                                             <a href="{{ route('consultations.print', $consultation->id) }}"
                                                 class="btn btn-secondary btn-sm mb-1 w-100">Print</a>
                                             <a href="{{ route('treatment-sessions.create', ['checkup_id' => $consultation->id]) }}"
-                                                class="btn btn-success btn-sm mb-1 w-100">Sessions</a>
+                                                class="btn btn-success btn-sm mb-1 w-100">Sessions</a> 
+                                                @if(!auth()->user()->hasRole('receptionist'))
+                                                  <a href="{{ url('/consultations/' . $consultation->id . '/edit') }}"
+                                                class="btn btn-warning btn-sm mb-1 w-100">Edit</a>
+                                                
                                             <form action="{{ url('/consultations/' . $consultation->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this consultation?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
                                             </form>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

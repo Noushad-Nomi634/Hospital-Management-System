@@ -19,6 +19,7 @@ class CheckupController extends Controller
             $query = DB::table('checkups')
                 ->join('patients', 'checkups.patient_id', '=', 'patients.id')
                 ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+                 ->leftJoin('doctors as ref', 'checkups.referred_by', '=', 'ref.id')
                 ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
                 ->select(
                     'checkups.*',
@@ -27,6 +28,7 @@ class CheckupController extends Controller
                     'patients.mr',
                     'patients.phone as patient_phone',
                     DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                    DB::raw("CONCAT(ref.first_name, ' ', ref.last_name) as referred_by_name"),
                     'branches.name as branch_name'
                 );
 
@@ -86,6 +88,7 @@ class CheckupController extends Controller
                 'fee'            => 'required|numeric|min:0',
                 'paid_amount'    => 'nullable|numeric|min:0',
                 'payment_method' => 'nullable|string',
+                'referred_by' => 'required|exists:doctors,id',
             ]);
 
             DB::beginTransaction();
@@ -103,6 +106,7 @@ class CheckupController extends Controller
                 'fee'            => $request->fee ?? 0,
                 'paid_amount'    => $request->paid_amount ?? 0,
                 'payment_method' => $request->payment_method ?? null,
+                'referred_by' => $request->referred_by,
                 'status'         => 'completed',
             ]);
 
@@ -239,6 +243,7 @@ class CheckupController extends Controller
             ->select(
                 'checkups.*',
                 DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                DB::raw("CONCAT(ref.first_name, ' ', ref.last_name) as referred_by_name"),
                 'branches.name as branch_name'
             )
             ->where('checkups.patient_id', $patient_id)
@@ -260,6 +265,7 @@ class CheckupController extends Controller
         $checkup = DB::table('checkups')
             ->join('patients', 'checkups.patient_id', '=', 'patients.id')
             ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+            ->leftJoin('doctors as ref', 'checkups.referred_by', '=', 'ref.id')
             ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
             ->select(
                 'checkups.*',
@@ -269,6 +275,7 @@ class CheckupController extends Controller
                 'patients.age as patient_age',
                 'patients.mr as patient_mr',
                 DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                DB::raw("CONCAT(ref.first_name, ' ', ref.last_name) as referred_by_name"),
                 'branches.name as branch_name'
             )
             ->where('checkups.id', $id)
@@ -292,6 +299,7 @@ class CheckupController extends Controller
         $checkup = DB::table('checkups')
             ->join('patients', 'checkups.patient_id', '=', 'patients.id')
             ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+            ->leftJoin('doctors as ref', 'checkups.referred_by', '=', 'ref.id')
             ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
             ->select(
                 'checkups.*',
@@ -301,6 +309,7 @@ class CheckupController extends Controller
                 'patients.age as patient_age',
                 'patients.mr as patient_mr',
                 DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+                DB::raw("CONCAT(ref.first_name, ' ', ref.last_name) as referred_by_name"),
                 'branches.name as branch_name'
             )
             ->where('checkups.id', $id)

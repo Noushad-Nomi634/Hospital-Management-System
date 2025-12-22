@@ -55,6 +55,21 @@
                             </select>
                         </div>
 
+
+                        <!-- Referred By Dropdown -->
+<div class="col-md-12">
+    <label for="referred_by" class="form-label">Referred By</label>
+    <select name="referred_by" id="referred_by" class="form-select" required>
+        <option value="">Select Referring Doctor</option>
+        @foreach($doctors as $doctor)
+            <option value="{{ $doctor->id }}" {{ old('referred_by') == $doctor->id ? 'selected' : '' }}>
+                {{ $doctor->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+
                         <!-- Consultation Fee -->
                         <div class="col-md-3">
                             <label for="fee" class="form-label">Consultation Fee</label>
@@ -106,7 +121,7 @@
     <script>
         $(document).ready(function() {
             // Initialize Select2
-            $('#patient_id, #doctor_id, #payment_method').select2({
+            $('#patient_id, #doctor_id, #payment_method,#referred_by').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 placeholder: 'Select an option',

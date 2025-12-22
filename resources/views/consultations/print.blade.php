@@ -283,10 +283,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="info-row">
-                                <span class="info-label">Phone:</span>
-                                <span>{{ $checkup->patient_phone ?? 'N/A' }}</span>
-                            </div>
+                          
                             <div class="info-row">
                                 <span class="info-label">Age/Gender:</span>
                                 <span>{{ $checkup->patient_age ?? 'N/A' }}y / {{ $checkup->gender ?? 'N/A' }}</span>
