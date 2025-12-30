@@ -10,88 +10,116 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    // View all users
-    public function index() {
-        // Eager load branch to avoid N+1 issue
-        $users = User::with('branch')->get();
+    // 🔐 Optional: controller level security
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('role:admin'); // sirf admin user manage kare
+    }
+
+    // =========================
+    // 1️⃣ List all users
+    // =========================
+    public function index()
+    {
+        $users = User::with(['branch', 'roles'])->get();
         return view('users.index', compact('users'));
     }
 
-    // Show create form
-    public function create() {
+    // =========================
+    // 2️⃣ Show create form
+    // =========================
+    public function create()
+    {
         $branches = Branch::all();
-         $roles = Role::all();
-        return view('users.create',  compact('branches', 'roles'));
+        $roles    = Role::all();
+
+        return view('users.create', compact('branches', 'roles'));
     }
 
-    // Store new user
-    public function store(Request $request) {
+    // =========================
+    // 3️⃣ Store new user
+    // =========================
+    public function store(Request $request)
+    {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'branch_id' => 'required',
-            'role' => 'required',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users',
+            'password'  => 'required|min:6',
+            'branch_id' => 'required|exists:branches,id',
+            'role'      => 'required|exists:roles,name',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
             'branch_id' => $request->branch_id,
-            'role' => $request->role,
         ]);
 
-        // Assign Spatie role for web guard
+        // ✅ Spatie role assign
         $user->assignRole($request->role);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()->route('users.index')
+            ->with('success', 'User created successfully.');
     }
 
-    // Show edit form
-    public function edit($id) {
-        $user = User::findOrFail($id);
+    // =========================
+    // 4️⃣ Show edit form
+    // =========================
+    public function edit($id)
+    {
+        $user     = User::with('roles')->findOrFail($id);
         $branches = Branch::all();
-        return view('users.edit', compact('user', 'branches'));
+        $roles    = Role::all();
+
+        return view('users.edit', compact('user', 'branches', 'roles'));
     }
 
-    // Update user
-  public function update(Request $request, $id) {
+    // =========================
+    // 5️⃣ Update user
+    // =========================
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
 
-    $user = User::findOrFail($id);
-
-    $request->validate([
-        'name' => 'required',
-        'email' => 'required|email|unique:users,email,'.$user->id,
-        'branch_id' => 'required',
-        'role' => 'required',
-    ]);
-
-    $user->update([
-        'name' => $request->name,
-        'email' => $request->email,
-        'branch_id' => $request->branch_id,
-    ]);
-
-    // ✅ role update//
-    $user->syncRoles([$request->role]);
-
-    if ($request->password) {
-        $user->update([
-            'password' => Hash::make($request->password)
+        $request->validate([
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $user->id,
+            'branch_id' => 'required|exists:branches,id',
+            'role'      => 'required|exists:roles,name',
+            'password'  => 'nullable|min:6',
         ]);
+
+        $user->update([
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'branch_id' => $request->branch_id,
+        ]);
+
+        // 🔐 Password update (optional)
+        if ($request->filled('password')) {
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+        }
+
+        // ✅ Role sync (old role remove + new role add)
+        $user->syncRoles([$request->role]);
+
+        return redirect()->route('users.index')
+            ->with('success', 'User updated successfully.');
     }
 
-    return redirect()->route('users.index')
-        ->with('success', 'User updated successfully.');
-}
-
-
-    // Delete user
-    public function destroy($id) {
+    // =========================
+    // 6️⃣ Delete user
+    // =========================
+    public function destroy($id)
+    {
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        return redirect()->route('users.index')
+            ->with('success', 'User deleted successfully.');
     }
 }
