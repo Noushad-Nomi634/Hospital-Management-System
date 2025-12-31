@@ -12,16 +12,36 @@ use Spatie\Permission\Models\Role;
 class DoctorController extends Controller
 {
     // Show all doctors
-    public function index()
-    {
-        try {
-            $doctors = Doctor::all();
-            return view('doctors.index', compact('doctors'));
-        } catch (\Exception $e) {
-            \Log::error('Doctor index error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to load doctors list.');
+   public function index()
+{
+    try {
+        $user = auth()->user();
+
+        $query = Doctor::with('branch');
+
+        // Admin → show all doctors
+        if ($user->role !== 'admin') {
+
+            // User has branch → show only that branch doctors
+            if (!is_null($user->branch_id)) {
+                $query->where('branch_id', $user->branch_id);
+            }
+            // User without branch → show nothing
+            else {
+                $query->whereRaw('1 = 0');
+            }
         }
+
+        $doctors = $query->get();
+
+        return view('doctors.index', compact('doctors'));
+
+    } catch (\Exception $e) {
+        \Log::error('Doctor index error: ' . $e->getMessage());
+        return back()->with('error', 'Unable to load doctors list.');
     }
+}
+
 
     // Show doctor detail
     public function show($id)
