@@ -12,7 +12,7 @@ class DoctorDashboardController extends Controller
 {
     public function index()
     {
-       $doctor = auth('doctor')->user(); // ye Doctor model se fetch karega
+       $doctor = auth()->user(); // ye Doctor model se fetch karega
  // Logged-in doctor
         $today = Carbon::today()->toDateString();
 

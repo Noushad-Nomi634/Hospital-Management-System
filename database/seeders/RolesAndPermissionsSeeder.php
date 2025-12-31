@@ -111,7 +111,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // 🔹 Doctor – appointments & sessions management (doctor guard)
         $doctorRole = Role::firstOrCreate(
-            ['name' => 'doctor', 'guard_name' => 'doctor']
+            ['name' => 'doctor', 'guard_name' => 'web']
         );
 
         $doctorPermissions = [
@@ -123,7 +123,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Ensure each permission exists for doctor guard
         foreach ($doctorPermissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'doctor']);
+            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
         }
 
         // Assign permissions to doctor role

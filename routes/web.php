@@ -74,7 +74,10 @@ Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->
 });
 
 // For Doctores Dashboard only
-Route::prefix('doctor')->middleware(['auth:doctor', 'role:doctor'])->name('doctor.')->group(function () {
+Route::prefix('doctor')
+->middleware(['auth', 'role:doctor'])
+->name('doctor.')
+->group(function () {
 
     // Dashboard
     Route::get('dashboard', [DoctorDashboardController::class, 'index'])
