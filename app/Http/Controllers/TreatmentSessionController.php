@@ -53,29 +53,30 @@ class TreatmentSessionController extends Controller
     try {
         $request->validate([
        'checkup_id'      => 'required|exists:checkups,id',
-    'doctor_id'       => 'required|exists:doctors,id',
-    'ss_dr'           => $request->input('satisfactory_check') ? 'required|exists:doctors,id' : 'nullable|exists:doctors,id',
-    'diagnosis'       => 'nullable|string|max:255',
-    'note'            => 'nullable|string',
-    'sessions'        => 'nullable|array',
-    'sessions.*.date' => 'nullable|date',
-    'sessions.*.time' => 'nullable|date_format:H:i',
-        ]);
+        'doctor_id'       => 'required|exists:doctors,id',
+        'ss_dr'           => $request->input('satisfactory_check') ? 'required|exists:doctors,id' : 'nullable|exists:doctors,id',
+        'diagnosis'       => 'nullable|string|max:255',
+        'note'            => 'nullable|string',
+        'sessions'        => 'nullable|array',
+        'sessions.*.date' => 'nullable|date',
+        'sessions.*.time' => 'nullable|date_format:H:i',
+            ]);
 
-        $checkup = Checkup::findOrFail($request->checkup_id);
-
-        // Create treatment session
-        $session = TreatmentSession::create([
-            'patient_id'  => $checkup->patient_id,
-            'branch_id'   => $checkup->doctor->branch_id ?? 1,
-            'checkup_id'  => $request->checkup_id,
-            'doctor_id'   => $request->doctor_id,
-            'ss_dr_id'    => $request->ss_dr ?? null,
-            'diagnosis'   => $request->diagnosis,
-            'note'        => $request->note,
-            'con_status'  => 0,
-            'session_fee' => 0,
-        ]);
+            $checkup = Checkup::findOrFail($request->checkup_id);
+            //check ss_toggle is checked
+            $con_status = $request->has('ss_toggle') ? 0 : 1;
+            // Create treatment session
+            $session = TreatmentSession::create([
+                'patient_id'  => $checkup->patient_id,
+                'branch_id'   => $checkup->doctor->branch_id ?? 1,
+                'checkup_id'  => $request->checkup_id,
+                'doctor_id'   => $request->doctor_id,
+                'ss_dr_id'    => $request->ss_dr ?? null,
+                'diagnosis'   => $request->diagnosis,
+                'note'        => $request->note,
+                'con_status'  => $con_status,
+                'session_fee' => 0,
+            ]);
 
         // Mark checkup completed
         Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);

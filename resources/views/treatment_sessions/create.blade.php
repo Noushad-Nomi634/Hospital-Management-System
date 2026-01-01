@@ -81,7 +81,8 @@ Dr Consultations
                         <!-- Satisfactory Doctor -->
                         <div class="col-md-6 mb-3">
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="ss_toggle">
+                                <input class="form-check-input" type="checkbox" id="ss_toggle" name="ss_toggle"
+                                    {{ old('ss_toggle') ? 'checked' : '' }}>
                                 <label class="form-check-label" for="ss_toggle">
                                     Take Satisfactory Session
                                 </label>

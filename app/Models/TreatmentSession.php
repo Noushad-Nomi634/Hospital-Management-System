@@ -26,6 +26,7 @@ class TreatmentSession extends Model
         'diagnosis',
         'note',
         'ss_dr_id',
+        'con_status',
 
 
     ];
