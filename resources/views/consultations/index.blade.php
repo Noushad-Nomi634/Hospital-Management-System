@@ -84,7 +84,7 @@
                                                 class="btn btn-secondary btn-sm mb-1 w-100">Print</a>
 
                                             {{-- Sessions button - doctor aur admin ke liye --}}
-                                            @if(auth()->user()->hasRole(['doctor','admin']))
+                                            @if(auth()->user()->hasRole(['doctor','admin','receptionist']))
                                             <a href="{{ route('treatment-sessions.create', ['checkup_id' => $consultation->id]) }}"
                                                 class="btn btn-success btn-sm mb-1 w-100">Sessions</a>
                                             @endif
