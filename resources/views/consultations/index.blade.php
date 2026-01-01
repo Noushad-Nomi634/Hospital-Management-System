@@ -33,9 +33,14 @@
                                 <th>Patient</th>
                                 <th>Date</th>
                                 <th>Doctor</th>
+
+                                {{-- Show these columns only if user is NOT doctor --}}
+                                @if(!auth()->user()->hasRole('doctor'))
                                 <th>Fee</th>
                                 <th>Paid Amount</th>
                                 <th>Payment Method</th>
+                                @endif
+
                                 <th>Checkup Status</th>
                                 <th style="width:200px;">Actions</th>
                             </tr>
@@ -46,9 +51,14 @@
                                 <td>{{ $consultation->patient_name ?? 'N/A' }}</td>
                                 <td>{{ \Carbon\Carbon::parse($consultation->created_at)->format('d-m-Y') }}</td>
                                 <td>{{ $consultation->doctor_name }}</td>
+
+                                {{-- Show only for non-doctor --}}
+                                @if(!auth()->user()->hasRole('doctor'))
                                 <td>Rs. {{ number_format($consultation->fee) }}</td>
                                 <td>Rs. {{ number_format($consultation->paid_amount) }}</td>
                                 <td>{{ bank_get_name($consultation->payment_method) ?? 'N/A' }}</td>
+                                @endif
+
                                 <td>
                                     @php $status = (int)($consultation->checkup_status ?? 0); @endphp
                                     @if ($status === 0)
@@ -61,6 +71,7 @@
                                     <span class="badge bg-secondary">Unknown</span>
                                     @endif
                                 </td>
+
                                 <td class="text-center">
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-outline-primary btn-sm">Actions</button>
@@ -71,25 +82,25 @@
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:180px;">
                                             
-                                            {{-- View button - sab ko dikhe --}}
+                                            {{-- View button --}}
                                             <a href="{{ url('/consultations/' . $consultation->id) }}"
                                                 class="btn btn-info btn-sm mb-1 w-100">View</a>
                                             
-                                            {{-- History button - sab ko dikhe --}}
+                                            {{-- History button --}}
                                             <a href="{{ route('consultations.history', $consultation->patient_id) }}"
                                                 class="btn btn-dark btn-sm mb-1 w-100">History</a>
                                             
-                                            {{-- Print button - sab ko dikhe --}}
+                                            {{-- Print button --}}
                                             <a href="{{ route('consultations.print', $consultation->id) }}"
                                                 class="btn btn-secondary btn-sm mb-1 w-100">Print</a>
 
-                                            {{-- Sessions button - doctor aur admin ke liye --}}
+                                            {{-- Sessions button for doctor/admin --}}
                                             @if(auth()->user()->hasRole(['doctor','admin','receptionist']))
                                             <a href="{{ route('treatment-sessions.create', ['checkup_id' => $consultation->id]) }}"
                                                 class="btn btn-success btn-sm mb-1 w-100">Sessions</a>
                                             @endif
 
-                                            {{-- Edit/Delete - sirf admin ke liye --}}
+                                            {{-- Edit/Delete only for admin --}}
                                             @if(auth()->user()->hasRole('admin'))
                                             <a href="{{ url('/consultations/' . $consultation->id . '/edit') }}"
                                                 class="btn btn-warning btn-sm mb-1 w-100">Edit</a>
@@ -107,7 +118,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center">No consultations found.</td>
+                                <td colspan="{{ auth()->user()->hasRole('doctor') ? 5 : 8 }}" class="text-center">No consultations found.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -140,7 +151,7 @@ $(document).ready(function () {
         pageLength: 10,
         lengthMenu: [5,10,25,50,100],
         ordering: true,
-        columnDefs: [{ orderable: false, targets: 7 }]
+        columnDefs: [{ orderable: false, targets: -1 }] // last column (Actions) not orderable
     });
 });
 </script>
