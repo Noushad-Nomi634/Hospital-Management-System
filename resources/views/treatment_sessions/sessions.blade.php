@@ -5,6 +5,8 @@
 @push('css')
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+
 <style>
     /* Fix for DataTables header alignment */
     .dataTables_wrapper .dataTables_scroll {
@@ -16,20 +18,15 @@
     .dropdown-menu {
         z-index: 9999 !important;
     }
-    /* Ensure table headers are visible */
     table.dataTable thead th {
         position: relative !important;
     }
-    
-    /* Fix for dropdown positioning in DataTables */
     .dataTables_wrapper {
         position: relative;
     }
     .btn-group {
         position: static !important;
     }
-    
-    /* Custom styling for dropdown buttons */
     .dropdown-menu .btn {
         border: none !important;
         text-align: left;
@@ -94,8 +91,6 @@
                                     <td>{{ $session->session_count }}</td>
                                     <td>{{ $session->pending_count }}</td>
                                     <td>{{ $session->completed_count }}</td>
-
-                                    {{-- Status --}}
                                     <td>
                                         @if ($session->status === 0)
                                             <span class="badge bg-warning text-dark">Not Enroll</span>
@@ -109,23 +104,18 @@
                                             <span class="badge bg-secondary">Unknown</span>
                                         @endif
                                     </td>
-
-                                    {{-- Actions Dropdown --}}
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-cog me-1"></i>Actions
                                             </button>
                                             <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 200px;">
-                                                <!-- Regular dropdown items without btn classes -->
                                                 <a href="{{ route('session-details', $session->id) }}" class="dropdown-item d-flex align-items-center text-primary mb-2">
                                                     <i class="fas fa-eye me-2"></i>Details
                                                 </a>
                                                 <a href="{{ route('treatment-sessions.edit', $session->id) }}" class="dropdown-item d-flex align-items-center text-warning mb-2">
                                                     <i class="fas fa-edit me-2"></i>Edit
                                                 </a>
-
-                                                {{-- ✅ Show Feedback Buttons only for Completed Sessions --}}
                                                 @if ($session->status === 2)
                                                     <div class="dropdown-divider my-2"></div>
                                                     <a href="{{ url('/feedback/doctor/' . $session->id) }}" class="dropdown-item d-flex align-items-center text-info mb-2">
@@ -153,6 +143,8 @@
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+{{-- DataTables Buttons --}}
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -160,13 +152,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-<!-- Font Awesome for icons -->
+
+{{-- DataTables Responsive --}}
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+{{-- Font Awesome --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+{{-- Optional: Core Plugins --}}
+<script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+<script src="{{ URL::asset('build/js/main.js') }}"></script>
 
 <script>
 $(document).ready(function() {
     var table = $('#sessions-table').DataTable({
         scrollX: true,
+        responsive: true,
         ordering: true,
         searching: true,
         pageLength: 5,
@@ -182,23 +186,18 @@ $(document).ready(function() {
             { extend: 'pdf', text: 'PDF', className: 'btn btn-sm btn-light' },
             { extend: 'print', text: 'Print', className: 'btn btn-sm btn-light' }
         ],
-        // Ensure proper header alignment with scroll
         initComplete: function() {
             this.api().columns.adjust();
         },
-        // Fix for dropdown positioning
         drawCallback: function() {
-            // Re-initialize dropdowns after table redraw
             $('.dropdown-toggle').dropdown();
         }
     });
 
-    // Fix dropdown positioning in DataTables
+    // Fix dropdown positioning
     $('#sessions-table').on('show.bs.dropdown', function(e) {
         var dropdown = $(e.target).closest('.btn-group').find('.dropdown-menu');
         var tableContainer = $(this).closest('.dataTables_scrollBody');
-        
-        // If dropdown is inside scrollable container, move it to body temporarily
         if (tableContainer.length) {
             dropdown.appendTo('body').addClass('dataTables-dropdown');
         }
@@ -207,8 +206,6 @@ $(document).ready(function() {
     $('#sessions-table').on('hide.bs.dropdown', function(e) {
         var dropdown = $(e.target).closest('.btn-group').find('.dropdown-menu');
         var btnGroup = $(e.target).closest('.btn-group');
-        
-        // Move dropdown back to original position
         if (dropdown.hasClass('dataTables-dropdown')) {
             dropdown.appendTo(btnGroup).removeClass('dataTables-dropdown');
         }
@@ -216,8 +213,6 @@ $(document).ready(function() {
 
     $('.dataTables_filter input').addClass('form-control form-control-sm');
     $('.dataTables_length select').addClass('form-select form-select-sm');
-    
-    // Re-adjust columns on window resize
     $(window).on('resize', function() {
         table.columns.adjust();
     });
