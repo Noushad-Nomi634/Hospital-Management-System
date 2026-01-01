@@ -16,6 +16,7 @@
         <ul class="metismenu" id="doctor-sidenav">
             @auth('doctor')
                 <!-- Dashboard -->
+                 <!-- Dashboard -->
                 <li>
                     <a href="{{ route('doctor.dashboard') }}">
                         <div class="parent-icon"><i class="material-icons-outlined">home</i></div>
