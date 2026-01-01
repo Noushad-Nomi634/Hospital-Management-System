@@ -75,57 +75,60 @@ Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->
 
 // For Doctores Dashboard only
 Route::prefix('doctor')
-->middleware(['auth:doctor', 'role:doctor'])
+    ->middleware(['auth:doctor', 'role:doctor'])
+    ->name('doctor.')
+    ->group(function () {
 
-->name('doctor.')
-->group(function () {
+        // ================= Dashboard =================
+        Route::get('dashboard', [DoctorDashboardController::class, 'index'])
+            ->middleware('permission:view_dashboard,doctor')
+            ->name('dashboard');
 
-    // Dashboard
-    Route::get('dashboard', [DoctorDashboardController::class, 'index'])
-        ->middleware('permission:view_dashboard')
-        ->name('dashboard');
+        // ================= Appointments (Checkups) =================
+        Route::get('appointments', [CheckupController::class, 'index'])
+            ->middleware('permission:view appointments,doctor')
+            ->name('appointments.index');
 
-// Feedback (view-only)
-    Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->middleware('permission:view feedback');
+        Route::get('appointments/create', [CheckupController::class, 'create'])
+            ->middleware('permission:create appointments,doctor')
+            ->name('appointments.create');
 
-       //feedback List routes
-        Route::get('/feedback/doctor-list', [FeedbackController::class, 'doctorList'])
-    ->middleware('permission:view feedback')
+        Route::post('appointments/store', [CheckupController::class, 'store'])
+            ->middleware('permission:create appointments,doctor')
+            ->name('appointments.store');
+
+        // ================= Sessions =================
+        Route::get('sessions', [SessionController::class, 'index'])
+            ->middleware('permission:manage_sessions,doctor')
+            ->name('sessions.index');
+
+        Route::get('ongoing-sessions/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])
+            ->middleware('permission:manage_sessions,doctor')
+            ->name('ongoing-sessions');
+
+        Route::get('session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])
+            ->middleware('permission:manage_sessions,doctor')
+            ->name('session-details');
+
+        Route::post('sessions/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])
+            ->middleware('permission:manage_sessions,doctor')
+            ->name('sessions.mark-completed');
+
+        // ================= Feedback (View Only) =================
+Route::get('feedback', [FeedbackController::class, 'index'])
+    ->middleware('permission:view feedback,doctor')
+    ->name('feedback.index');
+
+// Change this line:
+Route::get('feedback/doctor-list', [FeedbackController::class, 'doctorFeedbackList'])
+    ->middleware('permission:view feedback,doctor')
     ->name('feedback.doctor-list');
 
-Route::get('/feedback/patient-list', [FeedbackController::class, 'patientList'])
-    ->middleware('permission:view feedback')
+Route::get('feedback/patient-list', [FeedbackController::class, 'patientFeedbackList'])
+    ->middleware('permission:view feedback,doctor')
     ->name('feedback.patient-list');
 
-
-
-    // Appointments
-  Route::get('appointments', [CheckupController::class, 'index'])
-       ->middleware('permission:manage_appointments')
-       ->name('appointments.index');
-
-    // Sessions
-    Route::get('sessions', [SessionController::class, 'index'])
-        ->middleware('permission:manage_sessions')
-        ->name('sessions.index');
-
-         // Ongoing Sessions Route
-    Route::get('/ongoing-sessions/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])->name('ongoing-sessions');
-    Route::get('/session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])->name('session-details');
-
-    // Completed Sessions Route
-    Route::post('/sessions/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])->name('sessions.mark-completed');
-
-
-
-
-    // Feedback (view only)
-    Route::get('feedback', [FeedbackController::class, 'index'])
-        ->middleware('permission:view feedback')
-        ->name('feedback.index');
-
-});
-
+    });
 
 // For all authenticated users
 Route::middleware(['auth', 'role:admin|receptionist|manager'])->group(function () {

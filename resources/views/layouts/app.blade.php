@@ -54,7 +54,16 @@
 
     {{-- Sidebar menu --}}
     @php
-        $role = auth()->check() ? auth()->user()->roles->first()->name : null;
+        $role = null;
+
+        // Web guard users: admin, manager, receptionist
+        if(auth()->check()) {
+            $role = auth()->user()->roles->first()->name ?? null;
+        } 
+        // Doctor guard
+        elseif(auth('doctor')->check()) {
+            $role = 'doctor';
+        }
     @endphp
 
     @if($role === 'admin')

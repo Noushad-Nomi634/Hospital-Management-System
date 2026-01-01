@@ -70,25 +70,37 @@
                                             <span class="visually-hidden">Toggle Dropdown</span>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:180px;">
+                                            
+                                            {{-- View button - sab ko dikhe --}}
                                             <a href="{{ url('/consultations/' . $consultation->id) }}"
                                                 class="btn btn-info btn-sm mb-1 w-100">View</a>
+                                            
+                                            {{-- History button - sab ko dikhe --}}
                                             <a href="{{ route('consultations.history', $consultation->patient_id) }}"
                                                 class="btn btn-dark btn-sm mb-1 w-100">History</a>
-                                
+                                            
+                                            {{-- Print button - sab ko dikhe --}}
                                             <a href="{{ route('consultations.print', $consultation->id) }}"
                                                 class="btn btn-secondary btn-sm mb-1 w-100">Print</a>
+
+                                            {{-- Sessions button - doctor aur admin ke liye --}}
+                                            @if(auth()->user()->hasRole(['doctor','admin']))
                                             <a href="{{ route('treatment-sessions.create', ['checkup_id' => $consultation->id]) }}"
-                                                class="btn btn-success btn-sm mb-1 w-100">Sessions</a> 
-                                                @if(!auth()->user()->hasRole('receptionist'))
-                                                  <a href="{{ url('/consultations/' . $consultation->id . '/edit') }}"
+                                                class="btn btn-success btn-sm mb-1 w-100">Sessions</a>
+                                            @endif
+
+                                            {{-- Edit/Delete - sirf admin ke liye --}}
+                                            @if(auth()->user()->hasRole('admin'))
+                                            <a href="{{ url('/consultations/' . $consultation->id . '/edit') }}"
                                                 class="btn btn-warning btn-sm mb-1 w-100">Edit</a>
-                                                
+                                            
                                             <form action="{{ url('/consultations/' . $consultation->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this consultation?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
                                             </form>
                                             @endif
+
                                         </div>
                                     </div>
                                 </td>
@@ -113,7 +125,7 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-{{-- Required Plugins from Doctors page --}}
+{{-- Required Plugins --}}
 <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
 <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
 <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>

@@ -115,12 +115,15 @@ class RolesAndPermissionsSeeder extends Seeder
 );
 
 
-        $doctorPermissions = [
-            'view_dashboard',
-            'manage_appointments',
-            'manage_sessions',
-            'view feedback',
-        ];
+       $doctorPermissions = [
+    'view_dashboard',
+    'manage_appointments',
+    'manage_sessions',
+    'view feedback',
+    'view appointments',  
+    'create appointments', 
+];
+
 
         // Ensure each permission exists for doctor guard
        foreach ($doctorPermissions as $perm) {
