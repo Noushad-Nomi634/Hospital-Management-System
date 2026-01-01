@@ -6,8 +6,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 
-use App\Http\Controllers\AppointmentController;
-
 class Doctor extends Authenticatable
 {
     use HasRoles, Notifiable;
@@ -26,8 +24,8 @@ class Doctor extends Authenticatable
         'cnic',
         'dob',
         'last_education',
-        'document', // file path
-        'picture',  // file path
+        'document',
+        'picture',
         'status',
     ];
 
@@ -36,9 +34,7 @@ class Doctor extends Authenticatable
         'remember_token',
     ];
 
-    // ───────────────────────────────
-    // Relationships
-    // ───────────────────────────────
+    // ──────────────── Relationships ────────────────
 
     public function branch()
     {
@@ -75,13 +71,19 @@ class Doctor extends Authenticatable
         return $this->hasMany(SessionTime::class, 'completed_by_doctor_id');
     }
 
-    // ───────────────────────────────
-    // Accessors for full name
-    // ───────────────────────────────
-  public function getNameAttribute()
-{
-    return trim($this->first_name . ' ' . $this->last_name);
-}
-
+    // ──────────────── Accessor for full name ────────────────
+    public function getNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
+    // ──────────────── Booted method for auto role assignment ────────────────
+    protected static function booted()
+    {
+        static::created(function ($doctor) {
+            if (!$doctor->hasRole('doctor')) {
+                $doctor->assignRole('doctor'); // 🔹 Automatically assign doctor role
+            }
+        });
+    }
+}
