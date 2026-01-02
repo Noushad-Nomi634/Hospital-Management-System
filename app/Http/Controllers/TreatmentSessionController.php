@@ -92,10 +92,11 @@ public function store(Request $request)
         DB::commit();
 
         // ✅ SAFE REDIRECT (NO LOGOUT ISSUE)
-        if (auth('doctor')->check()) {
-            return redirect()->route('sessions.index')
-                ->with('success', '✅ Treatment session saved successfully.');
-        }
+       if (auth('doctor')->check()) {
+    return redirect()->route('doctor.consultations.index', ['status' => 0])
+        ->with('success', '✅ Treatment session saved successfully.');
+}
+
 
         return redirect()->route('doctor-consultations.index', 0)
             ->with('success', '✅ Treatment session saved successfully.');

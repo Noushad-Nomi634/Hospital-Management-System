@@ -79,6 +79,16 @@ Route::prefix('doctor')
     ->name('doctor.')
     ->group(function () {  
 
+         // Doctor Consultations
+        Route::get('consultations/{status}', [TreatmentSessionController::class, 'index'])
+            ->name('consultations.index');
+
+        // Agar status update ya view chahiye
+        Route::get('consultations/{id}/status-view', [TreatmentSessionController::class, 'viewssStatus'])
+            ->name('consultations.status-view');
+        Route::post('consultations/update-status', [TreatmentSessionController::class, 'updateStatus'])
+            ->name('consultations.update-status');
+
          // Treatment session store route for doctor
         Route::post('sessions/store', [TreatmentSessionController::class, 'store'])
             ->name('sessions.store');
