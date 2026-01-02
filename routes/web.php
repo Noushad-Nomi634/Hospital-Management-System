@@ -79,6 +79,12 @@ Route::prefix('doctor')
     ->name('doctor.')
     ->group(function () {  
 
+
+// 🔹 Doctor Enrollments
+        Route::get('enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])
+            ->middleware('permission:view enrollments,doctor')
+            ->name('enrollments.index');
+            
          // Doctor Consultations
         Route::get('consultations/{status}', [TreatmentSessionController::class, 'index'])
             ->name('consultations.index');

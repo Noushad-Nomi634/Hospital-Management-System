@@ -115,14 +115,33 @@ class RolesAndPermissionsSeeder extends Seeder
 );
 
 
-       $doctorPermissions = [
+      $doctorPermissions = [
+    // Dashboard
     'view_dashboard',
+
+    // Appointments
+    'view appointments',
+    'create appointments',
+    'edit appointments',
+    'delete appointments',
     'manage_appointments',
+
+    // Sessions
     'manage_sessions',
+
+    // Feedback
     'view feedback',
-    'view appointments',  
-    'create appointments', 
+
+    // Consultation
+    'view consultation',
+
+   // Enrollment
+'view enrollments',
+'create enrollments',
+'edit enrollments',
+'delete enrollments',
 ];
+
 
 
         // Ensure each permission exists for doctor guard
