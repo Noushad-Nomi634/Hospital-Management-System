@@ -48,42 +48,65 @@ class TreatmentSessionController extends Controller
         }
     }
 
-   public function store(Request $request)
+public function store(Request $request)
 {
     try {
+
+        // ✅ VALIDATION
         $request->validate([
-       'checkup_id'      => 'required|exists:checkups,id',
-        'doctor_id'       => 'required|exists:doctors,id',
-        'ss_dr'           => $request->input('satisfactory_check') ? 'required|exists:doctors,id' : 'nullable|exists:doctors,id',
-        'diagnosis'       => 'nullable|string|max:255',
-        'note'            => 'nullable|string',
-        'sessions'        => 'nullable|array',
-        'sessions.*.date' => 'nullable|date',
-        'sessions.*.time' => 'nullable|date_format:H:i',
-            ]);
+            'checkup_id' => 'required|exists:checkups,id',
+            'doctor_id'  => 'required|exists:doctors,id',
+            'diagnosis'  => 'nullable|string|max:255',
+            'note'       => 'nullable|string',
+            'ss_dr'      => 'nullable|exists:doctors,id',
+        ]);
 
-            $checkup = Checkup::findOrFail($request->checkup_id);
-            //check ss_toggle is checked
-            $con_status = $request->has('ss_toggle') ? 0 : 1;
-            // Create treatment session
-            $session = TreatmentSession::create([
-                'patient_id'  => $checkup->patient_id,
-                'branch_id'   => $checkup->doctor->branch_id ?? 1,
-                'checkup_id'  => $request->checkup_id,
-                'doctor_id'   => $request->doctor_id,
-                'ss_dr_id'    => $request->ss_dr ?? null,
-                'diagnosis'   => $request->diagnosis,
-                'note'        => $request->note,
-                'con_status'  => $con_status,
-                'session_fee' => 0,
-            ]);
+        DB::beginTransaction();
 
-        // Mark checkup completed
-        Checkup::where('id', $request->checkup_id)->update(['checkup_status' => 1]);
+        // ✅ FETCH CHECKUP
+        $checkup = Checkup::with('doctor')->findOrFail($request->checkup_id);
 
-        return redirect()->route('doctor-consultations.index', 0)->with('success', '✅ Treatment session created successfully.');
+        // ✅ SATISFACTORY SESSION LOGIC
+        // ss_toggle checked = NOT satisfactory → con_status = 0
+        // ss_toggle not checked = satisfactory → con_status = 1
+        $con_status = $request->has('ss_toggle') ? 0 : 1;
+
+        // ✅ CREATE TREATMENT SESSION
+        $session = TreatmentSession::create([
+            'patient_id'  => $checkup->patient_id,
+            'branch_id'   => $checkup->doctor->branch_id ?? 1,
+            'checkup_id'  => $checkup->id,
+            'doctor_id'   => $request->doctor_id,
+            'ss_dr_id'    => $request->ss_dr ?? null,
+            'diagnosis'   => $request->diagnosis,
+            'note'        => $request->note,
+            'con_status'  => $con_status,
+            'session_fee' => 0,
+        ]);
+
+        // ✅ MARK CHECKUP COMPLETED
+        $checkup->update([
+            'checkup_status' => 1
+        ]);
+
+        DB::commit();
+
+        // ✅ SAFE REDIRECT (NO LOGOUT ISSUE)
+        if (auth('doctor')->check()) {
+            return redirect()->route('sessions.index')
+                ->with('success', '✅ Treatment session saved successfully.');
+        }
+
+        return redirect()->route('doctor-consultations.index', 0)
+            ->with('success', '✅ Treatment session saved successfully.');
+
     } catch (\Exception $e) {
-        return redirect()->back()->with('error', '❌ Failed to create session: ' . $e->getMessage());
+
+        DB::rollBack();
+
+        return redirect()->back()
+            ->withInput()
+            ->with('error', '❌ Error: ' . $e->getMessage());
     }
 }
 

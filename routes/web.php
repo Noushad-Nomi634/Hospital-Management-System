@@ -77,7 +77,11 @@ Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->
 Route::prefix('doctor')
     ->middleware(['auth:doctor', 'role:doctor'])
     ->name('doctor.')
-    ->group(function () {
+    ->group(function () {  
+
+         // Treatment session store route for doctor
+        Route::post('sessions/store', [TreatmentSessionController::class, 'store'])
+            ->name('sessions.store');
 
         // ================= Dashboard =================
         Route::get('dashboard', [DoctorDashboardController::class, 'index'])
@@ -149,6 +153,11 @@ Route::middleware(['auth', 'role:admin|receptionist|manager'])->group(function (
 
      //Doctor Consultation Route
     Route::get('/doctor-consultations/{status}', [TreatmentSessionController::class, 'index'])->name('doctor-consultations.index');
+  
+Route::post('/treatment-sessions/store', [TreatmentSessionController::class, 'store'])
+    ->name('treatment-sessions.store');
+
+
 
     // Enrollment Session Route
     Route::get('/enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])->name('enrollments');

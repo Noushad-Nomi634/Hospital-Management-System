@@ -20,8 +20,12 @@ Dr Consultations
                 <h5 class="text-white">Dr Consultations</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('treatment-sessions.store') }}">
-                    @csrf
+              <form method="POST"
+      action="{{ auth('doctor')->check() 
+        ? route('doctor.sessions.store') 
+        : route('treatment-sessions.store') }}">
+    @csrf
+
 
                     @php
                         $selectedCheckupId = old('checkup_id') ?? request()->get('checkup_id');
