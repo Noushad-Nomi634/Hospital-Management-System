@@ -7,7 +7,7 @@ use App\Models\Patient;
 use App\Models\Branch;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
+use Illuminate\Support\Facades\DB;
 
 
 class PatientController extends Controller
@@ -21,9 +21,8 @@ class PatientController extends Controller
             $query = Patient::with('branch');
 
             if (auth()->user()->role !== 'admin') {
-    $query->where('branch_id', auth()->user()->branch_id);
-}
-
+                $query->where('branch_id', auth()->user()->branch_id);
+            }
 
             // Filter by patient ID if provided
             if ($request->filled('search_id')) {
@@ -42,66 +41,91 @@ class PatientController extends Controller
     /**
      * Show the form for creating a new patient.
      */
-    public function create()
-    {
-        try {
-            $branches = Branch::all();
-            return view('patients.create', compact('branches'));
-        } catch (\Exception $e) {
-            \Log::error('Patient create error: ' . $e->getMessage());
-            return back()->with('error', 'Something went wrong while loading the form.');
-        }
-    }
+ public function create()
+{
+    try {
+        $branches = Branch::select('id', 'name')->get();
 
-    /**
+        $doctors = DB::table('doctors')
+            ->select(
+                'id',
+                DB::raw("CONCAT(first_name,' ',last_name) as name")
+            )
+            ->get();
+
+        $patients = Patient::select('id', 'name')->get();
+
+        return view('patients.create', compact(
+            'branches',
+            'doctors',
+            'patients'
+        ));
+
+    } catch (\Exception $e) {
+        dd($e->getMessage());
+    }
+}
+
+/**
      * Store a newly created patient in storage.
      */
-    public function store(Request $request)
-    {
-        try {
-            // ✅ Validate input
-            $validatedData = $request->validate([
-                'name'          => 'required|string|max:255',
-                'gender'        => 'required|in:Male,Female,Other',
-                'guardian_name' => 'required|string|max:255',
-                'age'           => 'required|numeric',
-                'phone'         => 'required|string|max:20',
-               'cnic'           => 'nullable|string|max:15|unique:patients,cnic',
-                'address'       => 'required|string|max:500',
-                'branch_id'     => 'required|exists:branches,id',
-            ]);
+   public function store(Request $request)
+{
+    try {
+        $validatedData = $request->validate([
+            'name'          => 'required|string|max:255',
+            'gender'        => 'required|in:Male,Female,Other',
+            'guardian_name' => 'required|string|max:255',
+            'age'           => 'required|numeric',
+            'phone'         => 'required|string|max:20',
+            'cnic'          => 'nullable|string|max:15|unique:patients,cnic',
+            'address'       => 'required|string|max:500', // ✅ FIXED
+            'branch_id'     => 'required|exists:branches,id',
+            'type_select'   => 'nullable|string',
+            'sub_select'    => 'nullable|string',
+        ]);
 
-            // Store patient
-            $patient = Patient::create($validatedData);
+        Patient::create($validatedData);
 
-            return redirect()->route('patients.card', $patient->id)
-                 ->with('success', 'Patient added successfully!');
+        return redirect()->route('patients.index')
+            ->with('success', 'Patient added successfully!');
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->validator)->withInput();
-
-        } catch (\Exception $e) {
-            \Log::error('Patient store error: ' . $e->getMessage());
-            return back()->with('error', $e->getMessage())
-                        ->withInput();
-        }
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return back()->withErrors($e->validator)->withInput();
+    } catch (\Exception $e) {
+        \Log::error('Patient store error: ' . $e->getMessage());
+        return back()->with('error', $e->getMessage())->withInput();
     }
+}
 
     /**
      * Show the form for editing a patient.
      */
-    public function edit($id)
-    {
-        try {
-            $patient  = Patient::findOrFail($id);
-            $branches = Branch::all();
+ /**
+ * Show the form for editing a patient.
+ */
+public function edit($id)
+{
+    try {
+        $patient  = Patient::findOrFail($id);
+        $branches = Branch::all();
 
-            return view('patients.edit', compact('patient', 'branches'));
-        } catch (\Exception $e) {
-            \Log::error('Patient edit error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to load patient edit form.');
-        }
+        // ✅ Doctors as string array (for JS)
+        $doctors = DB::table('doctors')
+            ->select(DB::raw("CONCAT(first_name,' ',last_name) as name"))
+            ->pluck('name') // sirf names ka array
+            ->toArray();
+
+        // ✅ Patients as string array (for JS)
+        $patients = Patient::pluck('name')->toArray();
+
+        return view('patients.edit', compact('patient', 'branches', 'doctors', 'patients'));
+    } catch (\Exception $e) {
+        \Log::error('Patient edit error: ' . $e->getMessage());
+        return back()->with('error', 'Unable to load patient edit form.');
     }
+}
+
 
     /**
      * Update the specified patient in storage.
@@ -115,9 +139,11 @@ class PatientController extends Controller
                 'guardian_name' => 'required|string|max:255',
                 'age'           => 'required|numeric',
                 'phone'         => 'required|string|max:20',
-                'cnic'          => 'required|string|regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/|unique:patients,cnic,' . $id,
+                 'cnic'          => 'nullable|string|regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/|unique:patients,cnic',
                 'address'       => 'required|string|max:500',
                 'branch_id'     => 'required|exists:branches,id',
+                'type_select'   => 'nullable|string',
+                'sub_select'    => 'nullable|string',
             ]);
 
             $patient = Patient::findOrFail($id);
@@ -129,17 +155,17 @@ class PatientController extends Controller
                 'phone',
                 'cnic',
                 'address',
-                'branch_id'
+                'branch_id',
+                'type_select',  
+                'sub_select'
             ));
 
             return redirect('/patients')->with('success', 'Patient updated successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->validator)->withInput();
-
         } catch (\Exception $e) {
             \Log::error('Patient update error: ' . $e->getMessage());
-            return back()->with('error', 'Unable to update patient. Please try again.')
-                        ->withInput();
+            return back()->with('error', 'Unable to update patient. Please try again.')->withInput();
         }
     }
 

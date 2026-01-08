@@ -153,7 +153,7 @@ Route::get('feedback/patient-list', [FeedbackController::class, 'patientFeedback
 // For all authenticated users
 Route::middleware(['auth', 'role:admin|receptionist|manager'])->group(function () {
     //patients
-    Route::get('/patients', [PatientController::class, 'index']);
+    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index'); ;
     Route::get('/patients/create', [PatientController::class, 'create']);
     Route::post('/patients', [PatientController::class, 'store']);
     Route::get('/patients/{id}/edit', [PatientController::class, 'edit']);
@@ -272,9 +272,18 @@ Route::post('/sessions/{id}/complete', [SessionTimeController::class, 'markCompl
 Route::delete('/sessions/{id}', [SessionTimeController::class, 'destroy'])->name('sessions.destroy');
 
 // Employees
-Route::get('employees', [EmployeeController::class, 'index']);
-Route::get('employees/create', [EmployeeController::class, 'create']);
-Route::post('employees', [EmployeeController::class, 'store']);
+Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
+Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store');
+
+// Edit
+Route::get('employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+
+// Update
+Route::put('employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+
+// Delete
+Route::delete('employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 
 // Salaries
 Route::get('salaries', [EmployeeSalaryController::class, 'index']);

@@ -1,74 +1,140 @@
 @extends('layouts.app')
-@section('title')
-    Employee Datatable
-@endsection
+
+@section('title', 'Employee Datatable')
+
 @push('css')
-    <link href="{{ URL::asset('build/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
+<link href="{{ URL::asset('build/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
+<style>
+    /* Ensure action buttons and badges never wrap */
+    td.text-nowrap {
+        white-space: nowrap !important;
+    }
+
+    th.text-nowrap {
+        white-space: nowrap !important;
+    }
+
+    /* Hide horizontal scrollbar but allow scroll internally */
+    .table-responsive::-webkit-scrollbar {
+        display: none;
+    }
+    .table-responsive {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+</style>
 @endpush
+
 @section('content')
-    <x-page-title title="Employees" subtitle="Employee Data Table" />
+<x-page-title title="Employees" subtitle="Employee Data Table" />
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="/employees/create" class="btn btn-primary">+ Add New Employes</a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0 text-uppercase fw-bold">Employee List</h6>
+    <a href="{{ url('/employees/create') }}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle me-1"></i> Add New Employee
+    </a>
+</div>
 
-    <h6 class="mb-0 text-uppercase">Employee DataTable</h6>
-    <hr>
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="example" class="table table-striped table-bordered" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Designation</th>
-                            <th>Branch</th>
-                            <th>Basic Salary</th>
-                            <th>Phone</th>
-                            <th>Joining Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($employees as $index => $employee)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $employee->name }}</td>
-                            <td>{{ $employee->designation }}</td>
-                            <td>{{ $employee->branch_id }}</td>
-                            <td>{{ $employee->basic_salary }}</td>
-                            <td>{{ $employee->phone }}</td>
-                            <td>{{ $employee->joining_date }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Designation</th>
-                            <th>Branch</th>
-                            <th>Basic Salary</th>
-                            <th>Phone</th>
-                            <th>Joining Date</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="example" class="table table-hover table-striped table-bordered align-middle text-nowrap" style="width:100%">
+                <thead class="table-dark">
+                    <tr class="text-center">
+                        <th style="min-width: 40px;">#</th>
+                        <th style="min-width: 150px;">Name</th>
+                        <th style="min-width: 120px;">Designation</th>
+                        <th style="min-width: 120px;">Branch</th>
+                        <th style="min-width: 150px;">Department</th>
+                        <th style="min-width: 100px;">Shift</th>
+                        <th style="min-width: 120px;" class="text-end">Basic Salary</th>
+                        <th style="min-width: 120px;">Phone</th>
+                        <th style="min-width: 120px;">Joining Date</th>
+                        <th class="text-nowrap" style="width: 130px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($employees as $index => $employee)
+                    <tr>
+                        <td class="text-center fw-semibold">{{ $index + 1 }}</td>
+                        <td class="fw-semibold">{{ $employee->name }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-info text-dark px-2 py-1 fs-6">{{ $employee->designation }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark px-2 py-1 fs-6">{{ $employee->branch_name }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary text-white px-2 py-1 fs-6">{{ $employee->department ?? 'N/A' }}</span>
+                        </td>
+                        <td class="text-center">
+                            @php
+                                $shiftColors = [
+                                    'Morning' => 'bg-success',
+                                    'Afternoon' => 'bg-warning text-dark',
+                                    'Evening' => 'bg-secondary'
+                                ];
+                            @endphp
+                            <span class="badge {{ $shiftColors[$employee->shift] ?? 'bg-light text-dark' }} px-2 py-1 fs-6">
+                                {{ $employee->shift ?? 'N/A' }}
+                            </span>
+                        </td>
+                        <td class="text-end fw-bold">{{ number_format($employee->basic_salary) }}</td>
+                        <td class="text-center">{{ $employee->phone }}</td>
+                        <td class="text-center">{{ \Carbon\Carbon::parse($employee->joining_date)->format('d M Y') }}</td>
+
+                        {{-- Actions --}}
+                        <td class="text-center text-nowrap">
+                            <a href="{{ url('/employees/'.$employee->id.'/edit') }}" class="btn btn-sm btn-info text-white me-1">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <form action="{{ url('/employees/'.$employee->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 @endsection
+
 @push('script')
-    <!--plugins-->
-    <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            $('#example').DataTable();
-        });
-    </script>
-    <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
-    <script src="{{ URL::asset('build/js/main.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
+<script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
+<script src="{{ URL::asset('build/js/main.js') }}"></script>
+
+<script>
+$(document).ready(function () {
+    // Destroy & Re-init to fix buttons hide issue
+    if ($.fn.DataTable.isDataTable('#example')) {
+        $('#example').DataTable().clear().destroy();
+    }
+
+    $('#example').DataTable({
+        pageLength: 10,
+        ordering: true,
+        lengthChange: false,
+        responsive: true, // Columns shrink to fit screen
+        autoWidth: false,
+        scrollX: true, // Allow internal scroll but hidden via CSS
+        columnDefs: [
+            { orderable: false, targets: -1, responsivePriority: 1 }, // Actions always visible
+            { responsivePriority: 2, targets: 1 }, // Name
+            { responsivePriority: 3, targets: 4 }, // Department
+            { responsivePriority: 4, targets: 3 }, // Branch
+            { responsivePriority: 5, targets: 2 }  // Designation
+        ]
+    });
+});
+</script>
 @endpush

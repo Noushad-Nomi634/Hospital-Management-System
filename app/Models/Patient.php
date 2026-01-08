@@ -20,6 +20,9 @@ class Patient extends Model
     'cnic',
     'address',
     'branch_id',
+    'type_select',
+    'sub_select',
+
 ];
 
     protected static function booted()
