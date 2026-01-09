@@ -23,6 +23,19 @@
                     @csrf
                     @method('PUT')
 
+                    {{-- Prefix --}}
+                    <div class="col-md-2">
+                        <label for="prefix" class="form-label fw-semibold">Prefix</label>
+                        <select class="form-select form-select-lg" id="prefix" name="prefix" required>
+                            <option value="">Select</option>
+                            @foreach(['Mr.', 'Ms.', 'Mrs.'] as $p)
+                                <option value="{{ $p }}" {{ old('prefix', $employee->prefix) == $p ? 'selected' : '' }}>
+                                    {{ $p }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Name --}}
                     <div class="col-md-6">
                         <label for="name" class="form-label fw-semibold">Name</label>

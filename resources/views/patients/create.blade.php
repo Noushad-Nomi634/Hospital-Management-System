@@ -14,6 +14,18 @@
                 <form method="POST" action="{{ route('patients.store') }}" class="row g-3">
                     @csrf
 
+
+                    {{-- Prefix --}}
+<div class="col-md-2">
+    <label class="form-label">Prefix</label>
+    <select name="prefix" class="form-select" required>
+        <option value="">Select</option>
+        <option value="Mr." {{ old('prefix') == 'Mr.' ? 'selected' : '' }}>Mr.</option>
+        <option value="Ms." {{ old('prefix') == 'Ms.' ? 'selected' : '' }}>Ms.</option>
+        <option value="Mrs." {{ old('prefix') == 'Mrs.' ? 'selected' : '' }}>Mrs.</option>
+    </select>
+</div>
+
                     {{-- Name --}}
                     <div class="col-md-6">
                         <label class="form-label">Name</label>

@@ -28,8 +28,21 @@
 
                 <div class="row g-3">
 
+                    {{-- Prefix --}}
+                    <div class="col-lg-2">
+                        <label for="prefix" class="form-label">Prefix</label>
+                        <select name="prefix" id="prefix" class="form-control" required>
+                            <option value="">Select</option>
+                            @foreach(['Mr.', 'Ms.', 'Mrs.'] as $p)
+                                <option value="{{ $p }}" {{ old('prefix', $doctor->prefix) == $p ? 'selected' : '' }}>
+                                    {{ $p }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- First Name --}}
-                    <div class="col-lg-6">
+                    <div class="col-lg-5">
                         <label for="first_name" class="form-label">First Name</label>
                         <input type="text" name="first_name" id="first_name"
                                value="{{ old('first_name', $doctor->first_name) }}"
@@ -37,7 +50,7 @@
                     </div>
 
                     {{-- Last Name --}}
-                    <div class="col-lg-6">
+                    <div class="col-lg-5">
                         <label for="last_name" class="form-label">Last Name</label>
                         <input type="text" name="last_name" id="last_name"
                                value="{{ old('last_name', $doctor->last_name) }}"

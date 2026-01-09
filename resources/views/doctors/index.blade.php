@@ -48,7 +48,8 @@
                                 @forelse($doctors as $doctor)
                                     <tr>
                                         <td>{{ $doctor->id }}</td>
-                                        <td>{{ $doctor->first_name . ' ' . $doctor->last_name }}</td>
+                                        {{-- Prefix + Full Name --}}
+                                        <td>{{ $doctor->prefix . ' ' . $doctor->first_name . ' ' . $doctor->last_name }}</td>
                                         <td>{{ $doctor->branch->name ?? '-' }}</td>
                                         <td>{{ $doctor->phone ?? '-' }}</td>
                                         <td>{{ $doctor->email }}</td>

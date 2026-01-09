@@ -39,7 +39,7 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>MR#</th>
-                                <th>Name</th>
+                                <th>Prefix + Name</th>
                                 <th>Father / Husband</th>
                                 <th>Phone</th>
                                 <th>CNIC</th>
@@ -54,7 +54,7 @@
                             @forelse($patients as $patient)
                                 <tr>
                                     <td>{{ $patient->id }}</td>
-                                    <td>{{ $patient->name }}</td>
+                                    <td>{{ ($patient->prefix ? $patient->prefix.' ' : '') . $patient->name }}</td>
                                     <td>{{ $patient->guardian_name }}</td>
                                     <td>{{ $patient->phone }}</td>
                                     <td>{{ $patient->cnic }}</td>
@@ -142,7 +142,7 @@
     {{-- Core Dashboard Plugins --}}
     <script src="{{ URL::asset('build/plugins/perfect-scrollbar/js/perfect-scrollbar.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/metismenu/metisMenu.min.js') }}"></script>
-    <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></cript>
+    <script src="{{ URL::asset('build/plugins/input-tags/js/tagsinput.js') }}"></script>
     <script src="{{ URL::asset('build/plugins/simplebar/js/simplebar.min.js') }}"></script>
     <script src="{{ URL::asset('build/js/main.js') }}"></script>
 

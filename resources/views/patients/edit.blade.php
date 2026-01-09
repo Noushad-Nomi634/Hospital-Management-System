@@ -17,6 +17,20 @@
                         @csrf
                         @method('PUT')
 
+                        {{-- Prefix --}}
+                        @php
+                            $prefixValue = old('prefix') ?? $patient->prefix;
+                        @endphp
+                        <div class="col-md-2">
+                            <label for="prefix" class="form-label">Prefix</label>
+                            <select name="prefix" id="prefix" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="Mr." {{ $prefixValue === 'Mr.' ? 'selected' : '' }}>Mr.</option>
+                                <option value="Ms." {{ $prefixValue === 'Ms.' ? 'selected' : '' }}>Ms.</option>
+                                <option value="Mrs." {{ $prefixValue === 'Mrs.' ? 'selected' : '' }}>Mrs.</option>
+                            </select>
+                        </div>
+
                         {{-- Name --}}
                         <div class="col-md-6">
                             <label for="name" class="form-label">Name</label>
@@ -43,6 +57,13 @@
                             <label for="phone" class="form-label">Phone</label>
                             <input type="text" name="phone" class="form-control" id="phone"
                                    value="{{ old('phone', $patient->phone) }}" placeholder="Phone Number" required>
+                        </div>
+
+                        {{-- CNIC --}}
+                        <div class="col-md-6">
+                            <label for="cnic" class="form-label">CNIC</label>
+                            <input type="text" name="cnic" class="form-control" id="cnic"
+                                   value="{{ old('cnic', $patient->cnic) }}" placeholder="XXXXX-XXXXXXX-X">
                         </div>
 
                         {{-- Address --}}
@@ -76,18 +97,22 @@
                         </div>
 
                         {{-- Referred By --}}
+                        @php
+                            $typeValue = old('type_select') ?? $patient->type_select;
+                            $subValue  = old('sub_select') ?? $patient->sub_select;
+                        @endphp
                         <div class="col-md-6 mt-2">
                             <label for="type_select" class="form-label">Referred By</label>
                             <div class="d-flex gap-2">
                                 <select name="type_select" id="type_select" class="form-select">
                                     <option value="">Select Type</option>
-                                    <option value="doctor" {{ old('type_select', $patient->type_select) == 'doctor' ? 'selected' : '' }}>Doctor</option>
-                                    <option value="patient" {{ old('type_select', $patient->type_select) == 'patient' ? 'selected' : '' }}>Patient</option>
-                                    <option value="social" {{ old('type_select', $patient->type_select) == 'social' ? 'selected' : '' }}>Social Media</option>
+                                    <option value="doctor" {{ $typeValue === 'doctor' ? 'selected' : '' }}>Doctor</option>
+                                    <option value="patient" {{ $typeValue === 'patient' ? 'selected' : '' }}>Patient</option>
+                                    <option value="social" {{ $typeValue === 'social' ? 'selected' : '' }}>Social Media</option>
                                 </select>
 
-                                <select name="sub_select" id="sub_select" class="form-select {{ old('sub_select', $patient->sub_select) ? '' : 'd-none' }}">
-                                    <option value="">{{ old('sub_select', $patient->sub_select) ?? 'Select' }}</option>
+                                <select name="sub_select" id="sub_select" class="form-select {{ $subValue ? '' : 'd-none' }}">
+                                    <option value="">{{ $subValue ?? 'Select' }}</option>
                                 </select>
                             </div>
                         </div>
@@ -109,7 +134,6 @@
     const typeSelect = document.getElementById('type_select');
     const subSelect  = document.getElementById('sub_select');
 
-    // ✅ JS arrays of strings
     const doctors  = @json($doctors ?? []);
     const patients = @json($patients ?? []);
 
@@ -145,7 +169,7 @@
     }
 
     // Initial load
-    populateSubSelect(typeSelect.value, "{{ old('sub_select', $patient->sub_select) }}");
+    populateSubSelect(typeSelect.value, "{{ $subValue }}");
 
     // On change
     typeSelect.addEventListener('change', function () {

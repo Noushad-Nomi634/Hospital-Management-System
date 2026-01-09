@@ -26,6 +26,20 @@
                 @csrf
                 <div class="row g-3">
 
+                    {{-- Prefix --}}
+              <div class="col-lg-2">
+              <label for="prefix" class="form-label">Prefix</label>
+              <select name="prefix" id="prefix" class="form-control" required>
+             <option value="">Select</option>
+             @foreach(['Mr.', 'Ms.', 'Mrs.'] as $p)
+            <option value="{{ $p }}" {{ old('prefix', $doctor->prefix ?? '') == $p ? 'selected' : '' }}>
+                {{ $p }}
+            </option>
+            @endforeach
+           </select>
+          </div>
+
+
                     {{-- First Name --}}
                     <div class="col-lg-6">
                         <label for="first_name" class="form-label">First Name</label>

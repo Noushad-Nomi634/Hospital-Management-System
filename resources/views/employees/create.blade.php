@@ -21,8 +21,21 @@
                 <form action="{{ url('/employees') }}" method="POST" class="row g-4">
                     @csrf
 
+
+                    {{-- Prefix --}}
+<div class="col-md-2">
+    <label for="prefix" class="form-label fw-semibold">Prefix</label>
+    <select class="form-select form-select-lg" id="prefix" name="prefix" required>
+        <option value="">Select</option>
+        <option value="Mr.">Mr.</option>
+        <option value="Ms.">Ms.</option>
+        <option value="Mrs.">Mrs.</option>
+    </select>
+</div>
+
                     {{-- Name --}}
-                    <div class="col-md-6">
+                   <div class="col-md-4">
+
                         <label for="name" class="form-label fw-semibold">Name</label>
                         <input type="text" class="form-control form-control-lg" id="name" name="name" placeholder="Employee Name" required>
                     </div>

@@ -72,6 +72,7 @@ class DoctorController extends Controller
     {
         try {
             $validated = $request->validate([
+                'prefix'         => 'required|string|in:Mr.,Ms.,Mrs.',
                 'first_name'     => 'required|string|max:255',
                 'last_name'      => 'required|string|max:255',
                 'email'          => 'required|email|unique:doctors,email',
@@ -97,6 +98,7 @@ class DoctorController extends Controller
 
             // 2️⃣ Create Doctor (no linked User)
             $doctor = Doctor::create([
+                'prefix' => $validated['prefix'],
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
                 'email' => $validated['email'],
@@ -149,6 +151,7 @@ class DoctorController extends Controller
             $doctor = Doctor::findOrFail($id);
 
             $validated = $request->validate([
+                'prefix'         => 'required|string|in:Mr.,Ms.,Mrs.',
                 'first_name'     => 'required|string|max:255',
                 'last_name'      => 'required|string|max:255',
                 'email'          => 'required|email|unique:doctors,email,' . $doctor->id,

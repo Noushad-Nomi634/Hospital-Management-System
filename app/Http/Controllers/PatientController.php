@@ -73,6 +73,7 @@ class PatientController extends Controller
 {
     try {
         $validatedData = $request->validate([
+            'prefix'        => 'required|string|in:Mr.,Ms.,Mrs.', 
             'name'          => 'required|string|max:255',
             'gender'        => 'required|in:Male,Female,Other',
             'guardian_name' => 'required|string|max:255',
@@ -134,12 +135,14 @@ public function edit($id)
     {
         try {
             $request->validate([
+                'prefix'        => 'required|string|in:Mr.,Ms.,Mrs.',
                 'name'          => 'required|string|max:255',
                 'gender'        => 'required|in:Male,Female,Other',
                 'guardian_name' => 'required|string|max:255',
                 'age'           => 'required|numeric',
                 'phone'         => 'required|string|max:20',
-                 'cnic'          => 'nullable|string|regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/|unique:patients,cnic',
+                'cnic' => 'nullable|string|regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/|unique:patients,cnic,'.$id,
+
                 'address'       => 'required|string|max:500',
                 'branch_id'     => 'required|exists:branches,id',
                 'type_select'   => 'nullable|string',
@@ -148,6 +151,7 @@ public function edit($id)
 
             $patient = Patient::findOrFail($id);
             $patient->update($request->only(
+                'prefix',
                 'name',
                 'gender',
                 'guardian_name',

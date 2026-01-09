@@ -5,7 +5,6 @@
 @push('css')
 <link href="{{ URL::asset('build/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
 <style>
-    /* Ensure action buttons and badges never wrap */
     td.text-nowrap {
         white-space: nowrap !important;
     }
@@ -14,13 +13,12 @@
         white-space: nowrap !important;
     }
 
-    /* Hide horizontal scrollbar but allow scroll internally */
     .table-responsive::-webkit-scrollbar {
         display: none;
     }
     .table-responsive {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 @endpush
@@ -57,16 +55,30 @@
                     @foreach ($employees as $index => $employee)
                     <tr>
                         <td class="text-center fw-semibold">{{ $index + 1 }}</td>
-                        <td class="fw-semibold">{{ $employee->name }}</td>
-                        <td class="text-center">
-                            <span class="badge bg-info text-dark px-2 py-1 fs-6">{{ $employee->designation }}</span>
+
+                        {{-- ✅ Prefix + Name --}}
+                        <td class="fw-semibold">
+                            {{ $employee->prefix }} {{ $employee->name }}
                         </td>
+
                         <td class="text-center">
-                            <span class="badge bg-light text-dark px-2 py-1 fs-6">{{ $employee->branch_name }}</span>
+                            <span class="badge bg-info text-dark px-2 py-1 fs-6">
+                                {{ $employee->designation }}
+                            </span>
                         </td>
+
                         <td class="text-center">
-                            <span class="badge bg-secondary text-white px-2 py-1 fs-6">{{ $employee->department ?? 'N/A' }}</span>
+                            <span class="badge bg-light text-dark px-2 py-1 fs-6">
+                                {{ $employee->branch_name }}
+                            </span>
                         </td>
+
+                        <td class="text-center">
+                            <span class="badge bg-secondary text-white px-2 py-1 fs-6">
+                                {{ $employee->department ?? 'N/A' }}
+                            </span>
+                        </td>
+
                         <td class="text-center">
                             @php
                                 $shiftColors = [
@@ -79,16 +91,28 @@
                                 {{ $employee->shift ?? 'N/A' }}
                             </span>
                         </td>
-                        <td class="text-end fw-bold">{{ number_format($employee->basic_salary) }}</td>
-                        <td class="text-center">{{ $employee->phone }}</td>
-                        <td class="text-center">{{ \Carbon\Carbon::parse($employee->joining_date)->format('d M Y') }}</td>
+
+                        <td class="text-end fw-bold">
+                            {{ number_format($employee->basic_salary) }}
+                        </td>
+
+                        <td class="text-center">
+                            {{ $employee->phone }}
+                        </td>
+
+                        <td class="text-center">
+                            {{ \Carbon\Carbon::parse($employee->joining_date)->format('d M Y') }}
+                        </td>
 
                         {{-- Actions --}}
                         <td class="text-center text-nowrap">
                             <a href="{{ url('/employees/'.$employee->id.'/edit') }}" class="btn btn-sm btn-info text-white me-1">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
-                            <form action="{{ url('/employees/'.$employee->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
+
+                            <form action="{{ url('/employees/'.$employee->id) }}" method="POST"
+                                  class="d-inline-block"
+                                  onsubmit="return confirm('Are you sure?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger">
@@ -115,7 +139,6 @@
 
 <script>
 $(document).ready(function () {
-    // Destroy & Re-init to fix buttons hide issue
     if ($.fn.DataTable.isDataTable('#example')) {
         $('#example').DataTable().clear().destroy();
     }
@@ -124,15 +147,15 @@ $(document).ready(function () {
         pageLength: 10,
         ordering: true,
         lengthChange: false,
-        responsive: true, // Columns shrink to fit screen
+        responsive: true,
         autoWidth: false,
-        scrollX: true, // Allow internal scroll but hidden via CSS
+        scrollX: true,
         columnDefs: [
-            { orderable: false, targets: -1, responsivePriority: 1 }, // Actions always visible
-            { responsivePriority: 2, targets: 1 }, // Name
-            { responsivePriority: 3, targets: 4 }, // Department
-            { responsivePriority: 4, targets: 3 }, // Branch
-            { responsivePriority: 5, targets: 2 }  // Designation
+            { orderable: false, targets: -1, responsivePriority: 1 },
+            { responsivePriority: 2, targets: 1 },
+            { responsivePriority: 3, targets: 4 },
+            { responsivePriority: 4, targets: 3 },
+            { responsivePriority: 5, targets: 2 }
         ]
     });
 });

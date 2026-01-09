@@ -14,6 +14,7 @@ class Doctor extends Authenticatable
     protected $table = 'doctors';
 
     protected $fillable = [
+        'prefix',
         'branch_id',
         'first_name',
         'last_name',

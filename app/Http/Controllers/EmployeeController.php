@@ -40,6 +40,7 @@ class EmployeeController extends Controller
     {
         try {
             $request->validate([
+                'prefix'       => 'required|string|in:Mr.,Ms.,Mrs.',
                 'name'         => 'required|string|max:255',
                 'designation'  => 'required|string|max:255',
                 'branch_id'    => 'required|integer|exists:branches,id',
@@ -53,6 +54,7 @@ class EmployeeController extends Controller
             $salary = str_replace(',', '', $request->basic_salary);
 
             DB::table('employees')->insert([
+                'prefix'       => $request->prefix,
                 'name'         => $request->name,
                 'designation'  => $request->designation,
                 'branch_id'    => $request->branch_id,
@@ -97,6 +99,7 @@ class EmployeeController extends Controller
     {
         try {
             $request->validate([
+                 'prefix'       => 'required|string|in:Mr.,Ms.,Mrs.',
                 'name'         => 'required|string|max:255',
                 'designation'  => 'required|string|max:255',
                 'branch_id'    => 'required|integer|exists:branches,id',
@@ -110,6 +113,7 @@ class EmployeeController extends Controller
             $salary = str_replace(',', '', $request->basic_salary);
 
             DB::table('employees')->where('id', $id)->update([
+                 'prefix'       => $request->prefix, 
                 'name'         => $request->name,
                 'designation'  => $request->designation,
                 'branch_id'    => $request->branch_id,
