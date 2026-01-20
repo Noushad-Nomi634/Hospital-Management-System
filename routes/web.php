@@ -1,13 +1,10 @@
 <?php
 
-
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Doctors\DoctorDashboardController;
 use App\Http\Controllers\Doctors\DoctorController;
-
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\CheckupController;
-use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +12,6 @@ use App\Http\Controllers\TreatmentSessionController;
 use App\Http\Controllers\SessionInstallmentController;
 use App\Http\Controllers\GeneralSettingController;
 use App\Http\Controllers\SessionController;
-//use App\Http\Controllers\SessionDetailController;
 use App\Http\Controllers\PaymentOutstandingController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeSalaryController;
@@ -34,10 +30,11 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Manager\ManagerDashboardController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ExpenseController;
-
-
-
-
+use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\PaymentController;
 
 Auth::routes();
 
@@ -50,420 +47,761 @@ Route::get('/clear', function() {
     return "All caches cleared successfully!";
 })->name('clear');
 
+// ✅ Admin Dashboard Routes
+Route::prefix('admin')
+    ->middleware(['auth:web', 'role:admin'])
+    ->name('admin.')
+    ->group(function () {
+        Route::get('dashboard', [AdminController::class, 'dashboard'])
+            ->middleware('check_user_permission:view_dashboard')
+            ->name('dashboard');
+    });
 
 // ✅ Manager Dashboard Routes
 Route::prefix('manager')
     ->middleware(['auth:web', 'role:manager'])
     ->name('manager.')
     ->group(function () {
-        Route::get('dashboard', [App\Http\Controllers\Manager\ManagerDashboardController::class, 'index'])
+        Route::get('dashboard', [ManagerDashboardController::class, 'index'])
+            ->middleware('check_user_permission:view_dashboard')
             ->name('dashboard');
     });
 
-
-
-// For admin only
-Route::prefix('admin')->middleware(['auth:web', 'role:admin'])->name('admin.')->group(function () {
-    Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
-
-
-
-
-    // Add more admin-specific routes here
-});
-
-// For Doctores Dashboard only
+// ✅ Doctor Dashboard Routes
 Route::prefix('doctor')
     ->middleware(['auth:doctor', 'role:doctor'])
     ->name('doctor.')
-    ->group(function () {  
-
-
-// 🔹 Doctor Enrollments
-        Route::get('enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])
-            ->middleware('permission:view enrollments,doctor')
-            ->name('enrollments.index');
-            
-         // Doctor Consultations
-        Route::get('consultations/{status}', [TreatmentSessionController::class, 'index'])
-            ->name('consultations.index');
-
-        // Agar status update ya view chahiye
-        Route::get('consultations/{id}/status-view', [TreatmentSessionController::class, 'viewssStatus'])
-            ->name('consultations.status-view');
-        Route::post('consultations/update-status', [TreatmentSessionController::class, 'updateStatus'])
-            ->name('consultations.update-status');
-
-         // Treatment session store route for doctor
-        Route::post('sessions/store', [TreatmentSessionController::class, 'store'])
-            ->name('sessions.store');
-
-        // ================= Dashboard =================
+    ->group(function () {
+        // 🔹 Dashboard
         Route::get('dashboard', [DoctorDashboardController::class, 'index'])
-            ->middleware('permission:view_dashboard,doctor')
+            ->middleware('check_user_permission:view_dashboard')
             ->name('dashboard');
 
-        // ================= Appointments (Checkups) =================
-        Route::get('appointments', [CheckupController::class, 'index'])
-            ->middleware('permission:view appointments,doctor')
-            ->name('appointments.index');
+        // 🔹 Doctor Enrollments
+        Route::get('enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])
+            ->middleware('check_user_permission:view enrollment')
+            ->name('enrollments.index');
+            
+        // 🔹 Doctor Consultations
+        Route::get('consultations/{status}', [TreatmentSessionController::class, 'index'])
+            ->middleware('check_user_permission:view consultation')
+            ->name('consultations.index');
 
-        Route::get('appointments/create', [CheckupController::class, 'create'])
-            ->middleware('permission:create appointments,doctor')
-            ->name('appointments.create');
+        // 🔹 Consultation Status View/Update
+        Route::get('consultations/{id}/status-view', [TreatmentSessionController::class, 'viewssStatus'])
+            ->middleware('check_user_permission:manage_appointments')
+            ->name('consultations.status-view');
+        
+        Route::post('consultations/update-status', [TreatmentSessionController::class, 'updateStatus'])
+            ->middleware('check_user_permission:manage_appointments')
+            ->name('consultations.update-status');
+
+        // 🔹 Treatment Session Store
+        Route::post('sessions/store', [TreatmentSessionController::class, 'store'])
+            ->middleware('check_user_permission:view enrollment')
+            ->name('sessions.store');
+
+        // 🔹 Appointments (Checkups)
+    Route::get('appointments', [CheckupController::class, 'index'])
+    ->middleware('permission:view appointments')  
+    ->name('appointments.index');
+
+Route::get('appointments/create', [CheckupController::class, 'create'])
+    ->middleware('permission:create appointments,doctor')
+    ->name('appointments.create');
 
         Route::post('appointments/store', [CheckupController::class, 'store'])
-            ->middleware('permission:create appointments,doctor')
+            ->middleware('check_user_permission:create appointments')
             ->name('appointments.store');
 
-        // ================= Sessions =================
+        // 🔹 Sessions
         Route::get('sessions', [SessionController::class, 'index'])
-            ->middleware('permission:manage_sessions,doctor')
+            ->middleware('check_user_permission:manage_sessions')
             ->name('sessions.index');
 
         Route::get('ongoing-sessions/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])
-            ->middleware('permission:manage_sessions,doctor')
+            ->middleware('check_user_permission:manage_sessions')
             ->name('ongoing-sessions');
 
         Route::get('session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])
-            ->middleware('permission:manage_sessions,doctor')
+            ->middleware('check_user_permission:manage_sessions')
             ->name('session-details');
 
         Route::post('sessions/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])
-            ->middleware('permission:manage_sessions,doctor')
+            ->middleware('check_user_permission:manage_sessions')
             ->name('sessions.mark-completed');
 
-        // ================= Feedback (View Only) =================
-Route::get('feedback', [FeedbackController::class, 'index'])
-    ->middleware('permission:view feedback,doctor')
-    ->name('feedback.index');
+        // 🔹 Feedback (View Only)
+        Route::get('feedback', [FeedbackController::class, 'index'])
+            ->middleware('check_user_permission:view feedback')
+            ->name('feedback.index');
 
-// Change this line:
-Route::get('feedback/doctor-list', [FeedbackController::class, 'doctorFeedbackList'])
-    ->middleware('permission:view feedback,doctor')
-    ->name('feedback.doctor-list');
+        Route::get('feedback/doctor-list', [FeedbackController::class, 'doctorFeedbackList'])
+            ->middleware('check_user_permission:view feedback')
+            ->name('feedback.doctor-list');
 
-Route::get('feedback/patient-list', [FeedbackController::class, 'patientFeedbackList'])
-    ->middleware('permission:view feedback,doctor')
-    ->name('feedback.patient-list');
-
+        Route::get('feedback/patient-list', [FeedbackController::class, 'patientFeedbackList'])
+            ->middleware('check_user_permission:view feedback')
+            ->name('feedback.patient-list');
     });
 
-// For all authenticated users
-Route::middleware(['auth', 'role:admin|receptionist|manager'])->group(function () {
-    //patients
-    Route::get('/patients', [PatientController::class, 'index'])->name('patients.index'); ;
-    Route::get('/patients/create', [PatientController::class, 'create']);
-    Route::post('/patients', [PatientController::class, 'store']);
-    Route::get('/patients/{id}/edit', [PatientController::class, 'edit']);
-    Route::put('/patients/{id}', [PatientController::class, 'update'])->name('patients.update');
-    Route::get('/patients/{id}', [PatientController::class, 'show'])->name('patients.card');
-    Route::delete('/patients/{id}', [PatientController::class, 'destroy'])->name('patients.destroy');
-    Route::post('/patients', [PatientController::class, 'store'])->name('patients.store');
-
-
-    //Update Satisfactory session Route
-    Route::get('/doctor-consultations/{id}/status-view', [TreatmentSessionController::class, 'viewssStatus'])->name('doctor-consultations.status-view');
-    Route::post('/doctor-consultations/update-status', [TreatmentSessionController::class, 'updateStatus'])->name('doctor-consultations.update-status');
-
-     //Doctor Consultation Route
-    Route::get('/doctor-consultations/{status}', [TreatmentSessionController::class, 'index'])->name('doctor-consultations.index');
-  
-Route::post('/treatment-sessions/store', [TreatmentSessionController::class, 'store'])
-    ->name('treatment-sessions.store');
-
-
-
-    // Enrollment Session Route
-    Route::get('/enrollments/{status}', [TreatmentSessionController::class, 'showEnrollments'])->name('enrollments');
-    Route::get('/treatment-sessions/sessions/{session_id}', [TreatmentSessionController::class, 'showOngoingSessions'])
-    ->name('treatment-sessions.sessions');
-    // Enrollment Update Route
-    Route::put('/treatment-sessions/{id}/enrollment-update', [TreatmentSessionController::class, 'enrollmentUpdate'])
-        ->name('treatment-sessions.enrollmentUpdate');
-
-    // Ongoing Sessions Route
-    Route::get('/ongoing-sessions/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])->name('ongoing-sessions');
-    Route::get('/session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])->name('session-details');
-
-    // Completed Sessions Route
-    Route::post('/sessions/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])->name('sessions.mark-completed');
-
-
-    //Accounts Payments Routes
-    Route::get('/payments/outstanding-invoices', [PaymentOutstandingController::class, 'index'])->name('accounts.payments');
-    Route::get('//payments/completed-invoices', [PaymentOutstandingController::class, 'completedInvoices'])->name('accounts.completed-invoices');
-
-    // Invoice Ledger Route
-    Route::get('/invoice-ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedger'])->name('invoice.ledger');
-
-// Patient Ledger2
-Route::get('/patient-invoice-ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedgerr'])
-    ->name('invoice.ledgerr');
-
-    // New custom print route
-Route::get('/consultations/print-custom/{id}', [CheckupController::class, 'printSlipCustom'])->name('consultations.print.custom');
-
-    // Process Return Payment (Refund)
-Route::post('/payments/return', [PaymentOutstandingController::class, 'returnPayment'])->name('payments.returnPayment');
-
-
-    // Add payment to invoice
-    Route::post('/invoice-ledger/add-payment', [PaymentOutstandingController::class, 'addPayment'])->name('invoice.add-payment');
-
-
-    //Return Payments Route
-    // page that lists returned payments (you already have)
-    Route::get('/payments/return-payments', [PaymentOutstandingController::class, 'returnPayments'])
-        ->name('payments.return-payments');
-
-     // Checkup Invoice & Refund
-Route::get('/checkups/invoice/{checkup_id}', [PaymentOutstandingController::class, 'invoiceLedgerCheckup'])->name('checkups.invoice');
-Route::post('/checkups/refund', [PaymentOutstandingController::class, 'returnCheckupPayment'])->name('checkups.refund');
-
-// Payment transfer page
-Route::get('/transfer', [PaymentTransactionController::class, 'index'])->name('transfer.index');
-
-// Transfer store karne ke liye
-Route::post('/transfer', [PaymentTransactionController::class, 'store'])->name('transfer.store');
-
-// AJAX routes for balances
-Route::get('/transfer/get-bank-balance/{id}', [PaymentTransactionController::class, 'getBankBalance'])->name('transfer.getBankBalance');
-Route::get('/transfer/get-branch-balance/{id}', [PaymentTransactionController::class, 'getBranchBalance'])->name('transfer.getBranchBalance');
-
-//Branch Ledger
-Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
-Route::get('/ledger/filter', [LedgerController::class, 'filter'])->name('ledger.filter');
-
-//Bank Ledger
-Route::get('bank-ledger', [BankLedgerController::class, 'index'])->name('bankledger.index');
-Route::get('bank-ledger/filter', [BankLedgerController::class, 'filter'])->name('bankledger.filter');
-
-// Income Report
-Route::get('income-report', [IncomeReportController::class, 'index'])->name('income.report');
-
-// Feedback List Pages (branch-wise)
-Route::get('/feedback/doctor-list', [FeedbackController::class, 'doctorFeedbackList'])->name('feedback.doctor-list');
-Route::get('/feedback/patient-list', [FeedbackController::class, 'patientFeedbackList'])->name('feedback.patient-list');
-
-// Doctor Feedback
-Route::get('/feedback/doctor/{sessionId}', [FeedbackController::class, 'doctorFeedbackForm'])->name('feedback.doctor');
-Route::post('/feedback/doctor-submit', [FeedbackController::class, 'doctorFeedbackSubmit'])->name('feedback.doctor-submit');
-
-// Patient Feedback
-Route::get('/feedback/patient/{session_id}', [FeedbackController::class, 'patientFeedbackForm']);
-Route::post('/feedback/patient-submit', [FeedbackController::class, 'patientFeedbackSubmit']);
-
-    // AJAX: search patients (used by your patient search input)
-    Route::get('/payments/search-patient', [PaymentOutstandingController::class, 'searchPatient'])
-        ->name('payments.search-patient');
-
-    // AJAX: fetch payments HTML partial for a patient (used when clicking View Payments)
-    Route::get('/payments/fetch-patient-payments', [PaymentOutstandingController::class, 'fetchPatientPayments'])
-        ->name('payments.fetch-patient-payments');
-
-});
-
-
-
-
-Route::post('/sessions/{id}/complete', [SessionTimeController::class, 'markCompleted'])->name('sessions.complete');
-Route::delete('/sessions/{id}', [SessionTimeController::class, 'destroy'])->name('sessions.destroy');
-
-// Employees
-Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
-Route::get('employees/create', [EmployeeController::class, 'create'])->name('employees.create');
-Route::post('employees', [EmployeeController::class, 'store'])->name('employees.store');
-
-// Edit
-Route::get('employees/{id}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
-
-// Update
-Route::put('employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
-
-// Delete
-Route::delete('employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-
-// Salaries
-Route::get('salaries', [EmployeeSalaryController::class, 'index']);
-Route::get('salaries/create', [EmployeeSalaryController::class, 'create']);
-Route::post('salaries', [EmployeeSalaryController::class, 'store']);
-Route::post('/salaries/{id}/pay', [EmployeeSalaryController::class, 'markAsPaid'])->name('salaries.pay');
-// For modal-based salary mark as paid with adjustments
-Route::post('/salaries/mark-paid', [EmployeeSalaryController::class, 'markPaidWithAdjustment'])->name('salaries.markPaid');
-
-
-
-
-
-Route::get('/payments/outstandings', [\App\Http\Controllers\PaymentOutstandingController::class, 'index']);
-
-
-// Show form to add a new session datetime (for ➕ icon-- abx )
-Route::get('/treatment-sessions/{session_id}/add-entry', [TreatmentSessionController::class, 'addEntryForm'])->name('treatment-sessions.add-entry');
-
-// Handle form POST to store new session datetime
-Route::post('/treatment-sessions/{session_id}/store-entry', [TreatmentSessionController::class, 'storeEntry'])->name('treatment-sessions.store-entry');
-
-
-//Route::get('/session-details/create/{session}', [SessionDetailController::class, 'create'])->name('session-details.create');
-Route::get('/sessions', [SessionController::class, 'index'])->name('sessions.index');
-
-
-Route::get('/settings/general', [GeneralSettingController::class, 'index'])->name('settings.index');
-Route::post('/settings/general', [GeneralSettingController::class, 'update'])->name('settings.update');
-
-
-Route::get('/checkups/print/{id}', [CheckupController::class, 'printSlip'])->name('checkups.print');
-
-
-Route::get('general-settings', [GeneralSettingController::class, 'index'])->name('general-settings.index');
-Route::get('general-settings/{id}/edit', [GeneralSettingController::class, 'edit'])->name('general-settings.edit');
-Route::put('general-settings/{id}/update', [GeneralSettingController::class, 'update'])->name('general-settings.update');
-
-
-Route::get('/installments/create/{session_id}', [SessionInstallmentController::class, 'create'])->name('installments.create');
-Route::post('/installments/store', [SessionInstallmentController::class, 'store'])->name('installments.store');
-
-
-
-Route::get('/treatment-sessions/create', [TreatmentSessionController::class, 'create'])->name('treatment-sessions.create');
-Route::post('/treatment-sessions', [TreatmentSessionController::class, 'store'])->name('treatment-sessions.store');
-
-// Mark session complete (manual doctor name)
-Route::post('/sessions/{id}/complete', [TreatmentSessionController::class, 'markCompleted'])->name('sessions.complete');
-
-Route::get('/treatment-sessions/{id}/edit', [TreatmentSessionController::class, 'edit'])->name('treatment-sessions.edit');
-Route::put('/treatment-sessions/{id}', [TreatmentSessionController::class, 'update'])->name('treatment-sessions.update');
-Route::delete('/treatment-sessions/{id}', [TreatmentSessionController::class, 'destroy'])->name('treatment-sessions.destroy');
-
-// ✅ Treatment Session Summary
-Route::get('/treatment-sessions/summary', [TreatmentSessionController::class, 'sessionSummary'])
-    ->name('treatment-sessions.summary');
-
-Route::get('/treatment-sessions/{id}', [TreatmentSessionController::class, 'show'])->name('treatment-sessions.show');
-
-
-
-
-Route::get('/checkups', [CheckupController::class, 'index'])->name('checkups.index');
-Route::get('/checkups/create', [CheckupController::class, 'create']);
-// Checkup ID ke sath session create karne ka route
-Route::get('/treatment-sessions/create/{checkup}', [TreatmentSessionController::class, 'createWithCheckup'])
-    ->name('treatment-sessions.createWithCheckup');
-
-
-Route::get('/patients/{id}/checkup-fee', [CheckupController::class, 'getCheckupFee']);
-
-
-// Consultations Routes
-Route::get('/consultations', [CheckupController::class, 'index'])->name('consultations.index');
-Route::get('/consultations/create', [CheckupController::class, 'create'])->name('consultations.create');
-Route::post('/consultations', [CheckupController::class, 'store'])->name('consultations.store');
-Route::get('/consultations/{id}/edit', [CheckupController::class, 'edit'])->name('consultations.edit');
-Route::put('/consultations/{id}', [CheckupController::class, 'update'])->name('consultations.update');
-Route::delete('/consultations/{id}', [CheckupController::class, 'destroy'])->name('consultations.destroy');
-Route::get('/consultations/{id}', [CheckupController::class, 'show'])->name('consultations.show');
-
-// ✅ Print consultation slip
-Route::get('/consultations/{id}/print', [CheckupController::class, 'printSlip'])->name('consultations.print');
-
-// Patient History
-Route::get('/consultations/history/{patient_id}', [CheckupController::class, 'history'])->name('consultations.history');
-
-
-
-
-
-// Doctor CRUD
-Route::get('/doctors', [DoctorController::class, 'index'])->name('doctors.index');
-Route::get('/doctors/create', [DoctorController::class, 'create'])->name('doctors.create');
-Route::post('/doctors/store', [DoctorController::class, 'store'])->name('doctors.store');
-Route::get('/doctors/{id}/edit', [DoctorController::class, 'edit'])->name('doctors.edit');
-Route::put('/doctors/{id}', [DoctorController::class, 'update'])->name('doctors.update');
-Route::get('/doctors/{id}', [DoctorController::class, 'show'])->name('doctors.show');
-
-
-Route::delete('/doctors/{id}', [DoctorController::class, 'destroy'])->name('doctors.destroy');
-
-
-Route::get('/doctors/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
-    ->name('doctors.availability.index');
-
-Route::post('/doctors/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
-    ->name('doctors.availability.store');
-
-Route::post('/doctors/{doctor}/availability/generate-next-month', [DoctorAvailabilityController::class, 'generateNextMonth'])
-    ->name('doctors.availability.generateNextMonth');
-
-Route::delete('/doctors/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
-    ->name('doctors.availability.deleteMonth');
-
-
-    //Branches
-Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
-Route::get('/branches/create', [BranchController::class, 'create'])->name('branches.create');
-Route::post('/branches/store', [BranchController::class, 'store'])->name('branches.store');
-Route::get('/branches/edit/{id}', [BranchController::class, 'edit'])->name('branches.edit');
-Route::put('/branches/update/{id}', [BranchController::class, 'update'])->name('branches.update');
-Route::delete('/branches/delete/{id}', [BranchController::class, 'destroy'])->name('branches.destroy');
-
-//Bank
-Route::get('/banks', [BankController::class, 'index'])->name('banks.index');
-Route::get('/banks/create', [BankController::class, 'create'])->name('banks.create');
-Route::post('/banks', [BankController::class, 'store'])->name('banks.store');
-Route::get('/banks/{id}', [BankController::class, 'show'])->name('banks.show');
-Route::get('/banks/{id}/edit', [BankController::class, 'edit'])->name('banks.edit');
-Route::put('/banks/{id}', [BankController::class, 'update'])->name('banks.update');
-Route::delete('/banks/{id}', [BankController::class, 'destroy'])->name('banks.destroy');
-
-
-//users
-Route::get('users', [UserController::class, 'index'])->name('users.index');
-Route::get('users/create', [UserController::class, 'create'])->name('users.create');
-Route::post('users/store', [UserController::class, 'store'])->name('users.store');
-Route::get('users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
-Route::post('users/update/{id}', [UserController::class, 'update'])->name('users.update');
-Route::delete('users/delete/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-
-// For admin and receptionist
-Route::middleware(['role:receptionist'])->group(function () {
-  Route::get('/receptionist-dashboard', [ReceptionistDashboardController::class, 'index'])->name('receptionist.dashboard');
-
-    // Appointments Module
-    Route::get('/appointments', [App\Http\Controllers\AppointmentController::class, 'index'])->middleware('permission:view appointments');
-    Route::get('/appointments/create', [App\Http\Controllers\AppointmentController::class, 'create'])->middleware('permission:create appointments');
-    Route::post('/appointments/store', [App\Http\Controllers\AppointmentController::class, 'store'])->middleware('permission:create appointments');
-
-    // Consultation (view only)
-    Route::get('/consultations', [App\Http\Controllers\ConsultationController::class, 'index'])->middleware('permission:view consultation');
-
-    // Enrollment
-    Route::get('/enrollments', [App\Http\Controllers\EnrollmentController::class, 'index'])->middleware('permission:view enrollment');
-    Route::get('/enrollments/create', [App\Http\Controllers\EnrollmentController::class, 'create'])->middleware('permission:create enrollment');
-
-    // Feedback (view-only)
-    Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->middleware('permission:view feedback');
-
-    // Payments
-    Route::get('/payments', [App\Http\Controllers\PaymentController::class, 'index'])->middleware('permission:view payments');
-    Route::get('/payments/create', [App\Http\Controllers\PaymentController::class, 'create'])->middleware('permission:create payments');
-});
-
-
-// EXPENSE TYPES
-Route::get('/expense-types', [ExpenseTypeController::class, 'index'])->name('expense.types');
-Route::post('/expense-types/store', [ExpenseTypeController::class, 'store'])->name('expense.types.store');
-
-// EXPENSES
-Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
-Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
-Route::post('/expenses/store', [ExpenseController::class, 'store'])->name('expenses.store');
-
-
-
-
-
+// ✅ Receptionist Dashboard Routes
+Route::prefix('receptionist')
+    ->middleware(['role:receptionist'])
+    ->name('receptionist.')
+    ->group(function () {
+        Route::get('dashboard', [ReceptionistDashboardController::class, 'index'])
+            ->middleware('check_user_permission:view_dashboard')
+            ->name('dashboard');
+
+        // Appointments Module
+        Route::get('appointments', [AppointmentController::class, 'index'])
+            ->middleware('check_user_permission:view appointments')
+            ->name('appointments.index');
+        
+        Route::get('appointments/create', [AppointmentController::class, 'create'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.create');
+        
+        Route::post('appointments/store', [AppointmentController::class, 'store'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.store');
+
+        // Consultation (view only)
+        Route::get('consultations', [ConsultationController::class, 'index'])
+            ->middleware('check_user_permission:view consultation')
+            ->name('consultations.index');
+
+        // Enrollment
+        Route::get('enrollments', [EnrollmentController::class, 'index'])
+            ->middleware('check_user_permission:view enrollment')
+            ->name('enrollments.index');
+        
+        Route::get('enrollments/create', [EnrollmentController::class, 'create'])
+            ->middleware('check_user_permission:create enrollment')
+            ->name('enrollments.create');
+
+        // Feedback (view-only)
+        Route::get('feedback', [FeedbackController::class, 'index'])
+            ->middleware('check_user_permission:view feedback')
+            ->name('feedback.index');
+
+        // Payments
+        Route::get('payments', [PaymentController::class, 'index'])
+            ->middleware('check_user_permission:view payments')
+            ->name('payments.index');
+        
+        Route::get('payments/create', [PaymentController::class, 'create'])
+            ->middleware('check_user_permission:create payments')
+            ->name('payments.create');
+    });
+
+// ✅ Shared Routes (for admin, manager, etc.)
+Route::middleware(['auth', 'role:admin|manager|receptionist'])
+    ->group(function () {
+
+        // ================= PATIENTS =================
+        Route::prefix('patients')->group(function () {
+            Route::get('/', [PatientController::class, 'index'])
+                ->middleware('check_user_permission:view patients')
+                ->name('patients.index');
+            
+            Route::get('/create', [PatientController::class, 'create'])
+                ->middleware('check_user_permission:create patients')
+                ->name('patients.create');
+            
+            Route::post('/', [PatientController::class, 'store'])
+                ->middleware('check_user_permission:create patients')
+                ->name('patients.store');
+            
+            Route::get('/{id}/edit', [PatientController::class, 'edit'])
+                ->middleware('check_user_permission:edit patients')
+                ->name('patients.edit');
+            
+            Route::put('/{id}', [PatientController::class, 'update'])
+                ->middleware('check_user_permission:edit patients')
+                ->name('patients.update');
+            
+            Route::get('/{id}', [PatientController::class, 'show'])
+                ->middleware('check_user_permission:view patients')
+                ->name('patients.card');
+            
+            Route::delete('/{id}', [PatientController::class, 'destroy'])
+                ->middleware('check_user_permission:delete patients')
+                ->name('patients.destroy');
+
+        });
+
+
+
+        // ================= DOCTORS =================
+        Route::prefix('doctors')->group(function () {
+            Route::get('/', [DoctorController::class, 'index'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.index');
+            
+            Route::get('/create', [DoctorController::class, 'create'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.create');
+            
+            Route::post('/store', [DoctorController::class, 'store'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.store');
+            
+            Route::get('/{id}/edit', [DoctorController::class, 'edit'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.edit');
+            
+            Route::put('/{id}', [DoctorController::class, 'update'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.update');
+            
+            Route::get('/{id}', [DoctorController::class, 'show'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.show');
+            
+            Route::delete('/{id}', [DoctorController::class, 'destroy'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.destroy');
+
+            // Doctor Availability
+            Route::get('/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.availability.index');
+            
+            Route::post('/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.availability.store');
+            
+            Route::post('/{doctor}/availability/generate-next-month', [DoctorAvailabilityController::class, 'generateNextMonth'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.availability.generateNextMonth');
+            
+            Route::delete('/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctors.availability.deleteMonth');
+        });
+
+        
+
+        // ================= CHECKUPS/CONSULTATIONS =================
+        Route::prefix('consultations')->group(function () {
+            Route::get('/', [CheckupController::class, 'index'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.index');
+            
+            Route::get('/create', [CheckupController::class, 'create'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.create');
+            
+            Route::post('/', [CheckupController::class, 'store'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.store');
+            
+            Route::get('/{id}/edit', [CheckupController::class, 'edit'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.edit');
+            
+            Route::put('/{id}', [CheckupController::class, 'update'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.update');
+            
+            Route::delete('/{id}', [CheckupController::class, 'destroy'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.destroy');
+            
+            Route::get('/{id}', [CheckupController::class, 'show'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.show');
+            
+            Route::get('/{id}/print', [CheckupController::class, 'printSlip'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.print');
+            
+            Route::get('/print-custom/{id}', [CheckupController::class, 'printSlipCustom'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.print.custom');
+            
+            Route::get('/history/{patient_id}', [CheckupController::class, 'history'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('consultations.history');
+        });
+
+        // ================= TREATMENT SESSIONS =================
+        Route::prefix('treatment-sessions')->group(function () {
+            Route::get('/', [TreatmentSessionController::class, 'index'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('treatment-sessions.index');
+            
+            Route::get('/create', [TreatmentSessionController::class, 'create'])
+                ->middleware('check_user_permission:create enrollment')
+                ->name('treatment-sessions.create');
+            
+            Route::get('/create/{checkup}', [TreatmentSessionController::class, 'createWithCheckup'])
+                ->middleware('check_user_permission:create enrollment')
+                ->name('treatment-sessions.createWithCheckup');
+            
+            Route::post('/', [TreatmentSessionController::class, 'store'])
+                ->middleware('check_user_permission:create enrollment')
+                ->name('treatment-sessions.store');
+            
+            Route::get('/{id}/edit', [TreatmentSessionController::class, 'edit'])
+                ->middleware('check_user_permission:edit enrollment')
+                ->name('treatment-sessions.edit');
+            
+            Route::put('/{id}', [TreatmentSessionController::class, 'update'])
+                ->middleware('check_user_permission:edit enrollment')
+                ->name('treatment-sessions.update');
+            
+            Route::delete('/{id}', [TreatmentSessionController::class, 'destroy'])
+                ->middleware('check_user_permission:delete enrollment')
+                ->name('treatment-sessions.destroy');
+            
+            Route::get('/{id}', [TreatmentSessionController::class, 'show'])
+                ->middleware('check_user_permission:view enrollment')
+                ->name('treatment-sessions.show');
+            
+            Route::get('/summary', [TreatmentSessionController::class, 'sessionSummary'])
+                ->middleware('check_user_permission:view enrollment')
+                ->name('treatment-sessions.summary');
+            
+            Route::get('/sessions/{session_id}', [TreatmentSessionController::class, 'showOngoingSessions'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('treatment-sessions.sessions');
+            
+            Route::put('/{id}/enrollment-update', [TreatmentSessionController::class, 'enrollmentUpdate'])
+                ->middleware('check_user_permission:edit enrollment')
+                ->name('treatment-sessions.enrollmentUpdate');
+            
+            Route::get('/{session_id}/add-entry', [TreatmentSessionController::class, 'addEntryForm'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('treatment-sessions.add-entry');
+            
+            Route::post('/{session_id}/store-entry', [TreatmentSessionController::class, 'storeEntry'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('treatment-sessions.store-entry');
+        });
+
+         // 🔹 Appointments (Checkups)
+    Route::get('appointments', [CheckupController::class, 'index'])
+    ->middleware('permission:view appointments')  
+    ->name('appointments.index');
+
+Route::get('appointments/create', [CheckupController::class, 'create'])
+    ->middleware('permission:create appointments,doctor')
+    ->name('appointments.create');
+
+        Route::post('appointments/store', [CheckupController::class, 'store'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.store');
+        
+
+        // ================= SESSIONS =================
+        Route::prefix('sessions')->group(function () {
+            Route::get('/', [SessionController::class, 'index'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('sessions.index');
+            
+            Route::post('/{id}/complete', [SessionTimeController::class, 'markCompleted'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('sessions.complete');
+            
+            Route::delete('/{id}', [SessionTimeController::class, 'destroy'])
+                ->middleware('check_user_permission:delete enrollment')
+                ->name('sessions.destroy');
+            
+            Route::post('/mark-completed', [SessionTimeController::class, 'updateSectionCompleted'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('sessions.mark-completed');
+        });
+
+        // ================= ENROLLMENTS =================
+        Route::prefix('enrollments')->group(function () {
+            Route::get('/{status}', [TreatmentSessionController::class, 'showEnrollments'])
+                ->middleware('check_user_permission:view enrollment')
+                ->name('enrollments');
+        });
+
+        // ================= PAYMENTS & ACCOUNTS =================
+        Route::prefix('payments')->group(function () {
+            Route::get('/outstanding-invoices', [PaymentOutstandingController::class, 'index'])
+                ->middleware('check_user_permission:view payments')
+                ->name('accounts.payments');
+            
+            Route::get('/completed-invoices', [PaymentOutstandingController::class, 'completedInvoices'])
+                ->middleware('check_user_permission:view payments')
+                ->name('accounts.completed-invoices');
+            
+            Route::get('/outstandings', [PaymentOutstandingController::class, 'index'])
+                ->middleware('check_user_permission:view payments')
+                ->name('payments.outstandings');
+            
+            Route::get('/return-payments', [PaymentOutstandingController::class, 'returnPayments'])
+                ->middleware('check_user_permission:view returns')
+                ->name('payments.return-payments');
+            
+            Route::post('/return', [PaymentOutstandingController::class, 'returnPayment'])
+                ->middleware('check_user_permission:create returns')
+                ->name('payments.returnPayment');
+            
+            Route::get('/search-patient', [PaymentOutstandingController::class, 'searchPatient'])
+                ->middleware('check_user_permission:view payments')
+                ->name('payments.search-patient');
+            
+            Route::get('/fetch-patient-payments', [PaymentOutstandingController::class, 'fetchPatientPayments'])
+                ->middleware('check_user_permission:view payments')
+                ->name('payments.fetch-patient-payments');
+        });
+
+        // ================= INVOICE LEDGER =================
+        Route::prefix('invoice')->group(function () {
+            Route::get('/ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedger'])
+                ->middleware('check_user_permission:view payments')
+                ->name('invoice.ledger');
+            
+            Route::get('/patient-invoice-ledger/{session_id}', [PaymentOutstandingController::class, 'invoiceLedgerr'])
+                ->middleware('check_user_permission:view payments')
+                ->name('invoice.ledgerr');
+            
+            Route::post('/add-payment', [PaymentOutstandingController::class, 'addPayment'])
+                ->middleware('check_user_permission:create payments')
+                ->name('invoice.add-payment');
+        });
+
+        // ================= CHECKUP PAYMENTS =================
+        Route::prefix('checkups')->group(function () {
+            Route::get('/invoice/{checkup_id}', [PaymentOutstandingController::class, 'invoiceLedgerCheckup'])
+                ->middleware('check_user_permission:view payments')
+                ->name('checkups.invoice');
+            
+            Route::post('/refund', [PaymentOutstandingController::class, 'returnCheckupPayment'])
+                ->middleware('check_user_permission:create returns')
+                ->name('checkups.refund');
+        });
+
+        // ================= PAYMENT TRANSFER =================
+        Route::prefix('transfer')->group(function () {
+            Route::get('/', [PaymentTransactionController::class, 'index'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('transfer.index');
+            
+            Route::post('/', [PaymentTransactionController::class, 'store'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('transfer.store');
+            
+            Route::get('/get-bank-balance/{id}', [PaymentTransactionController::class, 'getBankBalance'])
+                ->middleware('check_user_permission:view payments')
+                ->name('transfer.getBankBalance');
+            
+            Route::get('/get-branch-balance/{id}', [PaymentTransactionController::class, 'getBranchBalance'])
+                ->middleware('check_user_permission:view payments')
+                ->name('transfer.getBranchBalance');
+        });
+
+        // ================= LEDGERS =================
+        Route::prefix('ledger')->group(function () {
+            Route::get('/', [LedgerController::class, 'index'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('ledger.index');
+            
+            Route::get('/filter', [LedgerController::class, 'filter'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('ledger.filter');
+        });
+
+        // ================= BANK LEDGER =================
+        Route::prefix('bank-ledger')->group(function () {
+            Route::get('/', [BankLedgerController::class, 'index'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('bankledger.index');
+            
+            Route::get('/filter', [BankLedgerController::class, 'filter'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('bankledger.filter');
+        });
+
+        // ================= INCOME REPORT =================
+        Route::prefix('income-report')->group(function () {
+            Route::get('/', [IncomeReportController::class, 'index'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('income.report');
+        });
+
+        // ================= FEEDBACK =================
+        Route::prefix('feedback')->group(function () {
+            Route::get('/doctor-list', [FeedbackController::class, 'doctorFeedbackList'])
+                ->middleware('check_user_permission:view feedback')
+                ->name('feedback.doctor-list');
+            
+            Route::get('/patient-list', [FeedbackController::class, 'patientFeedbackList'])
+                ->middleware('check_user_permission:view feedback')
+                ->name('feedback.patient-list');
+            
+            Route::get('/doctor/{sessionId}', [FeedbackController::class, 'doctorFeedbackForm'])
+                ->middleware('check_user_permission:view feedback')
+                ->name('feedback.doctor');
+            
+            Route::post('/doctor-submit', [FeedbackController::class, 'doctorFeedbackSubmit'])
+                ->middleware('check_user_permission:view feedback')
+                ->name('feedback.doctor-submit');
+            
+            Route::get('/patient/{session_id}', [FeedbackController::class, 'patientFeedbackForm'])
+                ->middleware('check_user_permission:view feedback')
+                ->name('feedback.patient');
+            
+            Route::post('/patient-submit', [FeedbackController::class, 'patientFeedbackSubmit'])
+                ->middleware('check_user_permission:view feedback')
+                ->name('feedback.patient-submit');
+        });
+
+        // ================= DOCTOR CONSULTATIONS =================
+        Route::prefix('doctor-consultations')->group(function () {
+            Route::get('/{status}', [TreatmentSessionController::class, 'index'])
+                ->middleware('check_user_permission:view consultation')
+                ->name('doctor-consultations.index');
+            
+            Route::get('/{id}/status-view', [TreatmentSessionController::class, 'viewssStatus'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctor-consultations.status-view');
+            
+            Route::post('/update-status', [TreatmentSessionController::class, 'updateStatus'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('doctor-consultations.update-status');
+        });
+
+        // ================= ONGOING SESSIONS =================
+        Route::prefix('ongoing-sessions')->group(function () {
+            Route::get('/{status}', [TreatmentSessionController::class, 'OngoingSessionsOnly'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('ongoing-sessions');
+            
+            Route::get('/session-details/{id}', [TreatmentSessionController::class, 'sessionDetails'])
+                ->middleware('check_user_permission:manage_sessions')
+                ->name('session-details');
+        });
+
+        // ================= EMPLOYEES =================
+        Route::prefix('employees')->group(function () {
+            Route::get('/', [EmployeeController::class, 'index'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('employees.index');
+            
+            Route::get('/create', [EmployeeController::class, 'create'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('employees.create');
+            
+            Route::post('/', [EmployeeController::class, 'store'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('employees.store');
+            
+            Route::get('/{id}/edit', [EmployeeController::class, 'edit'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('employees.edit');
+            
+            Route::put('/{id}', [EmployeeController::class, 'update'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('employees.update');
+            
+            Route::delete('/{id}', [EmployeeController::class, 'destroy'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('employees.destroy');
+        });
+
+        // ================= SALARIES =================
+        Route::prefix('salaries')->group(function () {
+            Route::get('/', [EmployeeSalaryController::class, 'index'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('salaries.index');
+            
+            Route::get('/create', [EmployeeSalaryController::class, 'create'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('salaries.create');
+            
+            Route::post('/', [EmployeeSalaryController::class, 'store'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('salaries.store');
+            
+            Route::post('/{id}/pay', [EmployeeSalaryController::class, 'markAsPaid'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('salaries.pay');
+            
+            Route::post('/mark-paid', [EmployeeSalaryController::class, 'markPaidWithAdjustment'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('salaries.markPaid');
+        });
+
+        // ================= INSTALLMENTS =================
+        Route::prefix('installments')->group(function () {
+            Route::get('/create/{session_id}', [SessionInstallmentController::class, 'create'])
+                ->middleware('check_user_permission:create payments')
+                ->name('installments.create');
+            
+            Route::post('/store', [SessionInstallmentController::class, 'store'])
+                ->middleware('check_user_permission:create payments')
+                ->name('installments.store');
+        });
+
+        // ================= SETTINGS =================
+        Route::prefix('settings')->group(function () {
+            Route::get('/general', [GeneralSettingController::class, 'index'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('settings.index');
+            
+            Route::post('/general', [GeneralSettingController::class, 'update'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('settings.update');
+        });
+
+        Route::prefix('general-settings')->group(function () {
+            Route::get('/', [GeneralSettingController::class, 'index'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('general-settings.index');
+            
+            Route::get('/{id}/edit', [GeneralSettingController::class, 'edit'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('general-settings.edit');
+            
+            Route::put('/{id}/update', [GeneralSettingController::class, 'update'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('general-settings.update');
+        });
+
+        // ================= BRANCHES =================
+        Route::prefix('branches')->group(function () {
+            Route::get('/', [BranchController::class, 'index'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('branches.index');
+            
+            Route::get('/create', [BranchController::class, 'create'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('branches.create');
+            
+            Route::post('/store', [BranchController::class, 'store'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('branches.store');
+            
+            Route::get('/edit/{id}', [BranchController::class, 'edit'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('branches.edit');
+            
+            Route::put('/update/{id}', [BranchController::class, 'update'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('branches.update');
+            
+            Route::delete('/delete/{id}', [BranchController::class, 'destroy'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('branches.destroy');
+        });
+
+        // ================= BANKS =================
+        Route::prefix('banks')->group(function () {
+            Route::get('/', [BankController::class, 'index'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.index');
+            
+            Route::get('/create', [BankController::class, 'create'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.create');
+            
+            Route::post('/', [BankController::class, 'store'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.store');
+            
+            Route::get('/{id}', [BankController::class, 'show'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.show');
+            
+            Route::get('/{id}/edit', [BankController::class, 'edit'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.edit');
+            
+            Route::put('/{id}', [BankController::class, 'update'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.update');
+            
+            Route::delete('/{id}', [BankController::class, 'destroy'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('banks.destroy');
+        });
+
+        // ================= USERS =================
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'index'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('users.index');
+            
+            Route::get('/create', [UserController::class, 'create'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('users.create');
+            
+            Route::post('/store', [UserController::class, 'store'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('users.store');
+            
+            Route::get('/edit/{id}', [UserController::class, 'edit'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('users.edit');
+            
+            Route::post('/update/{id}', [UserController::class, 'update'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('users.update');
+            
+            Route::delete('/delete/{id}', [UserController::class, 'destroy'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('users.destroy');
+        });
+
+        // ================= EXPENSE TYPES =================
+        Route::prefix('expense-types')->group(function () {
+            Route::get('/', [ExpenseTypeController::class, 'index'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('expense.types');
+            
+            Route::post('/store', [ExpenseTypeController::class, 'store'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('expense.types.store');
+        });
+
+        // ================= EXPENSES =================
+        Route::prefix('expenses')->group(function () {
+            Route::get('/', [ExpenseController::class, 'index'])
+                ->middleware('check_user_permission:view_reports')
+                ->name('expenses.index');
+            
+            Route::get('/create', [ExpenseController::class, 'create'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('expenses.create');
+            
+            Route::post('/store', [ExpenseController::class, 'store'])
+                ->middleware('check_user_permission:manage_payments')
+                ->name('expenses.store');
+        });
+
+        // ================= ROLE PERMISSIONS =================
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/roles-permissions', [RolePermissionController::class, 'rolePermissions'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('role.permissions');
+            
+            Route::post('/roles-permissions/update', [RolePermissionController::class, 'updateRolePermission'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('role.permissions.update');
+            
+            Route::get('/users-permissions', [RolePermissionController::class, 'userPermissions'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('user.permissions');
+            
+            Route::post('/users-permissions/update', [RolePermissionController::class, 'updateUserPermission'])
+                ->middleware('check_user_permission:manage_appointments')
+                ->name('user.permissions.update');
+        });
+
+        // ================= CHECKUP FEE AJAX =================
+        Route::get('/patients/{id}/checkup-fee', [CheckupController::class, 'getCheckupFee'])
+            ->middleware('check_user_permission:view consultation')
+            ->name('patients.checkup-fee');
+    });
+
+// ================= PUBLIC/COMMON ROUTES =================
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');
+//Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');

@@ -65,9 +65,19 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
+        // 🔹 Add enrollment permissions also for web guard (fixes error)
+        Permission::firstOrCreate(['name' => 'create enrollments', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'view enrollments', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'edit enrollments', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'delete enrollments', 'guard_name' => 'web']);
+
         // 🔹 Admin – full access (web guard)
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web'])
-            ->givePermissionTo(Permission::where('guard_name', 'web')->get());
+       // 🔹 Admin – full access (web guard)
+$adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+
+$adminRole->syncPermissions(
+    Permission::where('guard_name', 'web')->pluck('name')->toArray()
+);
 
         // 🔹 Manager – full access (web guard)
         Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web'])
@@ -98,6 +108,10 @@ class RolesAndPermissionsSeeder extends Seeder
                 'create enrollment',
                 'edit enrollment',
                 'delete enrollment',
+                'view enrollments',
+                'create enrollments',
+                'edit enrollments',
+                'delete enrollments',
 
                 // Feedback (view-only)
                 'view feedback',
@@ -110,45 +124,41 @@ class RolesAndPermissionsSeeder extends Seeder
             ]);
 
         // 🔹 Doctor – appointments & sessions management (doctor guard)
-      $doctorRole = Role::firstOrCreate(
-    ['name' => 'doctor', 'guard_name' => 'doctor'] 
-);
+        $doctorRole = Role::firstOrCreate(
+            ['name' => 'doctor', 'guard_name' => 'doctor']
+        );
 
+        $doctorPermissions = [
+            // Dashboard
+            'view_dashboard',
 
-      $doctorPermissions = [
-    // Dashboard
-    'view_dashboard',
+            // Appointments
+            'view appointments',
+            'create appointments',
+            'edit appointments',
+            'delete appointments',
+            'manage_appointments',
 
-    // Appointments
-    'view appointments',
-    'create appointments',
-    'edit appointments',
-    'delete appointments',
-    'manage_appointments',
+            // Sessions
+            'manage_sessions',
 
-    // Sessions
-    'manage_sessions',
+            // Feedback
+            'view feedback',
 
-    // Feedback
-    'view feedback',
+            // Consultation
+            'view consultation',
 
-    // Consultation
-    'view consultation',
-
-   // Enrollment
-'view enrollments',
-'create enrollments',
-'edit enrollments',
-'delete enrollments',
-];
-
-
+            // Enrollment
+            'view enrollments',
+            'create enrollments',
+            'edit enrollments',
+            'delete enrollments',
+        ];
 
         // Ensure each permission exists for doctor guard
-       foreach ($doctorPermissions as $perm) {
-    Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'doctor']); 
-}
-
+        foreach ($doctorPermissions as $perm) {
+            Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'doctor']);
+        }
 
         // Assign permissions to doctor role
         $doctorRole->syncPermissions($doctorPermissions);
@@ -169,7 +179,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view patients',
             ]);
 
-        // 🔹 Cashier (if needed)
+        // 🔹 Cashier
         Role::firstOrCreate(['name' => 'cashier', 'guard_name' => 'web'])
             ->givePermissionTo([
                 'manage_payments',
@@ -182,5 +192,4 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view_reports',
             ]);
     }
-    
 }

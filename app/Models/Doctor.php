@@ -4,15 +4,21 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Models\Permission;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Doctor extends Authenticatable
 {
-    use HasRoles, Notifiable;
+    use HasRoles, Notifiable {
+        HasRoles::hasPermissionTo as traitHasPermissionTo; // alias for override
+    }
 
+    // ──────────────── Guard for Spatie ────────────────
     protected $guard_name = 'doctor';
     protected $table = 'doctors';
 
+    // ──────────────── Fillable Columns ────────────────
     protected $fillable = [
         'prefix',
         'branch_id',
@@ -30,13 +36,13 @@ class Doctor extends Authenticatable
         'status',
     ];
 
+    // ──────────────── Hidden Columns ────────────────
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
     // ──────────────── Relationships ────────────────
-
     public function branch()
     {
         return $this->belongsTo(Branch::class, 'branch_id');
@@ -78,12 +84,47 @@ class Doctor extends Authenticatable
         return trim($this->first_name . ' ' . $this->last_name);
     }
 
+    // ──────────────── Polymorphic Denied Permissions ────────────────
+    public function deniedPermissions(): MorphToMany
+    {
+        return $this->morphToMany(
+            Permission::class,
+            'model',               // morph name from morphs('model') in migration
+            'denied_permissions',  // table name
+            'model_id',            // current model id column
+            'permission_id'        // related model id column
+        );
+    }
+
+    // ──────────────── Override hasPermissionTo for denied check ────────────────
+    public function hasPermissionTo($permission, $guardName = null): bool
+    {
+        $guardName = $guardName ?? $this->guard_name;
+
+        // Agar permission string hai, fetch Permission model
+        if (is_string($permission)) {
+            $permission = Permission::where('name', $permission)
+                ->where('guard_name', $guardName)
+                ->first();
+
+            if (!$permission) return false;
+        }
+
+        // Denied permissions check
+        if ($this->deniedPermissions->contains('id', $permission->id)) {
+            return false;
+        }
+
+        // Spatie trait method use karo
+        return $this->traitHasPermissionTo($permission, $guardName);
+    }
+
     // ──────────────── Booted method for auto role assignment ────────────────
     protected static function booted()
     {
         static::created(function ($doctor) {
             if (!$doctor->hasRole('doctor')) {
-                $doctor->assignRole('doctor'); // 🔹 Automatically assign doctor role
+                $doctor->assignRole('doctor'); // Automatically assign doctor role
             }
         });
     }

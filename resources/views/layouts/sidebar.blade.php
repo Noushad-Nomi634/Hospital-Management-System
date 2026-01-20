@@ -347,6 +347,14 @@
                 </a>
             </li>
 
+             {{--Payments Transactions--}}
+             <li>
+                <a href="{{ url('roles-permissions') }}">
+                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
+                <div class="menu-title">Roles Permissions</div>
+                </a>
+            </li>
+
 
           
            
