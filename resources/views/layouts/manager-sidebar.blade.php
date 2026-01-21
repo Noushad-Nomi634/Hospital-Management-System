@@ -73,12 +73,12 @@
                 </a>
                 <ul>
                     <li>
-                    <a href="{{ url('/checkups') }}">
+                    <a href="{{ url('manager/appointments') }}">
                         <i class="material-icons-outlined">fact_check</i> All Appointments
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/checkups/create') }}">
+                    <a href="{{ url('manager/appointments/create') }}">
                         <i class="material-icons-outlined">add_circle</i>  Book Appointment
                     </a>
                     </li>

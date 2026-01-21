@@ -73,12 +73,12 @@
                 </a>
                 <ul>
                     <li>
-                    <a href="{{ url('/checkups') }}">
+                    <a href="{{ url('admin/appointments') }}">
                         <i class="material-icons-outlined">fact_check</i> All Appointments
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/checkups/create') }}">
+                    <a href="{{ url('admin/appointments/create') }}">
                         <i class="material-icons-outlined">add_circle</i>  Book Appointment
                     </a>
                     </li>
@@ -347,11 +347,20 @@
                 </a>
             </li>
 
-             {{--Payments Transactions--}}
+             {{--Role permissions--}}
              <li>
                 <a href="{{ url('roles-permissions') }}">
                 <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
                 <div class="menu-title">Roles Permissions</div>
+                </a>
+            </li>
+
+
+{{--users permissions--}}
+             <li>
+                <a href="{{ url('users-permissions') }}">
+                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
+                <div class="menu-title">Users Permissions</div>
                 </a>
             </li>
 

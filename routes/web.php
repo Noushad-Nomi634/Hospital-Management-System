@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Doctors\DoctorDashboardController;
 use App\Http\Controllers\Doctors\DoctorController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\CheckupController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TreatmentSessionController;
 use App\Http\Controllers\SessionInstallmentController;
 use App\Http\Controllers\GeneralSettingController;
@@ -32,9 +32,9 @@ use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ConsultationController; // Added missing import
 
 Auth::routes();
 
@@ -55,6 +55,20 @@ Route::prefix('admin')
         Route::get('dashboard', [AdminController::class, 'dashboard'])
             ->middleware('check_user_permission:view_dashboard')
             ->name('dashboard');
+
+            // 🔹 Appointments (Checkups) - FIXED: Using consistent middleware
+        Route::get('appointments', [CheckupController::class, 'index'])
+            ->middleware('check_user_permission:view appointments')
+            ->name('appointments.index');
+
+        Route::get('appointments/create', [CheckupController::class, 'create'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.create');
+
+        Route::post('appointments/store', [CheckupController::class, 'store'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.store');
+
     });
 
 // ✅ Manager Dashboard Routes
@@ -65,6 +79,20 @@ Route::prefix('manager')
         Route::get('dashboard', [ManagerDashboardController::class, 'index'])
             ->middleware('check_user_permission:view_dashboard')
             ->name('dashboard');
+
+             // 🔹 Appointments (Checkups) - FIXED: Using consistent middleware
+        Route::get('appointments', [CheckupController::class, 'index'])
+            ->middleware('check_user_permission:view appointments')
+            ->name('appointments.index');
+
+        Route::get('appointments/create', [CheckupController::class, 'create'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.create');
+
+        Route::post('appointments/store', [CheckupController::class, 'store'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.store');
+
     });
 
 // ✅ Doctor Dashboard Routes
@@ -101,14 +129,14 @@ Route::prefix('doctor')
             ->middleware('check_user_permission:view enrollment')
             ->name('sessions.store');
 
-        // 🔹 Appointments (Checkups)
-    Route::get('appointments', [CheckupController::class, 'index'])
-    ->middleware('permission:view appointments')  
-    ->name('appointments.index');
+        // 🔹 Appointments (Checkups) - FIXED: Using consistent middleware
+        Route::get('appointments', [CheckupController::class, 'index'])
+            ->middleware('check_user_permission:view appointments')
+            ->name('appointments.index');
 
-Route::get('appointments/create', [CheckupController::class, 'create'])
-    ->middleware('permission:create appointments,doctor')
-    ->name('appointments.create');
+        Route::get('appointments/create', [CheckupController::class, 'create'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.create');
 
         Route::post('appointments/store', [CheckupController::class, 'store'])
             ->middleware('check_user_permission:create appointments')
@@ -145,34 +173,35 @@ Route::get('appointments/create', [CheckupController::class, 'create'])
             ->name('feedback.patient-list');
     });
 
-// ✅ Receptionist Dashboard Routes
+// ✅ Receptionist Dashboard Routes - FIXED: Added correct middleware and fixed ConsultationController
 Route::prefix('receptionist')
-    ->middleware(['role:receptionist'])
+    ->middleware(['auth:web', 'role:receptionist'])
     ->name('receptionist.')
     ->group(function () {
         Route::get('dashboard', [ReceptionistDashboardController::class, 'index'])
             ->middleware('check_user_permission:view_dashboard')
             ->name('dashboard');
 
-        // 🔹 Appointments (Checkups)
-    Route::get('appointments', [CheckupController::class, 'index'])
-    ->middleware('permission:view appointments')  
-    ->name('appointments.index');
+      // 🔹 Appointments (Checkups) - FIXED: Using consistent middleware
+        Route::get('appointments', [CheckupController::class, 'index'])
+            ->middleware('check_user_permission:view appointments')
+            ->name('appointments.index');
 
-Route::get('appointments/create', [CheckupController::class, 'create'])
-    ->middleware('permission:create appointments,doctor')
-    ->name('appointments.create');
+        Route::get('appointments/create', [CheckupController::class, 'create'])
+            ->middleware('check_user_permission:create appointments')
+            ->name('appointments.create');
 
         Route::post('appointments/store', [CheckupController::class, 'store'])
             ->middleware('check_user_permission:create appointments')
             ->name('appointments.store');
 
-        // Consultation (view only)
+
+        // 🔹 Consultation (view only) - FIXED: Using correct controller
         Route::get('consultations', [ConsultationController::class, 'index'])
             ->middleware('check_user_permission:view consultation')
             ->name('consultations.index');
 
-        // Enrollment
+        // 🔹 Enrollment
         Route::get('enrollments', [EnrollmentController::class, 'index'])
             ->middleware('check_user_permission:view enrollment')
             ->name('enrollments.index');
@@ -181,12 +210,12 @@ Route::get('appointments/create', [CheckupController::class, 'create'])
             ->middleware('check_user_permission:create enrollment')
             ->name('enrollments.create');
 
-        // Feedback (view-only)
+        // 🔹 Feedback (view-only)
         Route::get('feedback', [FeedbackController::class, 'index'])
             ->middleware('check_user_permission:view feedback')
             ->name('feedback.index');
 
-        // Payments
+        // 🔹 Payments
         Route::get('payments', [PaymentController::class, 'index'])
             ->middleware('check_user_permission:view payments')
             ->name('payments.index');
@@ -196,8 +225,8 @@ Route::get('appointments/create', [CheckupController::class, 'create'])
             ->name('payments.create');
     });
 
-// ✅ Shared Routes (for admin, manager, etc.)
-Route::middleware(['auth', 'role:admin|manager|receptionist'])
+// ✅ Shared Routes (for admin, manager, receptionist)
+Route::middleware(['auth:web', 'role:admin|manager|receptionist'])
     ->group(function () {
 
         // ================= PATIENTS =================
@@ -229,10 +258,7 @@ Route::middleware(['auth', 'role:admin|manager|receptionist'])
             Route::delete('/{id}', [PatientController::class, 'destroy'])
                 ->middleware('check_user_permission:delete patients')
                 ->name('patients.destroy');
-
         });
-
-
 
         // ================= DOCTORS =================
         Route::prefix('doctors')->group(function () {
@@ -282,8 +308,6 @@ Route::middleware(['auth', 'role:admin|manager|receptionist'])
                 ->name('doctors.availability.deleteMonth');
         });
 
-        
-
         // ================= CHECKUPS/CONSULTATIONS =================
         Route::prefix('consultations')->group(function () {
             Route::get('/', [CheckupController::class, 'index'])
@@ -325,6 +349,21 @@ Route::middleware(['auth', 'role:admin|manager|receptionist'])
             Route::get('/history/{patient_id}', [CheckupController::class, 'history'])
                 ->middleware('check_user_permission:view consultation')
                 ->name('consultations.history');
+        });
+
+        // ================= APPOINTMENTS =================
+        Route::prefix('appointments')->group(function () {
+            Route::get('/', [AppointmentController::class, 'index'])
+                ->middleware('check_user_permission:view appointments')
+                ->name('appointments.index');
+            
+            Route::get('/create', [AppointmentController::class, 'create'])
+                ->middleware('check_user_permission:create appointments')
+                ->name('appointments.create');
+            
+            Route::post('/store', [AppointmentController::class, 'store'])
+                ->middleware('check_user_permission:create appointments')
+                ->name('appointments.store');
         });
 
         // ================= TREATMENT SESSIONS =================
@@ -381,20 +420,6 @@ Route::middleware(['auth', 'role:admin|manager|receptionist'])
                 ->middleware('check_user_permission:manage_sessions')
                 ->name('treatment-sessions.store-entry');
         });
-
-         // 🔹 Appointments (Checkups)
-    Route::get('appointments', [CheckupController::class, 'index'])
-    ->middleware('permission:view appointments')  
-    ->name('appointments.index');
-
-Route::get('appointments/create', [CheckupController::class, 'create'])
-    ->middleware('permission:create appointments,doctor')
-    ->name('appointments.create');
-
-        Route::post('appointments/store', [CheckupController::class, 'store'])
-            ->middleware('check_user_permission:create appointments')
-            ->name('appointments.store');
-        
 
         // ================= SESSIONS =================
         Route::prefix('sessions')->group(function () {
@@ -777,24 +802,20 @@ Route::get('appointments/create', [CheckupController::class, 'create'])
                 ->name('expenses.store');
         });
 
-        // ================= ROLE PERMISSIONS =================
-        Route::middleware(['role:admin'])->group(function () {
-            Route::get('/roles-permissions', [RolePermissionController::class, 'rolePermissions'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('role.permissions');
-            
-            Route::post('/roles-permissions/update', [RolePermissionController::class, 'updateRolePermission'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('role.permissions.update');
-            
-            Route::get('/users-permissions', [RolePermissionController::class, 'userPermissions'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('user.permissions');
-            
-            Route::post('/users-permissions/update', [RolePermissionController::class, 'updateUserPermission'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('user.permissions.update');
-        });
+      // ================= ROLE PERMISSIONS =================
+Route::middleware(['role:admin'])->group(function () {
+    Route::get('/roles-permissions', [RolePermissionController::class, 'rolePermissions'])
+        ->name('role.permissions');
+
+    Route::post('/roles-permissions/update', [RolePermissionController::class, 'updateRolePermission'])
+        ->name('role.permissions.update');
+
+    Route::get('/users-permissions', [RolePermissionController::class, 'userPermissions'])
+        ->name('user.permissions');
+
+    Route::post('/users-permissions/update', [RolePermissionController::class, 'updateUserPermission'])
+        ->name('user.permissions.update');
+});
 
         // ================= CHECKUP FEE AJAX =================
         Route::get('/patients/{id}/checkup-fee', [CheckupController::class, 'getCheckupFee'])
@@ -804,4 +825,4 @@ Route::get('appointments/create', [CheckupController::class, 'create'])
 
 // ================= PUBLIC/COMMON ROUTES =================
 Route::get('/', [HomeController::class, 'index'])->name('home');
-//Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');
+ Route::get('{any}', [HomeController::class, 'root'])->where('any', '.*');

@@ -17,7 +17,7 @@
             {{-- Dashboard --}}
             @can('view_dashboard')
             <li class="{{ request()->is('receptionist-dashboard') ? 'mm-active' : '' }}">
-                <a href="{{ url('/receptionist-dashboard') }}">
+                <a href="{{ url('/receptionist/dashboard') }}">
                     <div class="parent-icon"><i class="material-icons-outlined">home</i></div>
                     <div class="menu-title">Dashboard</div>
                 </a>
@@ -56,12 +56,12 @@
                 <ul class="{{ request()->is('checkups*') ? 'mm-show' : '' }}">
                     @can('view appointments')
                     <li class="{{ request()->is('checkups') ? 'mm-active' : '' }}">
-                        <a href="{{ url('/checkups') }}"><i class="material-icons-outlined">fact_check</i>All Appointments</a>
+                        <a href="{{ url('/receptionist/appointments') }}"><i class="material-icons-outlined">fact_check</i>All Appointments</a>
                     </li>
                     @endcan
                     @can('create appointments')
                     <li class="{{ request()->is('checkups/create') ? 'mm-active' : '' }}">
-                        <a href="{{ url('/checkups/create') }}"><i class="material-icons-outlined">add_circle</i>Book Appointment</a>
+                        <a href="{{ url('/receptionist/appointments/create') }}"><i class="material-icons-outlined">add_circle</i>Book Appointment</a>
                     </li>
                     @endcan
                 </ul>
