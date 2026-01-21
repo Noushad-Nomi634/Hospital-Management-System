@@ -154,16 +154,16 @@ Route::prefix('receptionist')
             ->middleware('check_user_permission:view_dashboard')
             ->name('dashboard');
 
-        // Appointments Module
-        Route::get('appointments', [AppointmentController::class, 'index'])
-            ->middleware('check_user_permission:view appointments')
-            ->name('appointments.index');
-        
-        Route::get('appointments/create', [AppointmentController::class, 'create'])
-            ->middleware('check_user_permission:create appointments')
-            ->name('appointments.create');
-        
-        Route::post('appointments/store', [AppointmentController::class, 'store'])
+        // 🔹 Appointments (Checkups)
+    Route::get('appointments', [CheckupController::class, 'index'])
+    ->middleware('permission:view appointments')  
+    ->name('appointments.index');
+
+Route::get('appointments/create', [CheckupController::class, 'create'])
+    ->middleware('permission:create appointments,doctor')
+    ->name('appointments.create');
+
+        Route::post('appointments/store', [CheckupController::class, 'store'])
             ->middleware('check_user_permission:create appointments')
             ->name('appointments.store');
 
