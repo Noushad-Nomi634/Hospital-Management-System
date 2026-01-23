@@ -27,72 +27,79 @@
                 <div class="row g-3">
 
                     {{-- Prefix --}}
-              <div class="col-lg-2">
-              <label for="prefix" class="form-label">Prefix</label>
-              <select name="prefix" id="prefix" class="form-control" required>
-             <option value="">Select</option>
-             @foreach(['Mr.', 'Ms.', 'Mrs.'] as $p)
-            <option value="{{ $p }}" {{ old('prefix', $doctor->prefix ?? '') == $p ? 'selected' : '' }}>
-                {{ $p }}
-            </option>
-            @endforeach
-           </select>
-          </div>
-
+                    <div class="col-lg-2">
+                        <label for="prefix" class="form-label">Prefix</label>
+                        <select name="prefix" id="prefix" class="form-control" required>
+                            <option value="">Select</option>
+                            @foreach(['Mr.', 'Ms.', 'Mrs.'] as $p)
+                                <option value="{{ $p }}" {{ old('prefix') == $p ? 'selected' : '' }}>
+                                    {{ $p }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     {{-- First Name --}}
                     <div class="col-lg-6">
                         <label for="first_name" class="form-label">First Name</label>
                         <input type="text" name="first_name" id="first_name"
-                               class="form-control" placeholder="Enter first name" required>
+                               class="form-control" placeholder="Enter first name"
+                               value="{{ old('first_name') }}" required>
                     </div>
 
                     {{-- Last Name --}}
                     <div class="col-lg-6">
                         <label for="last_name" class="form-label">Last Name</label>
                         <input type="text" name="last_name" id="last_name"
-                               class="form-control" placeholder="Enter last name" required>
+                               class="form-control" placeholder="Enter last name"
+                               value="{{ old('last_name') }}" required>
                     </div>
 
                     {{-- Email --}}
                     <div class="col-lg-6">
                         <label for="email" class="form-label">Email Address</label>
                         <input type="email" name="email" id="email"
-                               class="form-control" placeholder="Enter email" required autocomplete="off">
+                               class="form-control" placeholder="Enter email" required autocomplete="off"
+                               value="{{ old('email') }}">
                     </div>
 
                     {{-- Phone --}}
                     <div class="col-lg-6">
                         <label for="phone" class="form-label">Phone Number</label>
                         <input type="text" name="phone" id="phone"
-                               class="form-control" placeholder="Enter phone number">
+                               class="form-control" placeholder="Enter phone number"
+                               value="{{ old('phone') }}">
                     </div>
 
                     {{-- CNIC --}}
                     <div class="col-lg-6">
                         <label for="cnic" class="form-label">CNIC</label>
                         <input type="text" name="cnic" id="cnic"
-                               class="form-control" placeholder="Enter CNIC number">
+                               class="form-control" placeholder="Enter CNIC number"
+                               value="{{ old('cnic') }}">
                     </div>
 
                     {{-- Date of Birth --}}
                     <div class="col-lg-6">
                         <label for="dob" class="form-label">Date of Birth</label>
-                        <input type="date" name="dob" id="dob" class="form-control">
+                        <input type="date" name="dob" id="dob" class="form-control"
+                               value="{{ old('dob') }}">
                     </div>
 
                     {{-- Last Education --}}
                     <div class="col-lg-6">
                         <label for="last_education" class="form-label">Last Education / Degree</label>
                         <input type="text" name="last_education" id="last_education"
-                               class="form-control" placeholder="Enter last education or degree">
+                               class="form-control" placeholder="Enter last education or degree"
+                               value="{{ old('last_education') }}">
                     </div>
 
                     {{-- Specialization --}}
                     <div class="col-lg-6">
                         <label for="specialization" class="form-label">Specialization</label>
                         <input type="text" name="specialization" id="specialization"
-                               class="form-control" placeholder="Enter specialization" required>
+                               class="form-control" placeholder="Enter specialization" required
+                               value="{{ old('specialization') }}">
                     </div>
 
                     {{-- Status --}}
@@ -100,8 +107,8 @@
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-control" required>
                             <option value="">Select Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
 
@@ -132,7 +139,9 @@
                         <select name="branch_id" id="branch_id" class="form-control" required>
                             <option value="">Select Branch</option>
                             @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>

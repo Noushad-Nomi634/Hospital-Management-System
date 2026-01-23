@@ -67,6 +67,8 @@
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger mb-1 w-100">Delete</button>
                                                     </form>
+                                                    <a href="{{ route('user.permissions.show', $user->id) }}" class="btn btn-sm btn-info w-100">Permissions</a>
+
                                                 </div>
                                             </div>
                                         </td>

@@ -103,10 +103,22 @@
                                                 @endif
 
                                                 {{-- Make Appointment --}}
-                                                <a href="{{ url('/checkups/create?patient_id='.$patient->id) }}"
-                                                   class="btn btn-sm btn-primary mb-1 w-100">
-                                                    Make Appointment
-                                                </a>
+                                               @php
+    $role = auth()->user()->getRoleNames()->first(); // admin, manager, receptionist
+@endphp
+
+<a href="
+    @if($role == 'admin')
+        {{ route('admin.appointments.create', ['patient_id' => $patient->id]) }}
+    @elseif($role == 'manager')
+        {{ route('manager.appointments.create', ['patient_id' => $patient->id]) }}
+    @elseif($role == 'receptionist')
+        {{ route('receptionist.appointments.create', ['patient_id' => $patient->id]) }}
+    @endif
+" class="btn btn-sm btn-primary mb-1 w-100">
+    Make Appointment
+</a>
+
 
                                             </div>
                                         </div>

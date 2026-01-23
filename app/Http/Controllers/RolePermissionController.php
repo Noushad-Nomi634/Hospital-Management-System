@@ -64,4 +64,10 @@ class RolePermissionController extends Controller
 
         return response()->json(['status'=>'success']);
     }
+
+    public function showUserPermissions(User $user)
+{
+    $permissions = Permission::all();
+    return view('users.user_permissions', compact('user', 'permissions'));
+}
 }

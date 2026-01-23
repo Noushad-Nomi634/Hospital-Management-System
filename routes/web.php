@@ -31,10 +31,9 @@ use App\Http\Controllers\Manager\ManagerDashboardController;
 use App\Http\Controllers\ExpenseTypeController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\RolePermissionController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ConsultationController; // Added missing import
+//use App\Http\Controllers\AppointmentController;
+//use App\Http\Controllers\EnrollmentController;
+//use App\Http\Controllers\PaymentController; 
 
 Auth::routes();
 
@@ -196,33 +195,13 @@ Route::prefix('receptionist')
             ->name('appointments.store');
 
 
-        // 🔹 Consultation (view only) - FIXED: Using correct controller
-        Route::get('consultations', [ConsultationController::class, 'index'])
-            ->middleware('check_user_permission:view consultation')
-            ->name('consultations.index');
-
-        // 🔹 Enrollment
-        Route::get('enrollments', [EnrollmentController::class, 'index'])
-            ->middleware('check_user_permission:view enrollment')
-            ->name('enrollments.index');
-        
-        Route::get('enrollments/create', [EnrollmentController::class, 'create'])
-            ->middleware('check_user_permission:create enrollment')
-            ->name('enrollments.create');
-
+    
+    
         // 🔹 Feedback (view-only)
         Route::get('feedback', [FeedbackController::class, 'index'])
             ->middleware('check_user_permission:view feedback')
             ->name('feedback.index');
 
-        // 🔹 Payments
-        Route::get('payments', [PaymentController::class, 'index'])
-            ->middleware('check_user_permission:view payments')
-            ->name('payments.index');
-        
-        Route::get('payments/create', [PaymentController::class, 'create'])
-            ->middleware('check_user_permission:create payments')
-            ->name('payments.create');
     });
 
 // ✅ Shared Routes (for admin, manager, receptionist)
@@ -351,20 +330,7 @@ Route::middleware(['auth:web', 'role:admin|manager|receptionist'])
                 ->name('consultations.history');
         });
 
-        // ================= APPOINTMENTS =================
-        Route::prefix('appointments')->group(function () {
-            Route::get('/', [AppointmentController::class, 'index'])
-                ->middleware('check_user_permission:view appointments')
-                ->name('appointments.index');
-            
-            Route::get('/create', [AppointmentController::class, 'create'])
-                ->middleware('check_user_permission:create appointments')
-                ->name('appointments.create');
-            
-            Route::post('/store', [AppointmentController::class, 'store'])
-                ->middleware('check_user_permission:create appointments')
-                ->name('appointments.store');
-        });
+       
 
         // ================= TREATMENT SESSIONS =================
         Route::prefix('treatment-sessions')->group(function () {
@@ -767,13 +733,20 @@ Route::middleware(['auth:web', 'role:admin|manager|receptionist'])
                 ->middleware('check_user_permission:manage_appointments')
                 ->name('users.edit');
             
-            Route::post('/update/{id}', [UserController::class, 'update'])
+            Route::put('/update/{id}', [UserController::class, 'update'])
                 ->middleware('check_user_permission:manage_appointments')
                 ->name('users.update');
             
             Route::delete('/delete/{id}', [UserController::class, 'destroy'])
                 ->middleware('check_user_permission:manage_appointments')
                 ->name('users.destroy');
+
+                // Show user permissions page
+             Route::get('/{user}/permissions', [UserController::class, 'permissions'])->name('users.permissions');
+
+             // Update user permissions via AJAX
+             Route::post('/permissions/update', [UserController::class, 'updatePermissions'])->name('user.permissions.update');
+
         });
 
         // ================= EXPENSE TYPES =================
@@ -812,6 +785,11 @@ Route::middleware(['role:admin'])->group(function () {
 
     Route::get('/users-permissions', [RolePermissionController::class, 'userPermissions'])
         ->name('user.permissions');
+
+           // 🔴 NEW: SINGLE USER PERMISSIONS
+    Route::get('/users/{user}/permissions', [RolePermissionController::class, 'showUserPermissions'])
+        ->name('user.permissions.show');
+
 
     Route::post('/users-permissions/update', [RolePermissionController::class, 'updateUserPermission'])
         ->name('user.permissions.update');

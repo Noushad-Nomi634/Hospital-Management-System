@@ -237,18 +237,20 @@ class CheckupController extends Controller
         $patient = DB::table('patients')->where('id', $patient_id)->first();
         if (!$patient) abort(404, 'Patient not found.');
 
-        $history = DB::table('checkups')
-            ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
-            ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
-            ->select(
-                'checkups.*',
-                DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
-                DB::raw("CONCAT(ref.first_name, ' ', ref.last_name) as referred_by_name"),
-                'branches.name as branch_name'
-            )
-            ->where('checkups.patient_id', $patient_id)
-            ->orderBy('checkups.id', 'desc')
-            ->get();
+     $history = DB::table('checkups')
+    ->join('doctors', 'checkups.doctor_id', '=', 'doctors.id')
+    ->leftJoin('doctors as ref', 'checkups.referred_by', '=', 'ref.id') // <-- add this
+    ->leftJoin('branches', 'checkups.branch_id', '=', 'branches.id')
+    ->select(
+        'checkups.*',
+        DB::raw("CONCAT(doctors.first_name, ' ', doctors.last_name) as doctor_name"),
+        DB::raw("CONCAT(ref.first_name, ' ', ref.last_name) as referred_by_name"),
+        'branches.name as branch_name'
+    )
+    ->where('checkups.patient_id', $patient_id)
+    ->orderBy('checkups.id', 'desc')
+    ->get();
+
 
         return view('consultations.history', [
             'history'       => $history,

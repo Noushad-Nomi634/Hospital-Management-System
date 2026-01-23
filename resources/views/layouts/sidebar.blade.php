@@ -286,13 +286,38 @@
                     </a>
                     </li>
                     <li>
-                    <a href="{{ url('/users') }}">
-                        <i class="material-icons-outlined">group</i> Users
-                    </a>
+                   
                     </li>
                 </ul>
             </li>
 
+
+   <!-- Users Menu -->
+<li>
+    <a class="has-arrow" href="javascript:;" aria-expanded="false">
+        <div class="parent-icon">
+            <i class="material-icons-outlined">supervised_user_circle</i>
+        </div>
+        <div class="menu-title">Users</div>
+    </a>
+    <ul class="mm-collapse">
+        <li>
+            <a href="{{ url('users-permissions') }}">
+                <i class="material-icons-outlined">store</i> Users Permissions
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('roles-permissions') }}">
+                <i class="material-icons-outlined">account_balance_wallet</i> Roles Permissions
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('/users') }}">
+                <i class="material-icons-outlined">group</i> Add Users
+            </a>
+        </li>
+    </ul>
+</li>
                {{--Reporting--}}
 
 <li>
@@ -347,23 +372,7 @@
                 </a>
             </li>
 
-             {{--Role permissions--}}
-             <li>
-                <a href="{{ url('roles-permissions') }}">
-                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-                <div class="menu-title">Roles Permissions</div>
-                </a>
-            </li>
-
-
-{{--users permissions--}}
-             <li>
-                <a href="{{ url('users-permissions') }}">
-                <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
-                <div class="menu-title">Users Permissions</div>
-                </a>
-            </li>
-
+        
 
           
            
