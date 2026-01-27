@@ -65,9 +65,14 @@
                 {{-- Role --}}
                 <div class="col-lg-6">
                     <label for="role" class="form-label">Role</label>
-                    <input type="text" name="role" id="role"
-                           value="{{ old('role', $user->role) }}"
-                           class="form-control" placeholder="Enter role" required>
+                    <select name="role" id="role" class="form-control" required>
+                        <option value="">Select Role</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                {{ ucfirst($role->name) }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 {{-- Submit Buttons --}}

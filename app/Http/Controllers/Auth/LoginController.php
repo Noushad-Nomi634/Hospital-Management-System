@@ -14,7 +14,7 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        $roles = Role::all(); // fetch all roles
+        $roles = Role::where('guard_name', 'web')->get();
         return view('auth.login', compact('roles'));
     }
 

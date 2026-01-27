@@ -301,11 +301,7 @@
         <div class="menu-title">Users</div>
     </a>
     <ul class="mm-collapse">
-        <li>
-            <a href="{{ url('users-permissions') }}">
-                <i class="material-icons-outlined">store</i> Users Permissions
-            </a>
-        </li>
+      
         <li>
             <a href="{{ url('roles-permissions') }}">
                 <i class="material-icons-outlined">account_balance_wallet</i> Roles Permissions

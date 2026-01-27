@@ -72,12 +72,8 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'delete enrollments', 'guard_name' => 'web']);
 
         // 🔹 Admin – full access (web guard)
-       // 🔹 Admin – full access (web guard)
-$adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-
-$adminRole->syncPermissions(
-    Permission::where('guard_name', 'web')->pluck('name')->toArray()
-);
+        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web'])
+            ->givePermissionTo(Permission::where('guard_name', 'web')->get());
 
         // 🔹 Manager – full access (web guard)
         Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web'])
@@ -159,6 +155,18 @@ $adminRole->syncPermissions(
         foreach ($doctorPermissions as $perm) {
             Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'doctor']);
         }
+
+        // 🔹 Doctor – web guard (for create/edit user)
+$doctorWebRole = Role::firstOrCreate(
+    ['name' => 'doctor', 'guard_name' => 'web']
+);
+
+foreach ($doctorPermissions as $perm) {
+    Permission::firstOrCreate(['name' => $perm, 'guard_name' => 'web']);
+}
+
+$doctorWebRole->syncPermissions($doctorPermissions);
+
 
         // Assign permissions to doctor role
         $doctorRole->syncPermissions($doctorPermissions);

@@ -42,7 +42,7 @@
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Branch</th>
-                                    <th>Role</th>
+                                    <th>Role(s)</th>
                                     <th style="width:200px;">Actions</th>
                                 </tr>
                             </thead>
@@ -53,7 +53,13 @@
                                         <td>{{ $user->name ?? 'N/A' }}</td>
                                         <td>{{ $user->email ?? 'N/A' }}</td>
                                         <td>{{ $user->branch?->name ?? 'N/A' }}</td>
-                                        <td>{{ $user->role ?? 'N/A' }}</td>
+                                        <td>
+                                            @forelse($user->roles as $role)
+                                                <span >{{ $role->name }}</span>
+                                            @empty
+                                                <span class="badge bg-secondary">No Role</span>
+                                            @endforelse
+                                        </td>
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-outline-primary">Actions</button>
@@ -68,7 +74,6 @@
                                                         <button type="submit" class="btn btn-sm btn-danger mb-1 w-100">Delete</button>
                                                     </form>
                                                     <a href="{{ route('user.permissions.show', $user->id) }}" class="btn btn-sm btn-info w-100">Permissions</a>
-
                                                 </div>
                                             </div>
                                         </td>
@@ -118,4 +123,3 @@
         });
     </script>
 @endpush
-
