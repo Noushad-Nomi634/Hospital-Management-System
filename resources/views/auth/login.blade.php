@@ -2,109 +2,107 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="section-authentication-cover">
-    <div class="row g-0">
-        <!-- Left Image -->
-        <div class="col-12 col-xl-7 col-xxl-8 d-none d-xl-flex border-end bg-transparent">
-            <div class="card rounded-0 mb-0 border-0 shadow-none bg-transparent">
-                <div class="card-body">
-                    <img src="{{ URL::asset('build/images/auth/login1.png') }}" class="img-fluid auth-img-cover-login" width="650" alt="">
-                </div>
-            </div>
+<div class="auth-wrapper d-flex min-vh-100">
+
+    <!-- Left Branding Section -->
+    <div class="col-lg-7 d-none d-lg-flex align-items-center justify-content-center auth-left">
+        <div class="text-center px-5">
+            <img src="{{ URL::asset('build/images/auth/login1.png') }}" class="img-fluid mb-4" width="520" alt="">
+            <h2 class="fw-bold text-white">Welcome Back 👋</h2>
+            <p class="text-white-50 mt-2">Securely access your dashboard and manage everything in one place.</p>
         </div>
+    </div>
 
-        <!-- Login Form -->
-        <div class="col-12 col-xl-5 col-xxl-4 border-top border-4 border-primary border-gradient-1 d-flex align-items-center justify-content-center">
-            <div class="card rounded-0 m-3 mb-0 border-0 shadow-none bg-none">
-                <div class="card-body p-sm-5">
-                    <img src="{{ URL::asset('build/images/logo1.png') }}" class="mb-4" width="145" alt="">
-                    <h4 class="fw-bold">Get Started Now</h4>
-                    <p class="mb-0">Enter your credentials to login your account</p>
+    <!-- Right Login Card -->
+    <div class="col-lg-5 d-flex align-items-center justify-content-center bg-light">
+        <div class="auth-card shadow-lg rounded-4 p-4 p-md-5 w-100 mx-3">
 
-                    @if($errors->any())
-                        <div class="alert alert-danger mt-3">
-                            {{ $errors->first() }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('login') }}" class="row g-3 mt-4">
-                        @csrf
-
-                        <div class="col-12">
-                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                                placeholder="john@example.com" value="{{ old('email') }}" required autofocus>
-                            @error('email')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="col-12">
-                            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                            <div class="input-group" id="show_hide_password">
-                                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Enter your password" required>
-                                <a href="javascript:void(0);" class="input-group-text bg-transparent"><i class="bi bi-eye-slash-fill"></i></a>
-                                @error('password')
-                                    <span class="invalid-feedback">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="role" class="form-label">Login As <span class="text-danger">*</span></label>
-                            <select class="form-control" name="role" required>
-                                <option value="" disabled selected>Select Role</option>
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ old('role') == $role->name ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('role')
-                                <span class="invalid-feedback">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6 form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <label class="form-check-label">Remember Me</label>
-                        </div>
-
-                        @if(Route::has('password.request'))
-                            <div class="col-md-6 text-end">
-                                <a href="{{ route('password.request') }}">Forgot Password?</a>
-                            </div>
-                        @endif
-
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-grd-primary w-100">Login</button>
-                        </div>
-
-                        <div class="col-12 text-start">
-                            <p class="mb-0">Don't have an account yet? <a href="{{ route('register') }}">Sign Up</a></p>
-                        </div>
-                    </form>
-
-                </div>
+            <div class="text-center mb-4">
+                <img src="{{ URL::asset('build/images/logo1.png') }}" width="140" class="mb-3" alt="">
+                <h3 class="fw-bold">Sign In</h3>
+                <p class="text-muted">Enter your credentials to continue</p>
             </div>
+
+            @if($errors->any())
+                <div class="alert alert-danger">{{ $errors->first() }}</div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}" class="row g-3">
+                @csrf
+
+                <div class="col-12">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control form-control-lg" placeholder="john@example.com" value="{{ old('email') }}" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Password</label>
+                    <div class="input-group input-group-lg" id="show_hide_password">
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <span class="input-group-text bg-white"><i class="bi bi-eye-slash-fill"></i></span>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Login As</label>
+                    <select class="form-select form-select-lg" name="role" required>
+                        <option value="" disabled selected>Select Role</option>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->name }}">{{ ucfirst($role->name) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-6 form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" name="remember">
+                    <label class="form-check-label">Remember Me</label>
+                </div>
+
+                <div class="col-md-6 text-end mt-2">
+                    <a href="{{ route('password.request') }}" class="text-decoration-none">Forgot Password?</a>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">Login</button>
+                </div>
+
+                <div class="col-12 text-center mt-3">
+                    <p class="mb-0">Don’t have an account? <a href="{{ route('register') }}" class="fw-semibold">Create Account</a></p>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>
 @endsection
 
+@push('style')
+<style>
+.auth-left{
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+}
+.auth-card{
+    max-width: 420px;
+    background: #fff;
+}
+.form-control, .form-select{
+    border-radius: 12px;
+}
+</style>
+@endpush
+
 @push('script')
 <script>
-$(document).ready(function() {
-    $("#show_hide_password a").on('click', function(event) {
-        event.preventDefault();
+$(document).ready(function(){
+    $('#show_hide_password span').on('click', function(){
         let input = $('#show_hide_password input');
         let icon = $('#show_hide_password i');
-        if(input.attr("type") == "text"){
-            input.attr('type','password');
-            icon.addClass("bi-eye-slash-fill").removeClass("bi-eye-fill");
-        } else {
+        if(input.attr('type') === 'password'){
             input.attr('type','text');
-            icon.removeClass("bi-eye-slash-fill").addClass("bi-eye-fill");
+            icon.removeClass('bi-eye-slash-fill').addClass('bi-eye-fill');
+        }else{
+            input.attr('type','password');
+            icon.removeClass('bi-eye-fill').addClass('bi-eye-slash-fill');
         }
     });
 });
