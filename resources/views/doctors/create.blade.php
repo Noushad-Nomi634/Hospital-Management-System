@@ -112,6 +112,23 @@
                         </select>
                     </div>
 
+
+       {{-- Shifts --}}
+                 <div class="col-lg-6">
+    <label for="shift" class="form-label">Shift</label>
+    <select name="shift" id="shift" class="form-control" required>
+        <option value="">Select Shift</option>
+        @foreach(['morning','afternoon','evening'] as $shift)
+            <option value="{{ $shift }}" {{ old('shift') == $shift ? 'selected' : '' }}>
+                {{ ucfirst($shift) }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+
+
+
                     {{-- Password --}}
                     <div class="col-lg-6">
                         <label for="password" class="form-label">Password</label>
@@ -179,6 +196,12 @@
                 placeholder: "Select Branch",
                 allowClear: true,
                 dropdownParent: $('#branch_id').parent()
+            });
+
+            $('#shift').select2({
+                placeholder: "Select Shift",
+                allowClear: true,
+                dropdownParent: $('#shift').parent()
             });
         });
     </script>

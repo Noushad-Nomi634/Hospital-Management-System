@@ -368,7 +368,39 @@
                 </a>
             </li>
 
-        
+    {{-- Doctor Availability Menu --}}
+<li class="menu-label">Doctor Availability</li>
+
+@php
+    // Admin → saare doctors
+    if(auth()->user()->hasRole('admin')){
+        $doctors = \App\Models\Doctor::all();
+    } else {
+        // Doctor login → sirf apna record
+        $doctors = auth()->user()->doctor ? collect([auth()->user()->doctor]) : collect();
+    }
+
+    // Check if current route is doctor availability
+    $activeDoctor = request()->route('doctor') ?? null;
+@endphp
+
+<li class="has-sub {{ request()->is('doctors/*/availability*') ? 'active' : '' }}">
+    <a href="javascript:void(0);" class="parent-link">
+        <div class="parent-icon">
+            <i class="material-icons-outlined">calendar_today</i>
+        </div>
+        <div class="menu-title">Doctor Availability</div>
+    </a>
+    <ul class="sub-menu">
+        @foreach($doctors as $doctor)
+        <li class="{{ $activeDoctor == $doctor->id ? 'active' : '' }}">
+            <a href="{{ route('doctors.availability.index', ['doctor' => $doctor->id, 'showForm' => 1]) }}">
+                {{ $doctor->name }}
+            </a>
+        </li>
+        @endforeach
+    </ul>
+</li>
 
           
            

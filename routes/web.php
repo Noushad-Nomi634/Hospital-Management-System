@@ -271,21 +271,21 @@ Route::middleware(['auth:web', 'role:admin|manager|receptionist'])
 
             // Doctor Availability
             Route::get('/{doctor}/availability', [DoctorAvailabilityController::class, 'index'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('doctors.availability.index');
-            
-            Route::post('/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('doctors.availability.store');
-            
-            Route::post('/{doctor}/availability/generate-next-month', [DoctorAvailabilityController::class, 'generateNextMonth'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('doctors.availability.generateNextMonth');
-            
-            Route::delete('/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
-                ->middleware('check_user_permission:manage_appointments')
-                ->name('doctors.availability.deleteMonth');
-        });
+        ->middleware('check_user_permission:manage_appointments')
+        ->name('doctors.availability.index');
+
+    Route::post('/{doctor}/availability/store', [DoctorAvailabilityController::class, 'store'])
+        ->middleware('check_user_permission:manage_appointments')
+        ->name('doctors.availability.store');
+
+    Route::post('/{doctor}/availability/generate-next-month', [DoctorAvailabilityController::class, 'generateNextMonth'])
+        ->middleware('check_user_permission:manage_appointments')
+        ->name('doctors.availability.generateNextMonth');
+
+    Route::delete('/{doctor}/availability/delete-month', [DoctorAvailabilityController::class, 'deleteMonth'])
+        ->middleware('check_user_permission:manage_appointments')
+        ->name('doctors.availability.deleteMonth');
+});
 
         // ================= CHECKUPS/CONSULTATIONS =================
         Route::prefix('consultations')->group(function () {

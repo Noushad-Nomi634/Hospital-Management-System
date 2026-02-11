@@ -41,6 +41,7 @@
                                     <th>Email</th>
                                     <th>Specialization</th>
                                     <th>Status</th>
+                                    <th>Shifts</th>
                                     <th style="width:200px;">Actions</th>
                                 </tr>
                             </thead>
@@ -59,6 +60,10 @@
                                                 {{ ucfirst($doctor->status) }}
                                             </span>
                                         </td>
+                                        <td>
+                                            <span class="badge bg-{{ $doctor->shift == 'morning' ? 'info' : 'warning' }}">
+                                                {{ ucfirst($doctor->shift) }}
+                                            </span>
                                         <td class="text-center">
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-outline-primary">Actions</button>

@@ -34,6 +34,7 @@ class Doctor extends Authenticatable
         'document',
         'picture',
         'status',
+        'shift',
     ];
 
     // ──────────────── Hidden Columns ────────────────

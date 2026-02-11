@@ -86,7 +86,13 @@ class DoctorController extends Controller
                 'document'       => 'nullable|file|mimes:pdf,jpg,png,jpeg',
                 'picture'        => 'nullable|image|mimes:jpg,png,jpeg',
                 'status'         => 'required|in:active,inactive',
+             'shift' => 'required|in:morning,afternoon,evening',
+
+
             ]);
+
+           $validated['shift'] = strtolower($validated['shift']);
+
 
             // 1️⃣ Handle uploads
             if ($request->hasFile('document')) {
@@ -108,6 +114,8 @@ class DoctorController extends Controller
                 'last_education' => $validated['last_education'],
                 'specialization' => $validated['specialization'],
                 'status' => $validated['status'],
+                'shift' => $validated['shift'],
+
                 'branch_id' => $validated['branch_id'],
                 'document' => $validated['document'] ?? null,
                 'picture' => $validated['picture'] ?? null,
@@ -164,7 +172,12 @@ class DoctorController extends Controller
                 'document'       => 'nullable|file|mimes:pdf,jpg,png,jpeg',
                 'picture'        => 'nullable|image|mimes:jpg,png,jpeg',
                 'status'         => 'required|in:active,inactive',
+           'shift' => 'required|in:morning,afternoon,evening',
+
+
             ]);
+            
+            $validated['shift'] = strtolower($validated['shift']);
 
             // Handle uploads
             if ($request->hasFile('document')) {

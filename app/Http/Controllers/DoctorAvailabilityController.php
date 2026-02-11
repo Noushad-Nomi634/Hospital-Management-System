@@ -12,6 +12,7 @@ use Exception;
 
 class DoctorAvailabilityController extends Controller
 {
+    // Show availability for a doctor
     public function index($doctorId)
     {
         try {
@@ -20,11 +21,9 @@ class DoctorAvailabilityController extends Controller
             $month = request('month', now()->month);
             $year  = request('year', now()->year);
 
-            // All dates of the month
             $datesInMonth = collect(range(1, Carbon::create($year, $month)->daysInMonth))
                 ->map(fn($day) => Carbon::create($year, $month, $day)->toDateString());
 
-            // Fresh availabilities from DB
             $availabilities = DB::table('doctor_availabilities')
                 ->where('doctor_id', $doctorId)
                 ->whereMonth('date', $month)
@@ -32,27 +31,28 @@ class DoctorAvailabilityController extends Controller
                 ->get()
                 ->keyBy('date');
 
-            return view('doctors.availability.index', compact(
-                'doctor', 'datesInMonth', 'availabilities', 'month', 'year'
-            ));
+            return view('doctors.availability.index', compact('doctor', 'datesInMonth', 'availabilities', 'month', 'year'));
         } catch (Exception $e) {
             Log::error('Error loading doctor availability: '.$e->getMessage());
             return redirect()->back()->with('error','Failed to load availability.');
         }
     }
 
+    // Store availability
     public function store(Request $request, $doctorId)
     {
         try {
             $request->validate([
-                'start_time' => 'nullable|array',
-                'end_time'   => 'nullable|array',
-                'is_leave'   => 'nullable|array'
+                'morning_start' => 'nullable|array',
+                'morning_end'   => 'nullable|array',
+                'morning_leave' => 'nullable|array',
+                'evening_start' => 'nullable|array',
+                'evening_end'   => 'nullable|array',
+                'evening_leave' => 'nullable|array',
             ]);
 
-            $allDates = collect($request->start_time ?? [])
-                ->keys()
-                ->merge(collect($request->end_time ?? [])->keys())
+            $allDates = collect(array_keys($request->morning_start ?? []))
+                ->merge(array_keys($request->evening_start ?? []))
                 ->unique();
 
             foreach ($allDates as $date) {
@@ -63,14 +63,26 @@ class DoctorAvailabilityController extends Controller
                     'date'      => $date
                 ]);
 
-                if (isset($request->is_leave[$date])) {
-                    $availability->start_time = null;
-                    $availability->end_time   = null;
-                    $availability->is_leave   = true;
+                // Morning shift
+                if(isset($request->morning_leave[$date])) {
+                    $availability->morning_start = null;
+                    $availability->morning_end   = null;
+                    $availability->morning_leave = true;
                 } else {
-                    $availability->start_time = $request->start_time[$date] ?? null;
-                    $availability->end_time   = $request->end_time[$date] ?? null;
-                    $availability->is_leave   = false;
+                    $availability->morning_start = $request->morning_start[$date] ?? null;
+                    $availability->morning_end   = $request->morning_end[$date] ?? null;
+                    $availability->morning_leave = false;
+                }
+
+                // Evening shift
+                if(isset($request->evening_leave[$date])) {
+                    $availability->evening_start = null;
+                    $availability->evening_end   = null;
+                    $availability->evening_leave = true;
+                } else {
+                    $availability->evening_start = $request->evening_start[$date] ?? null;
+                    $availability->evening_end   = $request->evening_end[$date] ?? null;
+                    $availability->evening_leave = false;
                 }
 
                 $availability->day_of_week = $dayOfWeek;
@@ -84,6 +96,7 @@ class DoctorAvailabilityController extends Controller
         }
     }
 
+    // Generate next month availability based on current month
     public function generateNextMonth($doctorId)
     {
         try {
@@ -105,15 +118,17 @@ class DoctorAvailabilityController extends Controller
                         'date'      => $date->format('Y-m-d')
                     ],
                     [
-                        'start_time' => $source?->start_time,
-                        'end_time'   => $source?->end_time,
-                        'is_leave'   => $source?->is_leave ?? false,
-                        'day_of_week'=> $dayName
+                        'morning_start' => $source?->morning_start,
+                        'morning_end'   => $source?->morning_end,
+                        'morning_leave' => $source?->morning_leave ?? false,
+                        'evening_start' => $source?->evening_start,
+                        'evening_end'   => $source?->evening_end,
+                        'evening_leave' => $source?->evening_leave ?? false,
+                        'day_of_week'   => $dayName
                     ]
                 );
             }
 
-            // Redirect automatically to next month view
             return redirect()->route('doctors.availability.index', [
                 'doctor' => $doctorId,
                 'month'  => now()->addMonth()->month,
@@ -125,21 +140,20 @@ class DoctorAvailabilityController extends Controller
         }
     }
 
+    // Delete current month
     public function deleteMonth($doctorId)
     {
         try {
             $month = now()->month;
             $year  = now()->year;
 
-            DB::table('doctor_availabilities')
-                ->where('doctor_id', $doctorId)
+            DoctorAvailability::where('doctor_id', $doctorId)
                 ->whereMonth('date', $month)
                 ->whereYear('date', $year)
                 ->delete();
 
-            return redirect()->route('doctors.availability.index', [
-                'doctor' => $doctorId
-            ])->with('success','Current month schedule deleted successfully.');
+            return redirect()->route('doctors.availability.index', ['doctor' => $doctorId])
+                ->with('success','Current month schedule deleted successfully.');
         } catch (Exception $e) {
             Log::error('Error deleting month schedule: '.$e->getMessage());
             return redirect()->back()->with('error','Failed to delete schedule.');

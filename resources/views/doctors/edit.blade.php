@@ -29,12 +29,13 @@
                 <div class="row g-3">
 
                     {{-- Prefix --}}
+                    @php $currentPrefix = old('prefix') ?? $doctor->prefix; @endphp
                     <div class="col-lg-2">
                         <label for="prefix" class="form-label">Prefix</label>
                         <select name="prefix" id="prefix" class="form-control" required>
                             <option value="">Select</option>
                             @foreach(['Mr.', 'Ms.', 'Mrs.'] as $p)
-                                <option value="{{ $p }}" {{ old('prefix', $doctor->prefix) == $p ? 'selected' : '' }}>
+                                <option value="{{ $p }}" {{ $currentPrefix == $p ? 'selected' : '' }}>
                                     {{ $p }}
                                 </option>
                             @endforeach
@@ -89,12 +90,13 @@
                     </div>
 
                     {{-- Branch --}}
+                    @php $currentBranch = old('branch_id') ?? $doctor->branch_id; @endphp
                     <div class="col-lg-6">
                         <label for="branch_id" class="form-label">Branch</label>
                         <select name="branch_id" id="branch_id" class="form-control" required>
                             <option value="">Select Branch</option>
                             @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}" {{ old('branch_id', $doctor->branch_id) == $branch->id ? 'selected' : '' }}>
+                                <option value="{{ $branch->id }}" {{ $currentBranch == $branch->id ? 'selected' : '' }}>
                                     {{ $branch->name }}
                                 </option>
                             @endforeach
@@ -117,7 +119,7 @@
                                class="form-control">
                     </div>
 
-                    {{-- Last Education / Degree --}}
+                    {{-- Last Education --}}
                     <div class="col-lg-6">
                         <label for="last_education" class="form-label">Last Education / Degree</label>
                         <input type="text" name="last_education" id="last_education"
@@ -126,12 +128,27 @@
                     </div>
 
                     {{-- Status --}}
+                    @php $currentStatus = old('status') ?? $doctor->status; @endphp
                     <div class="col-lg-6">
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-control" required>
                             <option value="">Select Status</option>
-                            <option value="active" {{ old('status', $doctor->status) == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ old('status', $doctor->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="active" {{ $currentStatus == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ $currentStatus == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                    </div>
+
+                    {{-- Shift --}}
+                    @php $currentShift = strtolower(old('shift', $doctor->shift)); @endphp
+                    <div class="col-lg-6">
+                        <label for="shift" class="form-label">Shift</label>
+                        <select name="shift" id="shift" class="form-control" required>
+                            <option value="">Select Shift</option>
+                            @foreach(['morning','afternoon','evening'] as $shift)
+                                <option value="{{ $shift }}" {{ $currentShift == $shift ? 'selected' : '' }}>
+                                    {{ ucfirst($shift) }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
